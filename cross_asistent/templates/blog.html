@@ -1,0 +1,44 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}
+{{ articulo.titulo|truncatechars:25 }}
+{% endblock %}
+
+{% block content %}
+{% if not encabezado_url == '' %}
+<div class="img_article position-relative">
+    <img src="{{encabezado_url}}" alt='Imagen de encabezado del articulo "{{ articulo.titulo }}"' class="img-fluid w-100">
+    <div class="mask mask_white"></div>
+</div>
+{% endif %}
+<main class="container container-fluid mb-5 {% if encabezado_url == '' %}mt-5{% endif %}">
+    <h2 class="text-center mb-5 fs-20">{{ articulo.titulo }}</h2>
+    <section class="px-md-5">
+        <div class="container container-fluid son_p">
+            {% autoescape off %}{{ articulo.contenido }}{% endautoescape %}
+        </div>
+        <div class="mt-5 d-flex flex-wrap align-items-center gap_40 ">
+            {% if not encabezado_url == '' %}
+            <div>
+                <img src="{{encabezado_url}}" alt='Imagen de encabezado del articulo "{{ articulo.titulo }}"'
+                    class="img-fluid img-rounded max_w250 materialBoxed">
+            </div>
+            {% endif %}
+            <div class="row">
+                {% if not foto_autor == '' %}
+                <div class="col-4 d-flex justify-content-center">
+                    <div class="img_circle img_circle-100">
+                        <img src="{{foto_autor}}" alt="Foto de perfil del Autor de Articulo" class="img-fluid img-rounded materialBoxed">
+                    </div>
+                </div>
+                {% endif %}
+                <div class="col">
+                    <p>Escrito por: {{ firma_autor }}</p>
+                    <p class="m-0">{{ articulo.creacion }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% include 'base/widget_footer.html' %}
+{% endblock %}

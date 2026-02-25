@@ -1,0 +1,218 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Modificar Calendario | Administracion{% endblock %}
+{% block link_home %}{% url 'vista_programador' %}{% endblock %}
+{% block link_default %}
+{% include 'base/widget_links-admin.html' %}
+{% endblock %}
+{% block content %}
+<main class="container container-fluid py-5 {% if not user.is_staff %}main_container{% endif %}">
+    <div class="mb-5">
+        <h1 class="text-center">Calendario <i class="fa-solid fa-calendar-days ms-1"></i></h1>
+        <hr class="hr_divisor mx-4 mx-md-0" />
+    </div>
+    <section class="row">
+        <!-- Formulario: Nuevo Evento -->
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Crear Nuevo <span class="text_detail">Evento</span>
+                    </h3>
+                    <form method="post" action="{% url 'create_database' %}" data-submit-form id="calendarForm" autocomplete="off">
+                        {% csrf_token %}
+                        <input type="text" id="categoria" name="categoria" class="d-none" value="Calendario" required />
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <i class="fa-solid fa-heading trailing"></i>
+                            <input type="text" id="titulo" name="titulo" class="form-control form-icon-trailing" required />
+                            <label class="form-label" for="titulo">Título:</label>
+                        </div>
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <i class="fa-solid fa-keyboard trailing"></i>
+                            <textarea class="form-control form-icon-trailing" id="informacion" name="informacion" rows="3"></textarea>
+                            <label for="informacion" class="form-label">Descripción:</label>
+                        </div>
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <i class="fa-solid fa-link trailing"></i>
+                            <input type="url" id="redirigir" name="redirigir" class="form-control form-icon-trailing" />
+                            <label class="form-label" for="redirigir">url / liga: <small>(opcional)</small></label>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-outline mb-4" data-mdb-input-init>
+                                    <input type="datetime-local" id="eStart" name="eStart" class="form-control active" min="2024-01-01T00:00" required />
+                                    <label class="form-label" for="eStart">Inicio:</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-outline mb-4" data-mdb-input-init>
+                                    <input type="datetime-local" id="eEnd" name="eEnd" class="form-control active" min="2024-01-01T00:00" required />
+                                    <label class="form-label" for="eEnd">Fin:</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" value="True" id="eAllDay" name="eAllDay" />
+                            <label class="form-check-label" for="eAllDay">Dura Todo el dia</label>
+                        </div>
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <input type="text" id="ePleace" name="ePleace" class="form-control active text-end" value="Campus UTC" required />
+                            <label class="form-label" for="ePleace">Lugar:</label>
+                        </div>
+                        <div class="form-outline mb-4">
+                            <select class="form-select" id="eColor" name="eColor" data-select_addClass required>
+                                <option selected disabled hidden>Seleccione Color de Fondo:</option>
+                                <option value="event_detail">Color por Defecto</option>
+                                <!-- <option value="customColor">Personalizado</option> -->
+                                <option value="bg_calendar_green">Verde Lima</option>
+                                <option value="bg_calendar_naranja">Naranja</option>
+                                <option value="bg_calendar_azulcielo">Azul Cielo</option>
+                                <option value="bg_calendar_morado">Morado</option>
+                                <option value="bg_calendar_rosa">Rosa</option>
+                                <option value="bg_calendar_rojo">Rojo</option>
+                                <option value="bg_calendar_amarillo">Amarillo</option>
+                                <option value="bg_calendar_azulfuerte">Azul Fuerte</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="imagen" class="form-label">Imágen: <small>(opcional)</small></label>
+                            <input type="file" class="form-control" id="imagen" name="imagen" accept="image/jpeg, image/png, image/webp*">
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn_detail btn-block">Guardar <i class="fa-solid fa-paper-plane ms-1"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Calendario -->
+        <div class="col-12 col-md-8">
+            <div class="card">
+                <div id="calendar" class="card-body" data-events="{% url 'calendario_eventos' %}" data-show_btnyear="{{show_btns_year}}"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal: Editar Evento -->
+    <div class="modal fade calendar_update" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <form method="post" action="{% url 'database_update' %}" data-submit-form id="calendarModForm" autocomplete="off" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Modificar Evento:</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    {% csrf_token %}
+                    <input type="text" id="categoriaUpdate" name="categoria" class="d-none" value="Calendario" required />
+                    <input type="text" id="idUpdate" name="id" class="d-none idUpdate" required />
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        <i class="fa-solid fa-heading trailing"></i>
+                        <input type="text" id="tituloUpdate" name="titulo" class="form-control form-icon-trailing" required />
+                        <label class="form-label" for="tituloUpdate">Título:</label>
+                    </div>
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        <i class="fa-solid fa-keyboard trailing"></i>
+                        <textarea class="form-control form-icon-trailing" id="informacionUpdate" name="informacion" rows="3"></textarea>
+                        <label for="informacionUpdate" class="form-label">Descripción:</label>
+                    </div>
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        <i class="fa-solid fa-link trailing"></i>
+                        <input type="url" id="redirigirUpdate" name="redirigir" class="form-control form-icon-trailing" />
+                        <label class="form-label" for="redirigirUpdate">url / liga: <small>(opcional)</small></label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md col-6">
+                            <div class="form-outline mb-4" data-mdb-input-init>
+                                <input type="datetime-local" id="eStartUpdate" name="eStart" class="form-control active" min="2024-01-01T00:00" required />
+                                <label class="form-label" for="eStartUpdate">Inicio:</label>
+                            </div>
+                        </div>
+                        <div class="col-md col-6">
+                            <div class="form-outline mb-4" data-mdb-input-init>
+                                <input type="datetime-local" id="eEndUpdate" name="eEnd" class="form-control active" min="2024-01-01T00:00" required />
+                                <label class="form-label" for="eEndUpdate">Fin:</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check my-2 my-md-0 mb-md-4">
+                                <input class="form-check-input" type="checkbox" value="True" id="eAllDayUpdate" name="eAllDay" />
+                                <label class="form-check-label" for="eAllDayUpdate">Dura Todo el dia</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-outline mb-4" data-mdb-input-init>
+                                <input type="text" id="ePleaceUpdate" name="ePleace" class="form-control active text-end" required />
+                                <label class="form-label" for="ePleaceUpdate">Lugar:</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <select class="form-select" id="eColorUpdate" name="eColor" data-select_addClass required>
+                            <option disabled hidden id="eColorSelected">Seleccione Color de Fondo:</option>
+                            <option value="event_detail">Color por Defecto</option>
+                            <option value="bg_calendar_green">Verde</option>
+                            <option value="bg_calendar_naranja">Naranja</option>
+                            <option value="bg_calendar_morado">Morado</option>
+                            <option value="bg_calendar_azulcielo">Azul Cielo</option>
+                            <option value="bg_calendar_rosa">Rosa</option>
+                            <option value="bg_calendar_azulfuerte">Azul Fuerte</option>
+                            <option value="bg_calendar_amarillo">Amarillo</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            <img src="{% static 'img/default_image.webp' %}" id="eventImg" class="img-rounded materialBoxed max_w150 max_h150" data-img_dom>
+                        </div>
+                        <div class="col-4 d-flex align-items-center">
+                            <input type="file" class="d-none" id="imagenUpdate" name="imagen" accept="image/jpeg, image/png, image/webp*" data-img_dom-change>
+                            <label for="imagenUpdate" class="btn bg_blue-green btn-block text-white">Cambiar Imagen <i class="fa-regular fa-images ms-1"></i></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-danger" data-mdb-ripple-init data-mdb-target="#eventDeleted" data-mdb-modal-init
+                        data-mdb-dismiss="modal">
+                        Eliminar Evento <i class="fa-regular fa-trash-can ms-1"></i>
+                    </button>
+                    <button type="submit" class="btn btn_detail">
+                        Guardar Cambios <i class="fa-solid fa-paper-plane ms-1"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Borrar elemento -->
+    <div class="modal fade" id="eventDeleted" tabindex="-1" aria-labelledby="eventDeletedLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventDeletedLabel">Eliminar Evento <i class="fa-solid fa-map-location-dot ms-1"></i></h5>
+                    <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="text-center">
+                        Desea eliminar el evento "<span class="text-danger eventTitle"></span>"? 😯🧐😬
+                    </h4>
+                    <p class="p-3 mb-0">
+                        Esta acción es permanente, las imágenes relacionadas también serán eliminadas. Lee detenidamente antes de eliminar.
+                    </p>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+
+                    <form id="formDeleteMap" data-submit-form action="{% url 'database_delete' %}" method="post">
+                        <input type="text" class="d-none idUpdate" required name="id">
+                        <button type="submit" class="btn btn-danger" data-mdb-ripple-init data-mdb-dismiss="modal">
+                            Eliminar Evento
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
+{% block scripts_end %}
+<script src="{% static 'js/settings_fullcalendar.js' %}"></script>
+{% endblock %}

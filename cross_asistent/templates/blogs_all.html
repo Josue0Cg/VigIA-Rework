@@ -1,0 +1,32 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Artículos y noticias 📰{% endblock %}
+{% block content %}
+<main class="container container-fluid py-5">
+    <div class="mb-5">
+        <h1 class="text-center">Muro UTC <i class="fa-solid fa-newspaper ms-1"></i></h1>
+        <hr class="hr_divisor mx-4 mx-md-0" />
+    </div>
+
+    {% if blogs_all %}
+    <div class="grid-system grid-auto_size">
+        {% for blog in blogs_all %}
+        <a href="{% url 'mostrar_blog' blog.id %}" class="grid-item {{blog.class}}">
+            <img src="{{blog.imagen}}" alt="{{blog.titulo}}" loading="lazy">
+            <div class="item__details">
+                <div class="w-100">
+                    <h5 class="m-0">{{blog.titulo}}</h5>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+
+    </div>
+    {% else %}
+    <div class="text-center">
+        <p class="lead">No hay blogs disponibles en este momento 😯. ¡Vuelve pronto para más actualizaciones!</p>
+    </div>
+    {% endif %}
+</main>
+{% include 'base/widget_footer.html' %}
+{% endblock %}

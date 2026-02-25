@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-mdb-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="{% static 'img/UTC_icono.ico' %}" />
+    <title>{% block title %}TITULO{% endblock %} | Asistente UTC</title>
+    <script>
+        (function () { const theme = localStorage.getItem('data-mdb-theme') || 'light'; document.documentElement.setAttribute('data-mdb-theme', theme); })();
+        (function () { const themeColor = localStorage.getItem('data-color_prefer') || 'blue'; document.documentElement.setAttribute('data-color_prefer', themeColor); })();
+    </script>
+    <link rel="preload" href="{% static 'css/mdb_fontawesome.min.css' %}" as="style" />
+    <link rel="preload" href="{% static 'js/libraries.min.js' %}" as="script" />
+
+    {% block extra_head %}{% endblock %}
+
+    <link rel="stylesheet" href="{% static 'css/mdb_fontawesome.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/styles.min.css' %}" />
+</head>
+
+<body>
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
+        <div class="container container-fluid">
+            <a class="navbar-brand" href="{% block link_home %}/{% endblock %}">
+                <img src="{% static 'img/UTC_logo-plano.webp' %}" alt="UTC logo" />
+            </a>
+            <div class="flex-grow-1"></div>
+            <div class="m-0 d-flex align-items-center">
+                <div class="order-lg-last">
+                    <button type="button" class="btn btn-floating btn_detail me-2 me-md-0 ms-md-2" title="Configuraciones" data-mdb-ripple-init
+                        data-mdb-modal-init data-mdb-target="#configModal">
+                        <i class="fa-solid fa-gear fs-14"></i>
+                    </button>
+                    {% block qrBTN %}{% endblock %}
+                </div>
+                <button data-mdb-collapse-init class="navbar-toggler" type="button" data-mdb-target="#navbarText" aria-controls="navbarText"
+                    aria-expanded="false" aria-label="Toggle navigation" data-btn_closed="overlayMenu"></button>
+                <div class="collapse navbar-collapse position-absolute top-100 navbar-light bg-body-tertiary flex-grow-0" id="navbarText">
+                    <ul class="navbar-nav mb-lg-0 px-2 px-lg-0">
+                        {% block link_default %}
+                        <li class="nav-item">
+                            <a class="btn {% if active_page == 'inicio' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block" href="/">Inicio <i
+                                    class="fa-solid fa-house-chimney ms-1"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn {% if active_page == 'faq' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
+                                href="{% url 'faq' %}">Preguntas <i class="fa-solid fa-clipboard-question ms-1"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn {% if active_page == 'map' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
+                                href="{% url 'map' %}">Mapa
+                                <i class="fa-solid fa-map-location-dot ms-1"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn {% if active_page == 'calendario' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
+                                href="{% url 'calendario' %}">Calendario <i class="fa-solid fa-calendar-days ms-1"></i></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn {% if active_page == 'blog' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
+                                href="{% url 'blog' %}">Blog <i class="fa-solid fa-newspaper ms-1"></i></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <div class="dropdown">
+                                <a class="btn btn_detail m-1 my-lg-0 d-block dropdown-toggle" href="" role="button" id="dropdownMenuLink" data-mdb-dropdown-init
+                                    data-mdb-ripple-init aria-expanded="false">
+                                    Otros <i class="fa-solid fa-users ms-1"></i>
+                                </a>
+
+                                <ul class="dropdown-menu mx-100" aria-labelledby="dropdownMenuLink">
+                                    <li>
+                                        <a href="{% url 'about' %}" class="dropdown-item {% if active_page|default:'' == 'about' %}active{% endif %}"
+                                            aria-current="true">Acerca de</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'singin' %}" class="dropdown-item {% if active_page|default:'' == 'singin' %}active{% endif %}"
+                                            aria-current="true">Acceder</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        {% endblock %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+    {% block content %}{% endblock %}
+
+    <!-- Configuraciones -->
+    <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="configModalLabel">Configuraciones <i class="fa-solid fa-gear ms-1"></i></h5>
+                    <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <section class="px-4">
+                        <div class="text-center mb-4">
+                            <div class="d-flex justify-content-between align-items-center gap_10">
+                                <p class="m-0">Tema: <span id="switchText">Claro</span></p>
+                                <div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked id="switchTheme">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <h6 class="text-center mb-3">Color de la Interfaz</h6>
+                        <div class="d-flex justify-content-around mb-3">
+                            <button class="btn btn-floating btn-success" data-change-color="green" data-rgb="#02913c"></button>
+                            <button class="btn btn-floating btn-primary" data-change-color="blue" data-rgb="#3b71ca"></button>
+                            <button class="btn btn-floating btn_purple" data-change-color="purple" data-rgb="#723bca"></button>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-floating btn_gradient_green" data-change-color="gradient_green" data-rgb=" #02913c"></button>
+                            <button class="btn btn-floating btn_gradient_blue" data-change-color="gradient_blue" data-rgb="#3b71ca"></button>
+                            <button class="btn btn-floating btn_cyan-purple" data-change-color="gradient_blue-purple" data-rgb="#3b71ca"></button>
+                            <button class="btn btn-floating btn_gradient_purple" data-change-color="gradient_purple" data-rgb="#723bca"></button>
+                            <button class="btn btn-floating btn_gradient_orange" data-change-color="gradient_orange" data-rgb="#d29c15"></button>
+                        </div>
+                        {% block moresettings %}{% endblock %}
+                    </section>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+    <div id="overlayMenu" class="menu_overlay"></div>
+    <script src="{% static 'js/libraries.min.js' %}"></script>
+    <script src="{% static 'js/settings.min.js' %}"></script>
+    {% block scripts_end %} {% endblock %}
+</body>
+
+</html>

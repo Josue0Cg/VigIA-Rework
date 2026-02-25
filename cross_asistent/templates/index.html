@@ -1,0 +1,177 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Inicio | Bienvenidos{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/index_styles.css' %}" />
+{% endblock %}
+
+{# Override navbar — index uses its own layout #}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="index-page">
+    <!-- UTC Logo (top-left) -->
+    <a href="/" class="index-logo">
+        <img src="{% static 'img/UTC_logo-plano.webp' %}" alt="UTC logo" />
+    </a>
+
+    <!-- Settings button (top-right) -->
+    <button type="button" class="index-settings-btn" title="Configuraciones" data-mdb-ripple-init data-mdb-modal-init
+        data-mdb-target="#configModal">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+
+    <!-- Sphere Section (clicking opens chat) -->
+    <section class="sphere-section">
+        <div class="sphere-container" id="sphereTrigger" title="Hablar con VigIA">
+            <canvas id="sphereCanvas"></canvas>
+        </div>
+    </section>
+
+    <!-- Floating Navigation (single row) -->
+    <nav class="floating-nav" aria-label="Navegación principal">
+        <a href="/" class="floating-nav-btn is-active">
+            <i class="fa-solid fa-house-chimney"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="{% url 'faq' %}" class="floating-nav-btn">
+            <i class="fa-solid fa-clipboard-question"></i>
+            <span>Preguntas</span>
+        </a>
+        <a href="{% url 'map' %}" class="floating-nav-btn">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>Mapa</span>
+        </a>
+        <a href="{% url 'calendario' %}" class="floating-nav-btn">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Calendario</span>
+        </a>
+        <a href="{% url 'blog' %}" class="floating-nav-btn">
+            <i class="fa-solid fa-newspaper"></i>
+            <span>Blog</span>
+        </a>
+        <div class="floating-dropdown">
+            <button type="button" class="floating-nav-btn" id="otrosDropdownBtn">
+                <i class="fa-solid fa-users"></i>
+                <span>Otros</span>
+            </button>
+            <div class="floating-dropdown-menu" id="otrosDropdownMenu">
+                <a href="{% url 'about' %}" class="floating-dropdown-item">Acerca de</a>
+                <a href="{% url 'singin' %}" class="floating-dropdown-item">Acceder</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- AI Chat Panel (full-screen overlay) -->
+    <section class="chat-panel" id="chatPanel">
+        <div class="chat-panel-inner">
+            <!-- Chat header -->
+            <div class="chat-panel-header">
+                <h3 class="chat-panel-title">
+                    <i class="fa-solid fa-robot"></i> VigIA
+                </h3>
+                <div class="chat-panel-header-actions">
+                    <button type="button" class="chat-header-btn speak_btn" id="speakBtn"
+                        title="Reproducir / Pausar voz">
+                        <i id="speak_btn_icon" class="fa-regular fa-circle-play"></i>
+                    </button>
+                    <button type="button" class="chat-header-btn" id="closeChatPanel" title="Cerrar chat">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat messages -->
+            <div class="chat-panel-messages" id="output"></div>
+
+            <!-- Chat input -->
+            <form id="chatForm" class="chat-panel-input" method="POST" action="{% url 'chatbot' %}">
+                {% csrf_token %}
+                <div class="chat-input-row">
+                    <textarea class="chat-textarea" id="txtQuestion" name="question" required rows="1" maxlength="200"
+                        placeholder="Escribe tu pregunta..."></textarea>
+                    <button type="button" class="chat-input-btn chat-mic-btn" id="chatMicBtn" title="Usar micrófono">
+                        <i class="fa-solid fa-microphone" id="btn_controls_icon"></i>
+                    </button>
+                    <button type="submit" id="chatForm_submit" class="chat-input-btn chat-send-btn" title="Enviar">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block moresettings %}
+<div class="text-center mt-5">
+    <h5>Configuraciones del Asistente</h5>
+    <h6 class="mt-4">Voz e idioma</h6>
+    <div class="form-outline">
+        <select class="form-select" id="voice_select"></select>
+    </div>
+</div>
+<div class="row mt-5">
+    <label class="col-4 d-flex align-items-center" for="rate_input">Velocidad: </label>
+    <div class="form-outline col" data-mdb-input-init>
+        <input type="number" id="rate_input" name="asistentSpeedd" class="form-control" min="0.1" max="2" step="0.1"
+            value="1.2" />
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_end %}
+<script src="{% static 'js/sphere_visualizer.js' %}"></script>
+<script src="{% static 'js/settings_chatbot.js' %}"></script>
+<script>
+    (function () {
+        // --- Floating dropdown toggle ---
+        const dropBtn = document.getElementById('otrosDropdownBtn');
+        const dropMenu = document.getElementById('otrosDropdownMenu');
+        if (dropBtn && dropMenu) {
+            dropBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropMenu.classList.toggle('show');
+            });
+            document.addEventListener('click', function () {
+                dropMenu.classList.remove('show');
+            });
+        }
+
+        // --- Sphere click → open chat ---
+        const sphereTrigger = document.getElementById('sphereTrigger');
+        const chatPanel = document.getElementById('chatPanel');
+        const closeBtn = document.getElementById('closeChatPanel');
+
+        if (sphereTrigger && chatPanel) {
+            sphereTrigger.addEventListener('click', function () {
+                chatPanel.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                // Focus text input after animation
+                setTimeout(function () {
+                    var txt = document.getElementById('txtQuestion');
+                    if (txt) txt.focus();
+                }, 600);
+            });
+        }
+
+        if (closeBtn && chatPanel) {
+            closeBtn.addEventListener('click', function () {
+                chatPanel.classList.remove('open');
+                document.body.style.overflow = '';
+                // Stop TTS when closing
+                if (window.speechSynthesis) window.speechSynthesis.cancel();
+                if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+            });
+        }
+
+        // Close chat with Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && chatPanel && chatPanel.classList.contains('open')) {
+                closeBtn.click();
+            }
+        });
+    })();
+</script>
+{% endblock %}

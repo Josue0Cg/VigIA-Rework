@@ -1,0 +1,227 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Banners | Administracion{% endblock %}
+{% block link_home %}{% url 'vista_programador' %}{% endblock %}
+{% block link_default %}
+{% include 'base/widget_links-admin.html' %}
+{% endblock %}
+{% block content %}
+<main class="container container-fluid py-5 {% if not user.is_authenticated %}main_container{% endif %}">
+    <div class="mb-5">
+        <h1 class="text-center">Banners <i class="fa-solid fa-image ms-1"></i></h1>
+        <hr class="hr_divisor mx-4 mx-md-0" />
+    </div>
+    <div class="row">
+        <!-- carousel -->
+        <section class="col-12 mb-4">
+            <div id="carouselMaterialStyle" class=" card carousel carousel_custom slide" data-mdb-ride="carousel" data-mdb-carousel-init>
+                <!-- Inner -->
+                <div class="carousel-inner">
+                    {% if banners_cound == 0 %}
+                    <div class="carousel-item active" id="bannerid_default" data-mdb-interval="15000">
+                        <img src="{% static 'img/default_image.webp' %}" />
+                        <div class="carousel-caption">
+                            <h5 class="text-white">😯 No hay banners</h5>
+                            <p class="mb-0">Este banner se muestra por <strong>default</strong></p>
+                        </div>
+                    </div>
+                    {%else%}
+                    {% for oneBanner in banners %}
+                    <div class="carousel-item" id="bannerid_{{oneBanner.id}}" data-mdb-interval="15000">
+                        <img src="{{oneBanner.imagen}}" />
+                        <div class="carousel-caption">
+                            {% autoescape off %}
+                            <h5>{{oneBanner.titulo}}</h5>
+                            {% endautoescape %}
+
+                            {% if not oneBanner.onlyImg %}
+                            {% if oneBanner.visible %}
+                            <p class="mb-0">{{oneBanner.descripcion}}</p>
+                            {% endif %}
+                            {% endif %}
+
+                            {% if oneBanner.onlyImg %}
+                            <small class="bg-success rounded-pill p-1 mt-3">Muestra solo la Imagen y boton</small>{% endif %}
+                            {% if not oneBanner.visible %}<small class="bg-danger rounded-pill p-1 mt-3">Banner Invisible</small>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <!-- Controls -->
+                {% if banners_cound > 1 %}
+                <button class="carousel-control-prev" type="button" data-mdb-target="#carouselMaterialStyle" data-mdb-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-mdb-target="#carouselMaterialStyle" data-mdb-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                {% endif %}
+            </div>
+        </section>
+        <!-- Crear nuevo banner -->
+        <section class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Crear <span class="text_detail">Nuevo</span> Banner</h3>
+                    <form method="POST" action="{% url 'upload_banner' %}" data-submit-form autocomplete="off">
+                        {% csrf_token %}
+                        <div>
+                            <label for="imagen" class="form-label">Imagen:</label>
+                            <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*" required>
+                        </div>
+                        <div class="border border-1 border-secondary rounded mt-4">
+                            <input type="text" id="tituloBanner" name="contenidoWord" class="form-control form-icon-trailing bannerTitle"
+                                placeholder="Titulo: resalta algunas palabras..." />
+                        </div>
+                        <div data-mdb-input-init class="form-outline position-relative mt-4">
+                            <button type="button" class="position-absolute top-0 end-0 btn p-0 fs-12 m-2 mt-1 none" data-clear="descripcion"><i
+                                    class="fa-solid fa-xmark m-0 p-0"></i></button>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" data-init-clear required></textarea>
+                            <label class="form-label" for="descripcion">Descripción:</label>
+                        </div>
+                        <div data-mdb-input-init class="form-outline position-relative mt-4">
+                            <button type="button" class="position-absolute top-0 end-0 btn p-0 fs-12 m-2 mt-1 none" data-clear="redirigir"><i
+                                    class="fa-solid fa-xmark m-0 p-0"></i></button>
+                            <input type="url" id="redirigir" name="redirigir" class="form-control form-icon-trailing" data-init-clear />
+                            <label class="form-label" for="redirigir">liga / url: <small>(Opcional)</small></label>
+                        </div>
+                        <div class="form-check mt-4 mb-0">
+                            <input class="form-check-input" type="checkbox" value="True" id="soloImagen" name="soloImagen" />
+                            <label class="form-check-label" for="soloImagen">Mostrar solo la imagen</label>
+                        </div>
+                        <div class="mt-4">
+                            <label for="expiracion" class="form-label">visible hasta: <small>(Opcional)</small></label>
+                            <input type="date" class="form-control" id="expiracion" name="expiracion">
+                        </div>
+                        <button type="submit" class="btn btn_detail btn-block mt-4" data-mdb-ripple-init data-mdb-ripple-color="white">
+                            Registrar <i class="fa-solid fa-paper-plane ms-1"></i></button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- Lista de banners registrados -->
+        <section class="col-lg-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="mb-3">Lista de banners</h4>
+                    <div class="d-flex flex-column align-items-center" data-table-load="tbodyBanners">
+                        <div class="pulse-container my-5">
+                            <div class="pulse-bubble bg_detail pulse-bubble-1"></div>
+                            <div class="pulse-bubble bg_detail pulse-bubble-2"></div>
+                            <div class="pulse-bubble bg_detail pulse-bubble-3"></div>
+                        </div>
+                    </div>
+                    <div class="d-none" id="table-container" data-table-container="tbodyBanners">
+                        <table id="datatableBanners" class="table table_odd align-middle m-0">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Descripción</th>
+                                    <th>Imagen</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyBanners" data-list-table="{% url 'list_banners' %}" data-url-info="{% url 'getitem_banner' %}"
+                                data-url-visible="{% url 'update_banner_visibility' %}">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+{% include 'base/widget_footer-admin.html' %}
+
+<!-- Modal: Edit Banner -->
+<div class="modal fade" id="editBannerModal" tabindex="-1" aria-labelledby="editBannerModalLabel" aria-hidden="true" data-mdb-backdrop="static"
+    data-mdb-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editBannerModalLabel">Editar Banner</h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start">
+                <form method="post" action="{% url 'edit_banner' %}" data-submit-form autocomplete="off">
+                    {% csrf_token %}
+                    <input type="hidden" name="banner_id" id="banner_id">
+                    <div>
+                        <label for="editImagen" class="form-label">Cambiar Imagen:</label>
+                        <input type="file" class="form-control" id="editImagen" name="imagen" accept="image/*">
+                    </div>
+                    <label for="editTitulo" class="form-label mt-4">Titulo:</label>
+                    <div class="border border-1 border-secondary rounded">
+                        <input type="text" id="editTitulo" name="contenidoWord" class="form-control bannerTitle" />
+                    </div>
+                    <div data-mdb-input-init class="form-outline position-relative mt-4">
+                        <button type="button" class="position-absolute top-0 end-0 btn p-0 fs-12 m-2 mt-1 none" data-clear="editDescripcion"><i
+                                class="fa-solid fa-xmark m-0 p-0"></i></button>
+                        <textarea class="form-control" id="editDescripcion" name="descripcion" rows="3" data-init-clear required></textarea>
+                        <label class="form-label" for="editDescripcion">Descripción:</label>
+                    </div>
+                    <div data-mdb-input-init class="form-outline position-relative mt-4">
+                        <button type="button" class="position-absolute top-0 end-0 btn p-0 fs-12 m-2 mt-1 none" data-clear="editRedirigir"><i
+                                class="fa-solid fa-xmark m-0 p-0"></i></button>
+                        <input type="url" id="editRedirigir" name="redirigir" class="form-control form-icon-trailing" data-init-clear />
+                        <label class="form-label" for="editRedirigir">liga / url:
+                            <small>(Opcional)</small></label>
+                    </div>
+                    <div class="form-check mt-4 mb-0">
+                        <input class="form-check-input" type="checkbox" value="True" id="editsoloImagen" name="soloImagen" />
+                        <label class="form-check-label" for="editsoloImagen">Mostrar solo la imagen</label>
+                    </div>
+                    <div class="mt-4">
+                        <label for="editExpiracion" class="form-label">visible hasta el dia: <small>(Opcional)</small></label>
+                        <input type="date" class="form-control" id="editExpiracion" name="expiracion">
+                    </div>
+                    <button type="submit" class="btn btn_detail btn-block mt-4" data-mdb-ripple-init data-mdb-ripple-color="white">
+                        Guardar Cambios <i class="fa-solid fa-paper-plane ms-1"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal: Eliminar Banner -->
+<div class="modal fade " id="eliminarBanner" tabindex="-1" aria-labelledby="labelModal0" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="labelModal0">
+                    Eliminar Banner</h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3 class="text-center mb-2">¿Quieres eliminar el banner <u id="deletebannername"></u>?</h3>
+                <p class="text-center">Esta acción es
+                    permanente</p>
+                <hr class="my-4">
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+                    <form id="eliminarBannerForm-" action="{% url 'delete_banner' %}" method="post" data-submit-form>
+                        {% csrf_token %}
+                        <input type="hidden" name="banner_id" id="deletebannerid">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" action="{% url 'update_banner_visibility' %}" class="d-none" data-submit-form data-submit-ready>
+    {% csrf_token %}
+    <button type="submit" class="d-none"> Actualizar Visibilidad</button>
+</form>
+{% endblock %}
+{% block scripts_end %}
+<script src="{% static 'tinymce/tinymce.min.js' %}"></script>
+<script src="{% static 'js/settings_tinymce.js' %}"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+<script src="{% static 'js/settings_datatable.js' %}"></script>
+{% endblock %}

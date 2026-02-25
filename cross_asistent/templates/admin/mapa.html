@@ -1,0 +1,396 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Mapa | Administracion{% endblock %}
+{% block link_home %}{% url 'vista_programador' %}{% endblock %}
+{% block link_default %}
+{% include 'base/widget_links-admin.html' %}
+{% endblock %}
+{% block extra_head %}
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+{% endblock %}
+{% block content %}
+<main class="full_page map_editing {% if not user.is_staff %}main_container{% endif %}" id='map' data-mapa_edif="{% url 'mapa_edificios' %}"
+    data-mapa_markers="{% url 'mapa_markers' %}">
+    <!-- Controles de ruta -->
+    <section class="controls_route card m-2 max_w250" id="controlsRoute">
+        <div class="card-header d-flex justify-content-between align-items-center p-3">
+            <h6 class="m-0"><i class="fa-solid fa-route me-1"></i>Como ir a...</h6>
+            <button type="button" class="btn-close" data-btn_closed="controlsRoute"></button>
+        </div>
+        <div class="card-body p-3">
+            <!-- Formulario de ruta -->
+            <form autocomplete="off" id="form_route">
+                <select id="origen" class="form-control mb-3">
+                    <option disabled selected hidden>Tu ubicación</option>
+                </select>
+                <select id="destino" class="form-control">
+                    <option disabled selected hidden>Seleccionar destino</option>
+                </select>
+            </form>
+            <div class="none mt-3" id="buttons_route">
+                <div class="d-flex justify-content-between">
+                    <button title="Borrar Formulario" type="button" class="btn btn_detail btn-sm p-2 px-3 fs-10" data-reset_form="form_route">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button title="Borrar Ruta" type="button" class="none btn btn-danger p-2 px-3 fs-13" data-reset_form="form_route" data-del_route>
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Informacion de la ruta -->
+        <div class="card-footer">
+            <div id="route-info" class="p-0 m-0 none"></div>
+        </div>
+    </section>
+    <!-- Indicaciones -->
+    <section class="controls_indications card m-2 max_w250" id="controlsIndic">
+        <div class="card-header d-flex justify-content-between align-items-center p-3">
+            <h6 class="m-0 fs-8"><i class="fa-solid fa-draw-polygon me-1"></i>Dibujar Poligono:</h6>
+            <button type="button" class="btn-close" data-btn_closed="controlsIndic"></button>
+        </div>
+        <div class="card-body p-3">
+            <p class="text-center m-0">
+                Da <strong id="poligonClicks">4</strong> cliks derechos en el mapa... <br>
+                Dibuja el poligono en sentido <u>Horario</u> <i class="fa-solid fa-arrow-rotate-right ms-1"></i>
+            </p>
+        </div>
+    </section>
+</main>
+
+<!-- OffCanvas: Editar/Crear informacion -->
+<form class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="infoLateral" aria-labelledby="infoLateralLabel"
+    method="post" action="{% url 'upload_map' %}" data-submit-form autocomplete="off">
+    <div class="offcanvas-header position-relative p-0">
+        <button type="button" class="btn-close p-3 m-1 m-2 position-absolute" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0" id="offcanvasContent">
+        <div class="position-relative min_h100">
+            <img src="{% static 'img/default_image.webp' %}" id="imagen_actual" class="img-fluid" />
+            <div class="mask mask_white">
+                <div class="d-flex align-items-end h-100 px-3">
+                    <div class="form-outline" data-mdb-input-init>
+                        <input type="text" id="nombreEdificio" name="nombreEdificio" class="form-control name_pleace" required />
+                        <label class="form-label" for="nombreEdificio">Nombre del Lugar:</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-3 mt-2">
+            {% csrf_token %}
+            <!-- Foto del Lugar -->
+            <div class="mb-4">
+                <input type="file" class="none" id="fotoEdificio" name="fotoEdificio" accept="image/*" data-img_dom="imagen_actual" />
+                <label class="btn bg_blue-green btn-block text-white" for="fotoEdificio" data-mdb-ripple-init data-mdb-ripple-color="white">
+                    Cambiar foto <i class="fa-regular fa-image ms-1"></i></label>
+            </div>
+            <input type="text" name="isNew" id="isNewEdif" class="d-none">
+            <input type="text" name="uuid" id="uuid" class="form-control d-none" data-uuid data-new-uid="{{UID}}" readonly required>
+
+            <!-- Marcador de imagen -->
+            <div class="mb-4" data-notmarker>
+                <input class="form-check-input" type="checkbox" id="hidename" name="hidename" checked />
+                <label class="form-check-label" for="hidename">: Mostrar Nombre</label>
+            </div>
+            <div class="mb-4">
+                <input class="form-check-input" type="checkbox" id="ismarker" name="ismarker" />
+                <label class="form-check-label" for="ismarker">: Marcador de Imagen</label>
+            </div>
+            <div class="form-outline none mb-4" data-mdb-input-init id="sizemarkerdiv">
+                <input type="number" id="sizemarker" name="sizemarker" class="form-control active text-end" min="0.01" max="1" step="0.01" value="0.05"
+                    required />
+                <label class="form-label" for="sizemarker">Tamaño:</label>
+            </div>
+
+            <!-- Color del poligono -->
+            <section class="row" data-notmarker>
+                <div class="col-10">
+                    <div class="form-outline" data-mdb-input-init>
+                        <input type="text" class="form-control" id="namecolor" name="namecolor" autocapitalize="off" data-colorName list="colorsList" />
+                        <label class="form-label" for="namecolor">Color:</label>
+                    </div>
+                    <datalist id="colorsList"></datalist>
+                </div>
+                <div class="col-2 ps-1">
+                    <input type="text" class="d-none" id="colorHex" name="colorEdificio" value="#808080" required />
+                    <input type="color" class="form-control form-control-color p-1 rounded border border-secondary" id="colorPicker" value="#808080"
+                        data-colorPicker>
+                </div>
+            </section>
+            <!-- Poligonos, boton e inputs -->
+            <button type="button" id="btnPoligon" class="btn btn_detail btn-block text-white mt-4" data-mdb-ripple-init data-mdb-ripple-color="white"
+                data-notmarker>
+                Dibujar Polígono<i class="fa-solid fa-draw-polygon ms-1"></i>
+            </button>
+            <button type="button" id="btnPoligonCancel" class="btn btn-danger btn-block mt-4 none" data-mdb-ripple-init data-mdb-ripple-color="white">
+                Cancelar <i class="fa-solid fa-power-off ms-1"></i>
+            </button>
+            <section class="none" id="esquinasPoligono">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="input-group form-outline mt-4" data-mdb-input-init>
+                            <input type="text" id="esquina1" name="esquina1" class="form-control pe-2" readonly aria-describedby="inputBtnE1" required />
+                            <label class="form-label" for="esquina1">Esquina 01:</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group form-outline mt-4" data-mdb-input-init>
+                            <input type="text" id="esquina2" name="esquina2" class="form-control pe-2" readonly aria-describedby="inputBtnE2" required />
+                            <label class="form-label" for="esquina2">Esquina 02:</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group form-outline mt-4" data-mdb-input-init>
+                            <input type="text" id="esquina3" name="esquina3" class="form-control pe-2" readonly aria-describedby="inputBtnE3" required />
+                            <label class="form-label" for="esquina3">Esquina 03:</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group form-outline mt-4" data-mdb-input-init>
+                            <input type="text" id="esquina4" name="esquina4" class="form-control pe-2" readonly aria-describedby="inputBtnE4" required />
+                            <label class="form-label" for="esquina4">Esquina 04:</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Coordenadas de la puerta -->
+            <div class="input-group form-outline mt-4" data-mdb-input-init>
+                <input type="text" id="puertaCordsEdificio" name="puertaCordsEdificio" class="form-control pe-4" aria-describedby="inputBtnDoor" readonly
+                    required />
+                <label class="form-label" for="puertaCordsEdificio">Punto de Entrada:</label>
+                <button class="btn btn_detail px-3 rounded-end text-white" type="button" id="inputBtnDoor" data-mdb-ripple-init data-mdb-ripple-color="white"
+                    title="Colocar Marcador de la Entrada">
+                    <i class="fa-solid fa-location-dot fs-10"></i>
+                </button>
+            </div>
+            <button id="btnOpenGalery" class="btn btn_detail btn-block mt-4 none" data-notmarker type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#pleaceGalery" aria-controls="pleaceGalery">
+                <div class="d-flex justify-content-between">
+                    <div><i class="fa-regular fa-images me-1"></i> Galeria:</div>
+                    <div><span id="galeryCount">2</span> Imagenes</div>
+                </div>
+            </button>
+            <!-- TinyMCE: Contenido de texto -->
+            <div class="mt-4" data-notmarker>
+                <textarea id="textTiny" class="form-control" name="contenidoWord"
+                    placeholder="Escribe a detalle sobre el lugar, puedes hacer listas, encabezados, parrafos y tablas"></textarea>
+            </div>
+            <div id="submitEdificio" class="mt-4 row">
+                <div class="col-2 none" id="btnDeletedPleace">
+                    <button title="Borrar lugar" type="button" class="btn btn-danger btn-block px-1" data-mdb-ripple-init data-mdb-ripple-color="white"
+                        data-bs-dismiss="offcanvas" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#deletePleace">
+                        <i class="fa-regular fa-trash-can tscale-1-4"></i>
+                    </button>
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn_detail btn-block" data-mdb-ripple-init data-mdb-ripple-color="white">
+                        Guardar Cambios <i class="fa-regular fa-floppy-disk ms-1"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 accordion accordion-borderless" id="noteAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingTwoX">
+                        <button data-mdb-collapse-init class="accordion-button btn collapsed bg_purple-blue text-white" type="button" data-mdb-toggle="collapse"
+                            data-mdb-target="#flush-collapseTwoX" aria-expanded="false" aria-controls="flush-collapseTwoX">
+                            Nota: ...
+                        </button>
+                    </h2>
+                    <div id="flush-collapseTwoX" class="accordion-collapse collapse" aria-labelledby="flush-headingTwoX" data-mdb-parent="#noteAccordion">
+                        <div class="accordion-body p-2">
+                            <small>
+                                Además de crear/editar la información del mapa, se recomienda editar los lugares y caminos en (OSM) OpenStreetMaps
+                                <i class="fa-solid fa-book-atlas"></i><br>
+                                También se recomienda registrar los caminos y lugares sin su nombre, ya que estos intervienen
+                                en la visualización del mapa en este sitio web. <br>
+                                Utiliza la capa de <u>Mapbox Satelite</u> <i class="fa-solid fa-layer-group ms-1"></i> al editar la información en OSM
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- OffCanvas: Galeria de imagenes -->
+<section class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="pleaceGalery" aria-labelledby="pleaceGaleryLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasLabel">Galeria de <span class="name_pleace"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" id="offcanvasContent">
+        <form action="{% url 'galery_up_images' %}" method="post" data-submit-form data-submit-blur="galeryUpImages">
+            <div id="drop-area">
+                Arrastra y suelta tus imágenes aquí o haz clic para seleccionarlas.
+                <input type="text" name="uuid" id="uuid" class="d-none" data-uuid data-new-uid="{{UID}}" readonly required>
+                <input type="file" name="images" id="file-input" class="d-none input_change" accept="image/jpeg, image/png, image/jpg" multiple required>
+            </div>
+            <button type="submit" id="galeryUpImages" class="d-none">Enviar</button>
+        </form>
+        <section id="image-list" class="image-list d-flex my-3"></section>
+        <section id="image-list-galery" class="image-list d-flex my-3" data-galery-del="{% url 'eliminar_imagen' %}"></section>
+    </div>
+</section>
+
+<!-- OffCanvas: Cambiar estilo -->
+<div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottom" aria-labelledby="offcanvasBottomLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasBottomLabel">Cambiar Estilo <i class="fa-solid fa-layer-group ms-1"></i></h5>
+        <button type="button" class="btn-close m-2 p-3" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body row" id="offcanvasbody">
+        <div class="col-4 col-md p-2">
+            <label class="card" for="satellite-streets-v12">
+                <input id="satellite-streets-v12" type="radio" name="rtoggle" value="satellite" class="none">
+                <div class="card-body pb-1 p-3 text-center">
+                    <div><i class="fa-solid fa-satellite"></i></div>
+                    <div>Satelital</div>
+                </div>
+            </label>
+        </div>
+        <div class="col-4 col-md p-2">
+            <label class="card btn_detail text-white cursor-not" for="streets-v12">
+                <input id="streets-v12" type="radio" name="rtoggle" value="streets" disabled checked class="none">
+                <div class="card-body pb-1 p-3 text-center">
+                    <div><i class="fa-solid fa-signs-post"></i></div>
+                    <div>Caminos</div>
+                </div>
+            </label>
+        </div>
+        <div class="col-4 col-md p-2">
+            <label class="card" for="outdoors-v12">
+                <input id="outdoors-v12" type="radio" name="rtoggle" value="outdoors" class="none">
+                <div class="card-body pb-1 p-3 text-center">
+                    <div><i class="fa-solid fa-road"></i></div>
+                    <div>Calles</div>
+                </div>
+            </label>
+        </div>
+        <div class="col-6 col-md p-2">
+            <label class="card" for="light-v11">
+                <input id="light-v11" type="radio" name="rtoggle" value="light" class="none">
+                <div class="card-body pb-1 p-3 text-center">
+                    <div><i class="fa-regular fa-map"></i></div>
+                    <div>Claro</div>
+                </div>
+            </label>
+        </div>
+        <div class="col-6 col-md p-2">
+            <label class="card" for="dark-v11">
+                <input id="dark-v11" type="radio" name="rtoggle" value="dark" class="none">
+                <div class="card-body pb-1 p-3 text-center">
+                    <div><i class="fa-solid fa-map"></i></div>
+                    <div>Oscuro</div>
+                </div>
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Importar y exportar -->
+<div class="modal fade" id="importInMap" tabindex="-1" aria-labelledby="importInMapLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importInMapLabel">Importar y Exportar <i class="fa-solid fa-cloud ms-1"></i></h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'export_mapa' %}" method="get">
+                    <button type="submit" class="btn btn_detail btn-block">
+                        Exportar CSV del Mapa <i class="fa-solid fa-file-arrow-down ms-1"></i>
+                    </button>
+                </form>
+                <hr class="hr_divisor my-4">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'import_mapa' %}" data-submit-form>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <input type="file" name="file" accept=".csv" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn_detail btn-block">
+                        Importar CSV <i class="fa-solid fa-file-arrow-up ms-1"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Abrir Google Maps -->
+<div class="modal fade" id="beforeSend" tabindex="-1" aria-labelledby="beforeSendLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="beforeSendLabel">Abrir Google Maps <i class="fa-solid fa-map-location-dot ms-1"></i></h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 class="col-8 col-md-12 mx-auto text-center">¿Quieres saber como llegar a la UTC?</h4>
+                <p class="p-3">Con esta opción te enviaremos a <span class="fw-bold style_google">Google</span> Maps, para que puedas ir desde tu ubicación
+                    hasta la UTC
+                </p>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+                <a target="_blank"
+                    href="https://www.google.com.mx/maps/dir/25.5565711,-100.936538/Universidad+Tecnol%C3%B3gica+de+Coahuila,+Boulevard+del+Parque+Industrial+Francisco+R.+Alanis,+Zona+Industrial,+Ramos+Arizpe,+Coahuila+de+Zaragoza/@25.5564822,-100.9417562,16z/data=!3m1!4b1!4m10!4m9!1m1!4e1!1m5!1m1!1s0x868814c0002295ff:0x5c622cc711957b03!2m2!1d-100.9368619!2d25.5583972!3e2?entry=ttu"
+                    class="btn btn_detail" data-mdb-ripple-init>Abrir <i class="fa-solid fa-up-right-from-square ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Borrar elemento -->
+<div class="modal fade" id="deletePleace" tabindex="-1" aria-labelledby="deletePleaceLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deletePleaceLabel">Eliminar Lugar <i class="fa-solid fa-map-location-dot ms-1"></i></h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 class="text-center">¿Quiere eliminar "<span class="text-danger" data-namePleace></span>"? 😯🧐😬</h4>
+                <br>
+                <h4 class="text-center">Esta acción es permanente y puede afectar varios sistemas</h4>
+                <p class="p-3 mb-0">
+                    "<span class="text-danger" data-namePleace></span>" está ligado a información en la base de datos global y del Mapa, puede eliminar ambos o
+                    solamente la
+                    información en el mapa.
+                </p>
+                <div class="d-flex justify-content-between">
+                    <form id="formDeleteMap" data-submit-form action="{% url 'del_pleace_map' %}" method="post">
+                        <input type="text" class="d-none" required name="uuid" data-uuid>
+                        <button type="submit" class="btn btn-warning" data-mdb-ripple-init data-mdb-dismiss="modal">
+                            Eliminar en Mapa
+                        </button>
+                    </form>
+                    <form id="formDeleteMap" data-submit-form action="{% url 'del_pleace_mapdb' %}" method="post">
+                        <input type="text" class="d-none" required name="uuid" data-uuid>
+                        <button type="submit" class="btn btn-danger" data-mdb-ripple-init data-mdb-dismiss="modal">
+                            Eliminar en Ambos
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-end">
+                <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts_end %}
+<script src="{% static 'tinymce/tinymce.min.js' %}"></script>
+<script src="{% static 'js/settings_tinymce.js' %}"></script>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="{% static 'js/settings_mapbox.js' %}"></script>
+{% endblock %}

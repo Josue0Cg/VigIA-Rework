@@ -1,0 +1,109 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}{{ user.username }} | Tu perfil {% endblock %}
+{% block link_home %}{% url 'vista_programador' %}{% endblock %}
+{% block link_default %}
+{% include 'base/widget_links-admin.html' %}
+{% endblock %}
+{% block content %}
+<main class="container container-fluid py-4 px-4 {% if not user.is_authenticated %}main_container{% endif %}">
+    <form action="{% url 'editprofile' %}" method="post" class="row" autocomplete="off" data-validate-profile>
+        {% csrf_token %}
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card card_perfil">
+                <div class="card__img_perfil" style="--color-bg1:#128be0; --color-bg2:#ae37cc; --var-img-perfil: url({% static 'img/Default_image.webp' %});">
+                    <div class="card__avatar_perfil">
+                        <img src="{{ user_profile.profile_picture }}" alt="Foto de perfil" class="img-rounded materialBoxed" id="imgProfileDom">
+                    </div>
+                </div>
+
+                <div class="card__perfil_content p-4 pt-0">
+                    <h2 class="w-100 text-center">
+                        <input type="text" name="username" id="username" class="w-100 text-center input_transparent" value="{{ user.username }}"
+                            data-input_transparent data-input_change placeholder="Ingresa tu Nombre de Usuario">
+                    </h2>
+                    <div class="my-4">
+                        <section>
+                            <strong class="fs-8">Nombre:</strong>
+                            <div class="my-1">
+                                <input type="text" name="first_name" id="first_name" class="text-center fs-12 input_transparent" value="{{ user.first_name }}"
+                                    data-input_transparent data-input_change placeholder="Ingresa tu Nombre">
+                            </div>
+                            <div class="my-1">
+                                <input type="text" name="last_name" id="last_name" class="text-center fs-12 input_transparent" value="{{ user.last_name }}"
+                                    data-input_transparent data-input_change placeholder="Ingresa tu Apellidos">
+                            </div>
+                        </section>
+                        <div class="mt-3"></div>
+                        <div class="flex-between-wrap align-items-center mt-3 mb-1">
+                            <strong class="me-3"><label for="email">Email:</label></strong>
+                            <input type="text" name="email" id="email" class="input_transparent flex-fill text-end" value="{{ user.email }}"
+                                data-input_transparent data-input_change placeholder="Ingresa tu Email">
+                        </div>
+                        <div class="flex-between-wrap align-items-center mt-3 mb-1">
+                            <strong class="me-3"><label for="firmaBlog" title="Firma del autor para tus Blogs">Firma:</label></strong>
+                            <input type="text" name="firmaBlog" id="firmaBlog" class="input_transparent flex-fill text-end"
+                                value="{{ user.userprofile.blog_firma }}" data-input_transparent placeholder="Firma para tus Blogs">
+                        </div>
+                        {% if user_profile.password_update %}
+                        <div class="flex-between-wrap align-items-center mt-3">
+                            <strong>Contraseña:</strong>
+                            <div class="flex-fill text-end">
+                                <small class="fs-7">( Ultima Modificacion )</small>
+                                <br>
+                                {{ user_profile.password_update }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <section class="row">
+                        <div class="col-12 mt-4 {% if user_profile.profile_picture == '/static/img/UTC_logo-plano.webp' %}d-none{% endif %}">
+                            <input type="checkbox" class="btn-check text-white" id="deletePicture" name="deletePicture" autocomplete="off" />
+                            <label class="btn bg_blue-red btn_check btn-block" for="deletePicture">Borrar foto Actual <i
+                                    class="fa-regular fa-trash-can ms-1"></i></label>
+                        </div>
+                        <div class="col-12 col-md-6 mt-4">
+                            <label class="btn btn-block bg_purple-blue text-white" for="userPicture">
+                                {% if user_profile.profile_picture == '/static/img/UTC_logo-plano.webp' %}Subir{% else %}Cambiar{% endif %} Foto de Perfil
+                                <i class="fa-solid fa-camera-rotate ms-1"></i>
+                            </label>
+                            <input type="file" class="none" id="userPicture" name="userPicture" accept="image/*" data-img_dom="imgProfileDom"
+                                data-input_change />
+                        </div>
+                        <div class="col-12 col-md-6 mt-4">
+                            <button type="button" id="updatePassBtn" class="btn btn-block bg_blue-green text-white">Cambiar Contraseña</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div id="profileSaved" class="col col-lg-4 mx-auto none">
+            <div class="card mt-4 mt-lg-0">
+                <div class="card-body">
+                    <h5 class="text-center mb-4">Para guardar los cambios confirma tu Contraseña</h5>
+                    <div class="form-outline" data-mdb-input-init>
+                        <input type="password" id="passwordSend" name="passwordSend" class="form-control text-end" required />
+                        <label class="form-label" for="passwordSend">Contraseña<span id="updatePassText" class="none"> actual</span>:</label>
+                    </div>
+                    <div id="updatePassBlock" class="none">
+                        <div class="form-outline mt-4" data-mdb-input-init>
+                            <input type="password" id="newPass" name="newPass" class="form-control text-end" />
+                            <label class="form-label" for="newPass">Nueva Contraseña:</label>
+                        </div>
+                        <div class="form-outline mt-4" data-mdb-input-init>
+                            <input type="password" id="confNewPass" name="confNewPass" class="form-control text-end" />
+                            <label class="form-label" for="confNewPass">Confirmar Nueva Contraseña:</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn_detail btn-block mt-4">Guardar Cambios <i class="fa-solid fa-paper-plane ms-1"></i></button>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+{% endblock %}
+
+{% block scripts_end %}
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+{% endblock %}

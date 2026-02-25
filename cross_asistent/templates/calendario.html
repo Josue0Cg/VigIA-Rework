@@ -1,0 +1,53 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Calendario de la Universidad 📰{% endblock %}
+{% block content %}
+<main class="container container-fluid py-5">
+    <section id="calendar" data-events="{% url 'calendario_eventos' %}" data-show_btnyear="{{show_btns_year}}"></section>
+
+    <!-- Modal: Ver info del Evento -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Detalle del Evento</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <p id="eventDesc" class="mb-4"></p>
+
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <img id="eventImg" class="img-rounded materialBoxed none max_w150">
+                        </div>
+                        <div class="d-flex align-items-center gap_10">
+                            <div>
+                                <p class="m-0" id="eventStartDate"></p>
+                                <small class="fs-7" id="eventStartTime"></small>
+                            </div>
+                            <div id="dateSeparator">-</div>
+                            <div>
+                                <p class="m-0" id="eventEndDate"></p>
+                                <small class="fs-7" id="eventEndTime"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="fs-6">Ubicación:</small>
+                        <p class="m-0" id="eventLoc"></p>
+                    </div>
+                    <div id="eventBtnDiv" class="none">
+                        <a id="eventBtn" class="btn btn_detail" target="_blank" rel="noopener noreferrer">Ver Más <i class="fa-solid fa-up-right-from-square ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% include 'base/widget_footer.html' %}
+{% endblock %}
+{% block scripts_end %}
+<script src="{% static 'js/settings_fullcalendar.js' %}"></script>
+{% endblock %}

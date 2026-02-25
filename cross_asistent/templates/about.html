@@ -1,0 +1,76 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Sobre Nosotros 🔧{% endblock %}{% block content %}
+<main class="container container-fluid py-5">
+  <div class="mb-5">
+    <h1 class="text-center">Sobre Nosotros <i class="fa-solid fa-users"></i></h1>
+    <hr class="hr_divisor mx-4 mx-md-0" />
+  </div>
+  <div class="container">
+    <!--Grid row-->
+    <div class="row">
+      <!--Grid column-->
+      <div class="col-md-8 mb-4">
+        <!--Section: Post data-mdb-->
+        <section class="border-bottom mb-4">
+          <img src="{{about_imgfirst.url}}" class="img-fluid shadow-2-strong img-rounded mb-4" />
+
+          <div class="row align-items-center mb-4">
+            <div class="col-lg-6 text-center text-lg-start mb-3 m-lg-0">
+              © <span class="text_detail">{{copyright_settings}}</span> Todos los Derechos reservados:
+              <a class="text-reset fw-bold text-decoration-underline" href="{{website_settings}}" target="_blank" rel="noopener noreferrer">Universidad
+                Tecnológica de Coahuila</a>
+            </div>
+
+            <div class="col-lg-6 text-center text-lg-end">
+              <a href="https://www.facebook.com/UniversidadTecnologicadeCoahuila/" title="facebook" target="_blank" rel="noopener noreferrer">
+                <button type="button" class="btn btn-primary px-3 me-1" data-mdb-ripple-init style="background-color: #3b5998;">
+                  <i class="fs-10 fab fa-facebook-f"></i>
+                </button>
+              </a>
+
+              <a href="https://www.instagram.com/utcoahuila/" title="Instagram" target="_blank" rel="noopener noreferrer" ">
+                <button type=" button" class="btn btn-primary px-3 me-1" data-mdb-ripple-init style="background-color: #bc2a8d;">
+                <i class="fs-10 fa-brands fa-instagram"></i>
+                </button>
+              </a>
+
+              <a href="https://www.tiktok.com/@utdecoahuila" title="Tiktok" target="_blank" rel="noopener noreferrer">
+                <button type="button" class="btn btn-primary px-3 me-1" data-mdb-ripple-init style="background-color: #000000;">
+                  <i class="fs-10 fa-brands fa-tiktok"></i>
+                </button>
+              </a>
+
+              <a href="https://x.com/utcoahuila" title="Twitter" target="_blank" rel="noopener noreferrer" class="me-4 text-reset">
+                <button type="button" class="btn btn-primary px-3 me-1" data-mdb-ripple-init style="background-color: #ffffff;">
+                  <i class="fs-10 fa-brands fa-x-twitter" style="color: #000000;"></i>
+                </button>
+              </a>
+            </div>
+          </div>
+        </section>
+        <section>{% autoescape off %}{{about_textfirst}}{% endautoescape %}</section>
+        <hr class="hr_divisor my-5">
+        <section>{% autoescape off %}{{about_textsecond}}{% endautoescape %}</section>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <section class="text-center border-bottom pb-5 mb-5">
+          <div class="bg-image hover-overlay mb-5" data-mdb-ripple-init>
+            <img src="/static/img/banner utc-2.jpg" class="img-fluid img-rounded materialBoxed" />
+          </div>
+        </section>
+        <section class="border-bottom py-5 my-5">
+          <iframe class="img-rounded rounded" src="https://www.tiktok.com/embed/v2/7378924345843862789" allowfullscreen>
+          </iframe>
+        </section>
+        <section class="pt-5 mt-5">
+          <img src="{{about_imgsecond.url}}" class="img-fluid shadow-2-strong img-rounded mt-4 materialBoxed" />
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include 'base/widget_footer.html' %}
+{% endblock %}

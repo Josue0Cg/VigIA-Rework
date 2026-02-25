@@ -1,0 +1,482 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Base de Datos | Administracion{% endblock %}
+{% block link_home %}{% url 'vista_programador' %}{% endblock %}
+{% block link_default %}
+{% include 'base/widget_links-admin.html' %}
+{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
+{% endblock %}
+
+{% block content %}
+<main class="container container-fluid py-5 {% if not user.is_authenticated %}main_container{% endif %}">
+    <div class="mb-5">
+        <h1 class="text-center">Base de Datos <i class="fa-solid fa-database ms-1"></i></h1>
+        <hr class="hr_divisor mx-4 mx-md-0" />
+    </div>
+    <div class="row">
+        <!-- Formulario: Crear Database -->
+        <section class="col-lg-8">
+            <section class="card mb-4">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Nuevo Registro</h3>
+                    <form method="post" action="{% url 'create_database' %}" data-submit-form id="databaseForm" autocomplete="off">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-outline mb-4">
+                                    <select class="form-select" id="categoria" name="categoria" required>
+                                        <option selected disabled hidden>Seleccione una categoría:</option>
+                                        {% for categoria in categorias %}
+                                        <option value="{{ categoria.categoria }}">{{ categoria.categoria }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-outline mb-4" data-mdb-input-init>
+                                    <i class="fa-solid fa-heading trailing"></i>
+                                    <input type="text" id="titulo" name="titulo" class="form-control form-icon-trailing" required />
+                                    <label class="form-label" for="titulo">Título:</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <i class="fa-solid fa-keyboard trailing"></i>
+                            <textarea class="form-control form-icon-trailing" id="informacion" name="informacion" rows="6" required></textarea>
+                            <label for="informacion" class="form-label">Información:</label>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-outline mb-4" data-mdb-input-init>
+                                    <i class="fa-solid fa-link trailing"></i>
+                                    <input type="url" id="redirigir" name="redirigir" class="form-control form-icon-trailing" />
+                                    <label class="form-label" for="redirigir">Redirigir: (url / liga)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="documentos" class="form-label">Documento: (PDF)</label>
+                                    <input type="file" class="form-control" id="documentos" name="documento" accept="application/pdf">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="imagenes" class="form-label">Imágen:</label>
+                                    <input type="file" class="form-control" id="imagenes" name="imagen" accept="image/jpeg, image/png, image/webp*">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button type="submit" class="btn btn_detail btn-block">Guardar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </section>
+        <section class="col-lg-4">
+            <div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="text-center mb-4">Descargar CSV</h3>
+                        <form action="{% url 'export_database' %}" method="get">
+                            <button type="submit" class="btn btn_detail btn-block">
+                                Descargar Base de Datos <i class="fa-solid fa-file-arrow-down ms-1"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="my-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mt5">
+                            <h3 class="text-center mb-4">Importar CSV</h3>
+                            <form method="POST" enctype="multipart/form-data" action="{% url 'import_database' %}" data-submit-form>
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <input type="file" name="file" accept=".csv" class="form-control">
+                                </div>
+                                <button type="submit" class="btn btn_detail btn-block">
+                                    Enviar a la Base de Datos <i class="fa-solid fa-file-arrow-up ms-1"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Todas las Preguntas -->
+        <section class="mb-4" id="preguntasEnviadas">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Preguntas de los Usuarios</h3>
+                    {% if preguntas_sending %}
+                    <!-- tabla de usuarios -->
+                    <div class="table-responsive rounded" id="table-container">
+                        <table class="table table_odd align-middle m-0">
+                            <thead>
+                                <tr class="text-center">
+                                    <th class="d-none d-md-table-cell">#</th>
+                                    <th>Preguntas</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for question in preguntas_sending %}
+                                <tr class="results_item table_odd_items">
+                                    <td class="text-center d-none d-md-table-cell">{{question.id}}</td>
+                                    <td>
+                                        <div class="accordion accordion-borderless" id="questionList">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="heading_{{question.id}}">
+                                                    <div data-mdb-collapse-init class="accordion-button collapsed" type="button" data-mdb-toggle="collapse"
+                                                        data-mdb-target="#collapse_{{question.id}}" aria-expanded="false"
+                                                        aria-controls="collapse_{{question.id}}">
+                                                        {{question.pregunta}}
+                                                    </div>
+                                                </h2>
+                                                <div id="collapse_{{question.id}}" class="accordion-collapse collapse" aria-labelledby="heading_{{question.id}}"
+                                                    data-mdb-parent="#questionList">
+                                                    <div class="accordion-body">
+                                                        {{question.descripcion}}
+                                                        <div class="mt-4 {% if not question.descripcion %}mb-4{% endif %}">
+                                                            <small>
+                                                                Enviado el: <br>
+                                                                {{question.fecha}}
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- Botones de acciones -->
+                                    <td>
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <form method="post" action="{% url 'question_deleted' %}" data-submit-form>
+                                                <input type="text" name="question_id" value="{{question.id}}" class="d-none">
+                                                <button title="Editar Usuario" type="submit" class="btn btn-floating btn-danger">
+                                                    <i class="fa-regular fa-trash-can fs-12"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center">
+                        <p class="lead m-0">No hay preguntas por el momento.</p>
+                    </div>
+                    {% endif %}
+                </div>
+        </section>
+        <!-- Tabla: registros de la base de datos -->
+        <section>
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h4 class="mb-3">Lista de Registros</h4>
+                    <div class="d-flex flex-column align-items-center" data-table-load="tbodyDatabase">
+                        <div class="pulse-container my-5">
+                            <div class="pulse-bubble bg_detail pulse-bubble-1"></div>
+                            <div class="pulse-bubble bg_detail pulse-bubble-2"></div>
+                            <div class="pulse-bubble bg_detail pulse-bubble-3"></div>
+                        </div>
+                    </div>
+                    <div class="d-none" id="table-container" data-table-container="tbodyDatabase">
+                        <table id="datatable_database" class="table table_odd align-middle m-0">
+                            <thead>
+                                <tr>
+                                    <th class="fw-bold text_detail">id</th>
+                                    <th class="fw-bold text_detail">Categoría</th>
+                                    <th class="fw-bold text_detail">Título</th>
+                                    <th class="fw-bold text_detail">Imágen</th>
+                                    <th class="fw-bold text_detail">Documento</th>
+                                    <th class="fw-bold text_detail">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyDatabase" data-list-table="{% url 'database_list' %}" data-url-info="{% url 'database_getitem' %}">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% if user.is_staff %}
+        <!-- Formulario: crear Categoria -->
+        <section class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Nueva Categoría</h3>
+                    <form method="post" action="{% url 'categorias_create' %}" data-submit-form id="categoriasForm" autocomplete="off">
+                        {% csrf_token %}
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <i class="fa-solid fa-layer-group trailing"></i>
+                            <input type="text" id="categoria" name="categoria" class="form-control form-icon-trailing" required />
+                            <label class="form-label" for="categoria">Nombre:</label>
+                        </div>
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
+                            <label for="descripcion" class="form-label">Descripción:</label>
+                        </div>
+                        <button type="submit" class="btn btn_detail btn-block">Registrar</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <section class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Descargar CSV</h3>
+                    <form action="{% url 'export_categorias' %}" method="get">
+                        <button type="submit" class="btn btn_detail btn-block">
+                            Descargar Categorias <i class="fa-solid fa-file-arrow-down ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <section class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Importar CSV</h3>
+                    <form method="POST" enctype="multipart/form-data" action="{% url 'import_categorias' %}" data-submit-form>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="file" name="file" accept=".csv" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn_detail btn-block">
+                            Enviar a Categorias <i class="fa-solid fa-file-arrow-up ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- Tabla: lista de categorias -->
+        <section class="col-12">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h4 class="mb-3">Lista de Registros</h4>
+                    {% if categoriasall %}
+                    <div class="table-responsive rounded" id="table-container">
+                        <table class="table table_odd align-middle m-0">
+                            <thead>
+                                <tr>
+                                    <th class="fw-bold text_detail">id</th>
+                                    <th class="fw-bold text_detail">Categoría</th>
+                                    <th class="fw-bold text_detail">Descripción</th>
+                                    <th class="fw-bold text_detail">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dato in categoriasall %}
+                                <tr class="table_odd_items">
+                                    <td>{{ dato.id }}</td>
+                                    <td>{{ dato.categoria }}</td>
+                                    <td class="text-start">{{ dato.descripcion }}</td>
+                                    <td>
+                                        <div class="d-flex flex-column align-items-center gap_10">
+                                            <button type="button" class="btn btn-floating btn-info" data-mdb-ripple-init data-mdb-modal-init
+                                                data-mdb-target="#editCTGModal{{ dato.id }}">
+                                                <i class="fa-solid fa-edit fs-12"></i>
+                                            </button>
+                                            {% csrf_token %}
+                                            <button type="button" class="btn btn-floating btn-danger" data-mdb-ripple-init data-mdb-modal-init
+                                                data-mdb-target="#eliminar_modal_{{ dato.id }}">
+                                                <i class="fa-regular fa-trash-can fs-12"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Modal: Edit Dategoria -->
+                                <div class="modal fade" id="editCTGModal{{ dato.id }}" tabindex="-1" aria-labelledby="editCTGModalLabel{{ dato.id }}"
+                                    aria-hidden="true" data-mdb-backdrop="static" data-mdb-keyboard="false">
+                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editCTGModalLabel{{ dato.id }}">Editar Informacion</h5>
+                                                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-start">
+                                                <form method="post" action="{% url 'categorias_update' %}" data-submit-form id="dbUpdate" autocomplete="off">
+                                                    {% csrf_token %}
+                                                    <input type="text" class="d-none" value="{{ dato.id }}" name="id">
+
+                                                    <div class="form-outline mb-4" data-mdb-input-init>
+                                                        <i class="fa-solid fa-layer-group trailing"></i>
+                                                        <input type="text" id="categoria_{{ dato.id }}" name="categoria"
+                                                            class="form-control form-icon-trailing active" value="{{ dato.categoria }}" readonly required />
+                                                        <label class="form-label" for="categoria_{{ dato.id }}">Nombre:</label>
+                                                    </div>
+
+                                                    <div class="form-outline mb-4" data-mdb-input-init>
+                                                        <textarea class="form-control active" id="descripcion_{{ dato.id }}" name="descripcion" rows="4"
+                                                            required>{{ dato.descripcion }}</textarea>
+                                                        <label for="descripcion_{{ dato.id }}" class="form-label">Descripción:</label>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <button type="submit" class="btn btn_detail btn-block">Guardar</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal: Eliminar Categoria -->
+                                <div class="modal fade " id="eliminar_modal_{{ dato.id }}" tabindex="-1" aria-labelledby="labelModal0{{ dato.id }}"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="labelModal0{{ dato.id }}">
+                                                    Eliminar Categoria</h5>
+                                                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <h3 class="text-center mb-2">¿Quieres eliminar la categoria <u>{{ dato.categoria }}</u>?
+                                                </h3>
+                                                <p class="text-center">Se eliminará toda la información relacionada, es decir que todos los registros de
+                                                    <u>Database</u> relacionados con este tambien seran afectados. <br> Esta acción es permanente
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer justify-content-between">
+                                                <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+                                                <form method="post" action="{% url 'categorias_delete' %}" data-submit-form>
+                                                    {% csrf_token %}
+                                                    <input type="text" value="{{ dato.id }}" name="id" class="d-none">
+                                                    <button type="submit" class="btn btn-danger">Eliminar <i class="fa-regular fa-trash-can ms-1"></i></button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center mt-5 mb-4">
+                        <p class="lead">No hay Datos disponibles en este momento 😯.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Modal: Edit database -->
+<div class="modal fade" id="editDBModal" tabindex="-1" aria-labelledby="editDBModalLabel" aria-hidden="true" data-mdb-backdrop="static"
+    data-mdb-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDBModalLabel">Editar Información</h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start">
+                <form method="post" action="{% url 'database_update' %}" data-submit-form id="dbUpdate" autocomplete="off">
+                    {% csrf_token %}
+                    <input type="text" class="d-none" value="" id="editid" name="id">
+                    <div class="row pt-2">
+                        <div class="col-md-3">
+                            <div class="form-outline mb-4">
+                                <select class="form-select" id="categoria" name="categoria" required>
+                                    <option selected hidden value="" id="editcateg">Categoria: </option>
+                                    {% for categoria in categorias %}
+                                    <option value="{{ categoria.categoria }}">{{ categoria.categoria }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-outline mb-4" data-mdb-input-init>
+                                <i class="fa-solid fa-heading trailing"></i>
+                                <input type="text" id="edittitulo" name="titulo" class="form-control active form-icon-trailing" value="" required />
+                                <label class="form-label" for="edittitulo">Título:</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        <i class="fa-solid fa-keyboard trailing"></i>
+                        <textarea class="form-control active form-icon-trailing" id="editinfo" name="informacion" rows="5" required></textarea>
+                        <label for="editinfo" class="form-label">Información:</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-outline mb-4" data-mdb-input-init>
+                                <i class="fa-solid fa-link trailing"></i>
+                                <input type="url" id="editredirigir" name="redirigir" class="form-control active form-icon-trailing" value="" />
+                                <label class="form-label" for="editredirigir">Redirigir: (url / liga)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label for="documentos" class="form-label">Cambiar Documento: (PDF)</label>
+                                <input type="file" class="form-control" id="documentos" name="documento" accept="application/pdf">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label for="imagenes" class="form-label">Cambiar Imágen:</label>
+                                <input type="file" class="form-control" id="imagenes" name="imagen" accept="image/jpeg, image/png, image/webp*">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button type="submit" class="btn btn_detail btn-block">Guardar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Eliminar database -->
+<div class="modal fade " id="deleteDBmodal" tabindex="-1" aria-labelledby="deleteDBmodalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteDBmodalLabel">Eliminar Información</h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3 class="text-center mb-2">¿Quieres eliminar el dato <u id="deltitulo"></u>?
+                </h3>
+                <p class="text-center">Esta acción es permanente ⚠️😯🤔 <br>Se eliminará toda la información relacionada</p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'database_delete' %}" data-submit-form>
+                    {% csrf_token %}
+                    <input type="text" value="" name="id" class="d-none" id="delid">
+                    <button type="submit" class="btn btn-danger">Eliminar <i class="fa-regular fa-trash-can ms-1"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts_end %}
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+<script src="{% static 'js/settings_datatable.js' %}"></script>
+{% endblock %}

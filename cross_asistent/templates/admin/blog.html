@@ -1,0 +1,172 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %}Crear Nuevo Articulo | Administracion{% endblock %}
+{% block link_home %}{% url 'vista_programador' %}{% endblock %}
+{% block link_default %}
+{% include 'base/widget_links-admin.html' %}
+{% endblock %}
+{% block content %}
+<main class="container container-fluid py-5 {% if not user.is_authenticated %}main_container{% endif %}">
+    <div class="mb-5">
+        <h1 class="text-center">Articulo <i class="fa-solid fa-newspaper ms-1"></i></h1>
+        <hr class="hr_divisor mx-4 mx-md-0" />
+    </div>
+    <form method="post" id="formularioArticulo" data-submit-form class="row pt-2" autocomplete="off">
+        {% csrf_token %}
+        <div class="col-12 col-md-6 col-xl-4 mb-4 mb-md-0 position-relative">
+            <div class="row sticky-md sticky-top-4">
+                <div class="col mb-4">
+                    <div class="card card_mxh-450 min_h200">
+                        <img src="{% static 'img/default_image.webp' %}" id="imgArticle" class="card-img" data-img_dom />
+                        <div class="card-img-overlay mask mask_dark">
+                            <div class="d-flex flex-column justify-content-end h-100">
+                                <div class="form-outline mb-4" data-mdb-input-init>
+                                    <input type="text" id="titulo" name="titulo" class="form-control text-white" required />
+                                    <label class="form-label text-white" for="titulo">Titulo / Encabezado:</label>
+                                </div>
+                                <div class="d-flex gap_10 text-white">
+                                    <div>
+                                        <p class="m-0">Escrito por:</p>
+                                    </div>
+                                    <div>
+                                        <p class="m-0 text-capitalize" id="firmaPerfilTexto">
+                                            {% if user.userprofile.blog_firma %}
+                                            {{user.userprofile.blog_firma}}
+                                            {% else %}
+                                            {{user.first_name}} {{user.last_name}}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-outline mb-3">
+                                <select class="form-select" id="blogNewUpdate" name="blogNewUpdate" data-get-blog="{% url 'blog_get' %}">
+                                    <option selected disabled hidden>Modificar Artículo:</option>
+                                    <option value="newBlog">Crear Nuevo Artículo:</option>
+                                    {% if user.is_staff %}
+                                    {% for blog in allblogs %}
+                                    <option value="{{ blog.id }}">({{blog.autor}}): {{ blog.titulo }}</option>
+                                    {% endfor %}
+                                    {% else %}
+                                    {% for blog in blogsTiple %}
+                                    <option value="{{ blog.id }}">{{ blog.titulo }}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                            <input type="text" id="autor" name="autor" class="d-none" readonly aria-label="readonly" value="{{user.username}}" required />
+                            <div class="mb-3" data-mdb-input-init>
+                                <label class="form-label" for="new_firma">
+                                    {% if user.userprofile.blog_firma %}
+                                    Cambiar
+                                    {% else %}
+                                    Personalizar
+                                    {% endif %}
+                                    firma:<span class="fs-8"> (opcional)</span>
+                                </label>
+                                <input type="text" id="new_firma" name="new_firma" class="form-control text-white"
+                                    placeholder="Ej: Ing. / Lic. {{user.first_name}}" />
+                            </div>
+
+                            <label class="form-label" for="encabezadoImg">Imagen de Encabezado: <span class="fs-8">(opcional)</span> </label>
+                            <input type="file" class="form-control text-right" id="encabezadoImg" name="encabezadoImg" accept="image/*" data-img_dom-change />
+                            <div class="d-none d-md-block">
+                                <button type="button" class="btn btn-danger btn-block mt-4 btnModal none" data-mdb-ripple-init data-mdb-modal-init
+                                    data-mdb-target="#blogDelete">
+                                    Eliminar Blog <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                                <button type="submit" class="btn btn_detail btn-block mt-4 blogSubmit" id="blogSubmit">
+                                    Publicar <i class="fa-regular fa-paper-plane ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-8">
+            <textarea id="mainTiny" name="contenidoWord" placeholder="Escribe tu articulo..." data-list-imgs="{% url 'lista_imagenes' %}"
+                data-upload-imgs="{% url 'send_imgsblog' %}"></textarea>
+            <div class="card d-md-none mt-4">
+                <div class="card-body row">
+                    <div class="col btnModal none">
+                        <button type="button" class="btn btn-danger btn-block" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#blogDelete">
+                            Eliminar Blog <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn_detail btn-block blogSubmit" id="blogSubmit">
+                            Publicar <i class="fa-regular fa-paper-plane ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+
+<!-- Modal: seleccionar imágenes -->
+<div class="modal fade" id="selectImageModal" tabindex="-1" aria-labelledby="selectImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectImageModalLabel">Galería, Seleccionar Imagen</h5>
+                <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="imageContainer" class="row">
+                    <!-- Aquí se insertarán las imágenes mediante AJAX -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Elimiinar Blog -->
+<div class="modal fade" id="blogDelete" tabindex="-1" aria-labelledby="blogDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blogDeleteLabel">Eliminar Blog</h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 class="text-center">Deseas eliminar el blog titulado:</h4>
+                <h4 class="text-center" id="blogDeleteTitle"></h4>
+                <p class="mb-0 mt-4">Esta acción es permanente, se eliminará la imágen de encabezado pero las imágenes del artículo se mantienen en la galería
+                    global</p>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+                <form action="{% url 'blog_delete' %}" method="post" id="formularioArticulo" data-submit-form>
+                    <input type="text" name="blogIdDelete" id="blogIdDelete" class="d-none">
+                    <button type="submit" class="btn btn-danger" data-mdb-ripple-init>eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts_end %}
+<script src="{% static 'tinymce/tinymce.min.js' %}"></script>
+<script src="{% static 'js/settings_tinymce.js' %}"></script>
+
+<script>
+    function insertImage(url) {
+        if (tinymce.activeEditor) {
+            tinymce.activeEditor.insertContent('<img src="' + url + '" class="img-tiny"/>');
+            $('#selectImageModal').modal('hide');
+        }
+    }
+</script>
+{% endblock %}

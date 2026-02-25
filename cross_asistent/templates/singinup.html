@@ -1,0 +1,103 @@
+{% extends 'base/widget.html' %}
+{% load static %}
+{% block title %} Administración | Iniciar Sesión / Registro{% endblock %}
+{% block content %}
+<!-- Se modificoc la parte del inicio de sesion para los usuarios que vayan a entrar -->
+<main class="container container-fluid">
+    <section class="col-12 col-md-6 mx-auto mt-5 mb-4">
+        <!-- barra de nevegacion de formulario -->
+        <div class="nav nav-pills nav-justified mb-4" id="loginup" role="tablist">
+            <button data-mdb-pill-init class="nav-link active" id="pills-login-tab" data-mdb-target="#pills-login" type="button" role="tab"
+                aria-controls="pills-login" aria-selected="true">
+                Acceder
+            </button>
+            <button data-mdb-pill-init class="nav-link" id="pills-logup-tab" data-mdb-target="#pills-logup" type="button" role="tab" aria-controls="pills-logup"
+                aria-selected="false">
+                Registro
+            </button>
+        </div>
+    </section>
+    <section class="card col-12 col-md-8 col-xl-6 mb-5 mx-auto">
+        <div class="card-body">
+            <div class="tab-content">
+                <!-- Ingresar -->
+                <div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
+                    <h3 class="text-center">Iniciar Sesión</h3>
+                    <hr class="hr_divisor mb-5">
+                    <form id="singinForm" method="POST" action="{% url 'singin' %}" data-submit-form autocomplete="off">
+                        {% csrf_token %}
+                        <div data-mdb-input-init class="form-outline">
+                            <i class="fa-solid fa-circle-user trailing"></i>
+                            <input type="text" id="username" name="username" required class="form-control form-icon-trailing" autocapitalize="off" />
+                            <label class="form-label" for="username">Ingresa tu Usuario / Email:</label>
+                        </div>
+                        <div data-mdb-input-init class="form-outline mt-4">
+                            <i class="fa-solid fa-key trailing"></i>
+                            <input type="password" id="password" name="password" required class="form-control form-icon-trailing" />
+                            <label class="form-label" for="password">Ingresa tu Contraseña:</label>
+                        </div>
+                        <button type="submit" class="btn btn_detail btn-block mt-4">Entrar</button>
+                    </form>
+                </div>
+                <!-- Registrar -->
+                <div class="tab-pane fade" id="pills-logup" role="tabpanel" aria-labelledby="tab-logup">
+                    <h3 class="text-center">Registráte!</h3>
+                    <hr class="hr_divisor mb-5 mb-md-2">
+                    <form id="signupForm" method="POST" action="{% url 'singup' %}" data-validate-singup autocomplete="off">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12 col-md-6 mt-0 mt-md-4">
+                                <div data-mdb-input-init class="form-outline">
+                                    <input type="text" id="first_name" name="first_name" class="form-control form-icon-trailing" required />
+                                    <i class="fa-solid fa-address-card trailing"></i>
+                                    <label class="form-label" for="first_name">Nombre:</label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 mt-4">
+                                <div data-mdb-input-init class="form-outline">
+                                    <input type="text" id="last_name" name="last_name" class="form-control form-icon-trailing" required />
+                                    <i class="fa-regular fa-address-card trailing"></i>
+                                    <label class="form-label" for="last_name">Apellidos:</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div data-mdb-input-init class="form-outline mt-4">
+                            <input type="text" id="usernameUp" name="username" class="form-control form-icon-trailing" required autocapitalize="off" data-selector-input="usernameSelect" data-valid-db />
+                            <i class="fa-solid fa-circle-user trailing"></i>
+                            <label class="form-label" for="usernameUp">Nombre de Usuario:</label>
+                        </div>
+
+                        <div data-mdb-input-init class="form-outline mt-4">
+                            <input type="email" id="email" name="email" class="form-control form-icon-trailing" required autocapitalize="off" data-selector-input="emailSelect" data-valid-db />
+                            <i class="fa-regular fa-envelope trailing"></i>
+                            <label class="form-label" for="email">Email:</label>
+                        </div>
+
+                        <div data-mdb-input-init class="form-outline mt-4">
+                            <input type="password" id="password1" name="password1" class="form-control form-icon-trailing" required />
+                            <i class="fa-solid fa-lock-open trailing" id="lockIcon"></i>
+                            <label class="form-label" for="password1">Contraseña:</label>
+                        </div>
+
+                        <div data-mdb-input-init class="form-outline mt-4">
+                            <input type="password" id="password2" name="password2" class="form-control form-icon-trailing" required />
+                            <i class="fa-solid fa-key trailing"></i>
+                            <label class="form-label" for="password2">Confirma tu contraseña:</label>
+                        </div>
+
+                        <button data-mdb-ripple-init type="submit" class="btn btn_detail btn-block mt-4">Registrarme
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% include 'base/widget_footer.html' %}
+{% endblock %}
+
+{% block scripts_end %}
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+{% endblock %}
