@@ -127,7 +127,7 @@
     transform: rotate(90deg);
 }
 
-/* --- Sphere Section --- */
+/* --- Sphere / Avatar Section --- */
 .sphere-section {
     display: flex;
     flex-direction: column;
@@ -141,17 +141,19 @@
 
 .sphere-container {
     position: relative;
-    width: min(380px, 65vw);
-    height: min(380px, 65vw);
+    width: min(420px, 70vw);
+    height: min(420px, 70vw);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    overflow: visible;
 }
 
 .sphere-container:hover {
     transform: scale(1.03);
+    filter: drop-shadow(0 0 30px rgba(38, 166, 154, 0.15));
 }
 
 .sphere-container:active {
@@ -160,6 +162,7 @@
 
 .sphere-container canvas {
     display: block;
+    overflow: visible;
 }
 
 /* ========================================================
