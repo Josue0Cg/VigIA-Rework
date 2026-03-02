@@ -1,9 +1,11 @@
 {% extends 'base/widget.html' %}
 {% load static %}
 {% block title %}Calendario de la Universidad 📰{% endblock %}
+{% block active_calendario %}is-active{% endblock %}
 {% block content %}
 <main class="container container-fluid py-5">
-    <section id="calendar" data-events="{% url 'calendario_eventos' %}" data-show_btnyear="{{show_btns_year}}"></section>
+    <section id="calendar" data-events="{% url 'calendario_eventos' %}" data-show_btnyear="{{show_btns_year}}">
+    </section>
 
     <!-- Modal: Ver info del Evento -->
     <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
@@ -39,7 +41,8 @@
                         <p class="m-0" id="eventLoc"></p>
                     </div>
                     <div id="eventBtnDiv" class="none">
-                        <a id="eventBtn" class="btn btn_detail" target="_blank" rel="noopener noreferrer">Ver Más <i class="fa-solid fa-up-right-from-square ms-1"></i></a>
+                        <a id="eventBtn" class="btn btn_detail" target="_blank" rel="noopener noreferrer">Ver Más <i
+                                class="fa-solid fa-up-right-from-square ms-1"></i></a>
                     </div>
                 </div>
             </div>

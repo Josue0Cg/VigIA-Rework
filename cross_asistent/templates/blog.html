@@ -3,11 +3,13 @@
 {% block title %}
 {{ articulo.titulo|truncatechars:25 }}
 {% endblock %}
+{% block active_blog %}is-active{% endblock %}
 
 {% block content %}
 {% if not encabezado_url == '' %}
 <div class="img_article position-relative">
-    <img src="{{encabezado_url}}" alt='Imagen de encabezado del articulo "{{ articulo.titulo }}"' class="img-fluid w-100">
+    <img src="{{encabezado_url}}" alt='Imagen de encabezado del articulo "{{ articulo.titulo }}"'
+        class="img-fluid w-100">
     <div class="mask mask_white"></div>
 </div>
 {% endif %}
@@ -28,7 +30,8 @@
                 {% if not foto_autor == '' %}
                 <div class="col-4 d-flex justify-content-center">
                     <div class="img_circle img_circle-100">
-                        <img src="{{foto_autor}}" alt="Foto de perfil del Autor de Articulo" class="img-fluid img-rounded materialBoxed">
+                        <img src="{{foto_autor}}" alt="Foto de perfil del Autor de Articulo"
+                            class="img-fluid img-rounded materialBoxed">
                     </div>
                 </div>
                 {% endif %}
