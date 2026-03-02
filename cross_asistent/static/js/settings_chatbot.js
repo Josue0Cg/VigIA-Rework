@@ -121,7 +121,7 @@ try {
         microphoneSpeech = false;
         console.warn("Este navegador no soporta la Web Speech API");
         $("#btn_controls_icon").addClass("fa-microphone-slash");
-        alertSToast("center", 9000, "warning", "Al parecer tu navegador no permite activar el micrófono. 🤔😯😥");
+        alertSToast("center", 9000, "warning", "Al parecer tu navegador no permite activar el micrófono.");
     }
 } catch (error) {
     alertSToast("top", 10000, "warning", error);
@@ -222,7 +222,7 @@ if ("speechSynthesis" in window) {
     }
 } else {
     console.warn("Este navegador no soporta API de síntesis de voz");
-    alertSToast("center", 7000, "warning", "Al parecer tu navegador no permite la API de síntesis de voz. 😯😥🥲");
+    alertSToast("center", 7000, "warning", "Al parecer tu navegador no permite la API de síntesis de voz. ");
 }
 
 // Espera a que el DOM se cargue para manejar el botón de hablar
@@ -249,7 +249,7 @@ function chatSubmit(e) {
     chatForm.reset();
 
     if (!texto3.test(pregunta)) {
-        return alertSToast("center", 6000, "warning", "Por favor, envía una pregunta más descriptiva 🧐😯😬");
+        return alertSToast("center", 6000, "warning", "Por favor, envía una pregunta más descriptiva");
     }
 
     const tokendid = cadenaRandom(5, alfabetico);
@@ -306,7 +306,7 @@ function chatSubmit(e) {
         })
         .catch((error) => {
             console.error("😥 Error:", error);
-            alertSToast("top", 8000, "warning", "Ocurrió un error. Intente nuevamente. 😥");
+            alertSToast("top", 8000, "warning", "Ocurrió un error. Intente nuevamente.");
         });
 }
 
@@ -361,7 +361,7 @@ speakButton.on("click", () => {
 
 // Saludo Inicial ######################
 if (contOutput && saludoMostrado) {
-    const initialMessage = `<div class="chat_msg asistent_response" data-tokeid="initialMessage"><span>¡Hola!!! Soy Hawky 👋😁, tu asistente virtual de la Universidad Tecnológica de Coahuila! Puedes preguntarme sobre tramites, carreras, costos u otros temas de la universidad. ¿En qué puedo ayudarte? 🫡🤘😋</span></div>`;
+    const initialMessage = `<div class="chat_msg asistent_response" data-tokeid="initialMessage"><span>¡Hola!!! Soy VigIA, tu asistente virtual de la Universidad Tecnológica de Coahuila. Puedes preguntarme sobre tramites, carreras, costos u otros temas de la universidad. ¿En qué puedo ayudarte?</span></div>`;
 
     contOutput.insertAdjacentHTML("beforeend", initialMessage);
     const elementInitMsg = document.querySelector(`.asistent_response[data-tokeid="initialMessage"]`);

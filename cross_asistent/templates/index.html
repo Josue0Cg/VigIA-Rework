@@ -9,7 +9,8 @@
 {# Override navbar — index uses its own layout #}
 {% block navbar %}{% endblock %}
 
-{# Override colors — remove color buttons on index #}
+{# Override theme + colors — not relevant on index #}
+{% block settings_theme %}{% endblock %}
 {% block settings_colors %}{% endblock %}
 
 {% block content %}
@@ -19,9 +20,8 @@
         <img src="{% static 'img/UTC_logo-plano.webp' %}" alt="UTC logo" />
     </a>
 
-    <!-- Settings button (top-right) -->
-    <button type="button" class="index-settings-btn" title="Configuraciones" data-mdb-ripple-init data-mdb-modal-init
-        data-mdb-target="#configModal">
+    <!-- Settings button (top-right) — uses JS to open modal -->
+    <button type="button" class="index-settings-btn" id="indexSettingsBtn" title="Configuraciones">
         <i class="fa-solid fa-gear"></i>
     </button>
 
@@ -79,7 +79,6 @@
     <!-- AI Chat Panel (full-screen overlay) -->
     <section class="chat-panel" id="chatPanel">
         <div class="chat-panel-inner">
-            <!-- Chat header -->
             <div class="chat-panel-header">
                 <h3 class="chat-panel-title">
                     <i class="fa-solid fa-robot"></i> VigIA
@@ -94,11 +93,7 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Chat messages -->
             <div class="chat-panel-messages" id="output"></div>
-
-            <!-- Chat input -->
             <form id="chatForm" class="chat-panel-input" method="POST" action="{% url 'chatbot' %}">
                 {% csrf_token %}
                 <div class="chat-input-row">
@@ -118,14 +113,14 @@
 {% endblock %}
 
 {% block moresettings %}
-<div class="text-center mt-5">
+<div class="text-center mt-4">
     <h5>Configuraciones del Asistente</h5>
     <h6 class="mt-4">Voz e idioma</h6>
     <div class="form-outline">
         <select class="form-select" id="voice_select"></select>
     </div>
 </div>
-<div class="row mt-5">
+<div class="row mt-4">
     <label class="col-4 d-flex align-items-center" for="rate_input">Velocidad: </label>
     <div class="form-outline col" data-mdb-input-init>
         <input type="number" id="rate_input" name="asistentSpeedd" class="form-control" min="0.1" max="2" step="0.1"
@@ -139,23 +134,54 @@
 <script src="{% static 'js/settings_chatbot.js' %}"></script>
 <script>
     (function () {
+        // --- Settings gear → open configModal manually ---
+        const settingsBtn = document.getElementById('indexSettingsBtn');
+        const configModalEl = document.getElementById('configModal');
+        if (settingsBtn && configModalEl) {
+            settingsBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Use MDB Modal if available, else Bootstrap
+                if (window.mdb && mdb.Modal) {
+                    const modal = mdb.Modal.getOrCreateInstance(configModalEl);
+                    modal.show();
+                } else if (window.bootstrap && bootstrap.Modal) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(configModalEl);
+                    modal.show();
+                } else {
+                    // Fallback: raw class toggle
+                    configModalEl.classList.add('show');
+                    configModalEl.style.display = 'block';
+                    document.body.classList.add('modal-open');
+                }
+            });
+        }
+
         // --- Hamburger toggle ---
         const navToggle = document.getElementById('navToggle');
         const navLinks = document.getElementById('navLinks');
         if (navToggle && navLinks) {
             navToggle.addEventListener('click', function (e) {
+                e.preventDefault();
                 e.stopPropagation();
-                navToggle.classList.toggle('active');
-                navLinks.classList.toggle('open');
+                const isOpen = navLinks.classList.contains('open');
+                if (isOpen) {
+                    navToggle.classList.remove('active');
+                    navLinks.classList.remove('open');
+                } else {
+                    navToggle.classList.add('active');
+                    navLinks.classList.add('open');
+                }
             });
-            // Close menu when clicking a link or outside
+            // Close menu when clicking outside
             document.addEventListener('click', function (ev) {
                 if (!navLinks.contains(ev.target) && !navToggle.contains(ev.target)) {
                     navToggle.classList.remove('active');
                     navLinks.classList.remove('open');
                 }
             });
-            navLinks.querySelectorAll('a.floating-nav-btn').forEach(function (link) {
+            // Close menu when clicking a nav link
+            navLinks.querySelectorAll('a.floating-nav-btn, a.floating-dropdown-item').forEach(function (link) {
                 link.addEventListener('click', function () {
                     navToggle.classList.remove('active');
                     navLinks.classList.remove('open');
@@ -180,18 +206,16 @@
         const sphereTrigger = document.getElementById('sphereTrigger');
         const chatPanel = document.getElementById('chatPanel');
         const closeBtn = document.getElementById('closeChatPanel');
-        let sphereClicked = false; // tracks if greeting was already played
+        let sphereClicked = false;
 
         if (sphereTrigger && chatPanel) {
             sphereTrigger.addEventListener('click', function () {
                 if (!sphereClicked) {
-                    // 1st click: play greeting voice
                     sphereClicked = true;
                     const greeting = "¡Hola! Soy Hawky, tu asistente virtual de la Universidad Tecnológica de Coahuila. Tócame de nuevo para chatear.";
                     if ('speechSynthesis' in window) {
                         window.speechSynthesis.cancel();
                         const utter = new SpeechSynthesisUtterance(greeting);
-                        // Try to use the selected voice
                         const voiceSel = document.getElementById('voice_select');
                         const rateSel = document.getElementById('rate_input');
                         if (voiceSel && window.speechSynthesis.getVoices().length > 0) {
@@ -201,7 +225,6 @@
                         }
                         utter.rate = rateSel ? parseFloat(rateSel.value) || 1.2 : 1.2;
                         utter.lang = 'es-MX';
-                        // Start sphere TTS pulse
                         if (window.sphereStartTTSPulse) window.sphereStartTTSPulse();
                         utter.onend = function () {
                             if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
@@ -209,7 +232,6 @@
                         window.speechSynthesis.speak(utter);
                     }
                 } else {
-                    // 2nd click: open chat panel
                     chatPanel.classList.add('open');
                     document.body.style.overflow = 'hidden';
                     setTimeout(function () {
@@ -229,7 +251,6 @@
             });
         }
 
-        // Close chat with Escape
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && chatPanel && chatPanel.classList.contains('open')) {
                 closeBtn.click();
