@@ -30,20 +30,22 @@
             <div class="flex-grow-1"></div>
             <div class="m-0 d-flex align-items-center">
                 <div class="order-lg-last">
-                    <button type="button" class="btn btn-floating btn_detail me-2 me-md-0 ms-md-2" title="Configuraciones" data-mdb-ripple-init
-                        data-mdb-modal-init data-mdb-target="#configModal">
+                    <button type="button" class="btn btn-floating btn_detail me-2 me-md-0 ms-md-2"
+                        title="Configuraciones" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#configModal">
                         <i class="fa-solid fa-gear fs-14"></i>
                     </button>
                     {% block qrBTN %}{% endblock %}
                 </div>
-                <button data-mdb-collapse-init class="navbar-toggler" type="button" data-mdb-target="#navbarText" aria-controls="navbarText"
-                    aria-expanded="false" aria-label="Toggle navigation" data-btn_closed="overlayMenu"></button>
-                <div class="collapse navbar-collapse position-absolute top-100 navbar-light bg-body-tertiary flex-grow-0" id="navbarText">
+                <button data-mdb-collapse-init class="navbar-toggler" type="button" data-mdb-target="#navbarText"
+                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation"
+                    data-btn_closed="overlayMenu"></button>
+                <div class="collapse navbar-collapse position-absolute top-100 navbar-light bg-body-tertiary flex-grow-0"
+                    id="navbarText">
                     <ul class="navbar-nav mb-lg-0 px-2 px-lg-0">
                         {% block link_default %}
                         <li class="nav-item">
-                            <a class="btn {% if active_page == 'inicio' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block" href="/">Inicio <i
-                                    class="fa-solid fa-house-chimney ms-1"></i></a>
+                            <a class="btn {% if active_page == 'inicio' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
+                                href="/">Inicio <i class="fa-solid fa-house-chimney ms-1"></i></a>
                         </li>
                         <li class="nav-item">
                             <a class="btn {% if active_page == 'faq' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
@@ -56,7 +58,8 @@
                         </li>
                         <li class="nav-item">
                             <a class="btn {% if active_page == 'calendario' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
-                                href="{% url 'calendario' %}">Calendario <i class="fa-solid fa-calendar-days ms-1"></i></i></a>
+                                href="{% url 'calendario' %}">Calendario <i
+                                    class="fa-solid fa-calendar-days ms-1"></i></i></a>
                         </li>
                         <li class="nav-item">
                             <a class="btn {% if active_page == 'blog' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
@@ -64,18 +67,21 @@
                         </li>
                         <li class="nav-item">
                             <div class="dropdown">
-                                <a class="btn btn_detail m-1 my-lg-0 d-block dropdown-toggle" href="" role="button" id="dropdownMenuLink" data-mdb-dropdown-init
-                                    data-mdb-ripple-init aria-expanded="false">
+                                <a class="btn btn_detail m-1 my-lg-0 d-block dropdown-toggle" href="" role="button"
+                                    id="dropdownMenuLink" data-mdb-dropdown-init data-mdb-ripple-init
+                                    aria-expanded="false">
                                     Otros <i class="fa-solid fa-users ms-1"></i>
                                 </a>
 
                                 <ul class="dropdown-menu mx-100" aria-labelledby="dropdownMenuLink">
                                     <li>
-                                        <a href="{% url 'about' %}" class="dropdown-item {% if active_page|default:'' == 'about' %}active{% endif %}"
+                                        <a href="{% url 'about' %}"
+                                            class="dropdown-item {% if active_page|default:'' == 'about' %}active{% endif %}"
                                             aria-current="true">Acerca de</a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'singin' %}" class="dropdown-item {% if active_page|default:'' == 'singin' %}active{% endif %}"
+                                        <a href="{% url 'singin' %}"
+                                            class="dropdown-item {% if active_page|default:'' == 'singin' %}active{% endif %}"
                                             aria-current="true">Acceder</a>
                                     </li>
                                 </ul>
@@ -95,8 +101,10 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="configModalLabel">Configuraciones <i class="fa-solid fa-gear ms-1"></i></h5>
-                    <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="configModalLabel">Configuraciones <i class="fa-solid fa-gear ms-1"></i>
+                    </h5>
+                    <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <section class="px-4">
@@ -111,19 +119,29 @@
                                 </div>
                             </div>
                         </div>
+                        {% block settings_colors %}
                         <h6 class="text-center mb-3">Color de la Interfaz</h6>
                         <div class="d-flex justify-content-around mb-3">
-                            <button class="btn btn-floating btn-success" data-change-color="green" data-rgb="#02913c"></button>
-                            <button class="btn btn-floating btn-primary" data-change-color="blue" data-rgb="#3b71ca"></button>
-                            <button class="btn btn-floating btn_purple" data-change-color="purple" data-rgb="#723bca"></button>
+                            <button class="btn btn-floating btn-success" data-change-color="green"
+                                data-rgb="#02913c"></button>
+                            <button class="btn btn-floating btn-primary" data-change-color="blue"
+                                data-rgb="#3b71ca"></button>
+                            <button class="btn btn-floating btn_purple" data-change-color="purple"
+                                data-rgb="#723bca"></button>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <button class="btn btn-floating btn_gradient_green" data-change-color="gradient_green" data-rgb=" #02913c"></button>
-                            <button class="btn btn-floating btn_gradient_blue" data-change-color="gradient_blue" data-rgb="#3b71ca"></button>
-                            <button class="btn btn-floating btn_cyan-purple" data-change-color="gradient_blue-purple" data-rgb="#3b71ca"></button>
-                            <button class="btn btn-floating btn_gradient_purple" data-change-color="gradient_purple" data-rgb="#723bca"></button>
-                            <button class="btn btn-floating btn_gradient_orange" data-change-color="gradient_orange" data-rgb="#d29c15"></button>
+                            <button class="btn btn-floating btn_gradient_green" data-change-color="gradient_green"
+                                data-rgb=" #02913c"></button>
+                            <button class="btn btn-floating btn_gradient_blue" data-change-color="gradient_blue"
+                                data-rgb="#3b71ca"></button>
+                            <button class="btn btn-floating btn_cyan-purple" data-change-color="gradient_blue-purple"
+                                data-rgb="#3b71ca"></button>
+                            <button class="btn btn-floating btn_gradient_purple" data-change-color="gradient_purple"
+                                data-rgb="#723bca"></button>
+                            <button class="btn btn-floating btn_gradient_orange" data-change-color="gradient_orange"
+                                data-rgb="#d29c15"></button>
                         </div>
+                        {% endblock %}
                         {% block moresettings %}{% endblock %}
                     </section>
                 </div>

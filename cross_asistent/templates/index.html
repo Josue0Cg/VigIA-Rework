@@ -9,6 +9,9 @@
 {# Override navbar — index uses its own layout #}
 {% block navbar %}{% endblock %}
 
+{# Override colors — remove color buttons on index #}
+{% block settings_colors %}{% endblock %}
+
 {% block content %}
 <div class="index-page">
     <!-- UTC Logo (top-left) -->
@@ -22,43 +25,53 @@
         <i class="fa-solid fa-gear"></i>
     </button>
 
-    <!-- Sphere Section (clicking opens chat) -->
+    <!-- Sphere Section (1st click = voice, 2nd click = chat) -->
     <section class="sphere-section">
         <div class="sphere-container" id="sphereTrigger" title="Hablar con VigIA">
             <canvas id="sphereCanvas" data-hawk-src="{% static 'img/VigIA-Logo-Rem.png' %}"></canvas>
         </div>
     </section>
 
-    <!-- Floating Navigation (single row) -->
+    <!-- Floating Navigation -->
     <nav class="floating-nav" aria-label="Navegación principal">
-        <a href="/" class="floating-nav-btn is-active">
-            <i class="fa-solid fa-house-chimney"></i>
-            <span>Inicio</span>
-        </a>
-        <a href="{% url 'faq' %}" class="floating-nav-btn">
-            <i class="fa-solid fa-clipboard-question"></i>
-            <span>Preguntas</span>
-        </a>
-        <a href="{% url 'map' %}" class="floating-nav-btn">
-            <i class="fa-solid fa-map-location-dot"></i>
-            <span>Mapa</span>
-        </a>
-        <a href="{% url 'calendario' %}" class="floating-nav-btn">
-            <i class="fa-solid fa-calendar-days"></i>
-            <span>Calendario</span>
-        </a>
-        <a href="{% url 'blog' %}" class="floating-nav-btn">
-            <i class="fa-solid fa-newspaper"></i>
-            <span>Blog</span>
-        </a>
-        <div class="floating-dropdown">
-            <button type="button" class="floating-nav-btn" id="otrosDropdownBtn">
-                <i class="fa-solid fa-users"></i>
-                <span>Otros</span>
-            </button>
-            <div class="floating-dropdown-menu" id="otrosDropdownMenu">
-                <a href="{% url 'about' %}" class="floating-dropdown-item">Acerca de</a>
-                <a href="{% url 'singin' %}" class="floating-dropdown-item">Acceder</a>
+        <!-- Hamburger toggle (mobile only) -->
+        <button type="button" class="nav-hamburger" id="navToggle" aria-label="Menú">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <!-- Nav links (collapsible on mobile) -->
+        <div class="floating-nav-links" id="navLinks">
+            <a href="/" class="floating-nav-btn is-active">
+                <i class="fa-solid fa-house-chimney"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="{% url 'faq' %}" class="floating-nav-btn">
+                <i class="fa-solid fa-clipboard-question"></i>
+                <span>Preguntas</span>
+            </a>
+            <a href="{% url 'map' %}" class="floating-nav-btn">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Mapa</span>
+            </a>
+            <a href="{% url 'calendario' %}" class="floating-nav-btn">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>Calendario</span>
+            </a>
+            <a href="{% url 'blog' %}" class="floating-nav-btn">
+                <i class="fa-solid fa-newspaper"></i>
+                <span>Blog</span>
+            </a>
+            <div class="floating-dropdown">
+                <button type="button" class="floating-nav-btn" id="otrosDropdownBtn">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Otros</span>
+                </button>
+                <div class="floating-dropdown-menu" id="otrosDropdownMenu">
+                    <a href="{% url 'about' %}" class="floating-dropdown-item">Acerca de</a>
+                    <a href="{% url 'singin' %}" class="floating-dropdown-item">Acceder</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -126,6 +139,30 @@
 <script src="{% static 'js/settings_chatbot.js' %}"></script>
 <script>
     (function () {
+        // --- Hamburger toggle ---
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('open');
+            });
+            // Close menu when clicking a link or outside
+            document.addEventListener('click', function (ev) {
+                if (!navLinks.contains(ev.target) && !navToggle.contains(ev.target)) {
+                    navToggle.classList.remove('active');
+                    navLinks.classList.remove('open');
+                }
+            });
+            navLinks.querySelectorAll('a.floating-nav-btn').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    navToggle.classList.remove('active');
+                    navLinks.classList.remove('open');
+                });
+            });
+        }
+
         // --- Floating dropdown toggle ---
         const dropBtn = document.getElementById('otrosDropdownBtn');
         const dropMenu = document.getElementById('otrosDropdownMenu');
@@ -139,20 +176,47 @@
             });
         }
 
-        // --- Sphere click → open chat ---
+        // --- Sphere click: 1st = voice greeting, 2nd = open chat ---
         const sphereTrigger = document.getElementById('sphereTrigger');
         const chatPanel = document.getElementById('chatPanel');
         const closeBtn = document.getElementById('closeChatPanel');
+        let sphereClicked = false; // tracks if greeting was already played
 
         if (sphereTrigger && chatPanel) {
             sphereTrigger.addEventListener('click', function () {
-                chatPanel.classList.add('open');
-                document.body.style.overflow = 'hidden';
-                // Focus text input after animation
-                setTimeout(function () {
-                    var txt = document.getElementById('txtQuestion');
-                    if (txt) txt.focus();
-                }, 600);
+                if (!sphereClicked) {
+                    // 1st click: play greeting voice
+                    sphereClicked = true;
+                    const greeting = "¡Hola! Soy Hawky, tu asistente virtual de la Universidad Tecnológica de Coahuila. Tócame de nuevo para chatear.";
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const utter = new SpeechSynthesisUtterance(greeting);
+                        // Try to use the selected voice
+                        const voiceSel = document.getElementById('voice_select');
+                        const rateSel = document.getElementById('rate_input');
+                        if (voiceSel && window.speechSynthesis.getVoices().length > 0) {
+                            const voices = window.speechSynthesis.getVoices();
+                            const idx = parseInt(voiceSel.value, 10);
+                            if (voices[idx]) utter.voice = voices[idx];
+                        }
+                        utter.rate = rateSel ? parseFloat(rateSel.value) || 1.2 : 1.2;
+                        utter.lang = 'es-MX';
+                        // Start sphere TTS pulse
+                        if (window.sphereStartTTSPulse) window.sphereStartTTSPulse();
+                        utter.onend = function () {
+                            if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+                        };
+                        window.speechSynthesis.speak(utter);
+                    }
+                } else {
+                    // 2nd click: open chat panel
+                    chatPanel.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                    setTimeout(function () {
+                        var txt = document.getElementById('txtQuestion');
+                        if (txt) txt.focus();
+                    }, 600);
+                }
             });
         }
 
@@ -160,7 +224,6 @@
             closeBtn.addEventListener('click', function () {
                 chatPanel.classList.remove('open');
                 document.body.style.overflow = '';
-                // Stop TTS when closing
                 if (window.speechSynthesis) window.speechSynthesis.cancel();
                 if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
             });
