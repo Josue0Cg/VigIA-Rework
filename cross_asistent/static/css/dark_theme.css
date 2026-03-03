@@ -1,0 +1,448 @@
+/* ==============================================
+   VigIA — Dark Cohesive Theme
+   Matches all views to the floating nav aesthetic
+   ============================================== */
+
+/* ===== Global Dark Background ===== */
+body {
+    background: linear-gradient(160deg,
+            #0a1628 0%,
+            #0d2847 40%,
+            #112e52 70%,
+            #0a1628 100%) !important;
+    background-attachment: fixed !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    min-height: 100vh;
+}
+
+/* ===== Subtle Star Particles ===== */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        radial-gradient(1px 1px at 5% 8%, rgba(255, 255, 255, 0.5) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 12% 35%, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+        radial-gradient(1px 1px at 18% 72%, rgba(255, 255, 255, 0.4) 50%, transparent 100%),
+        radial-gradient(1px 1px at 25% 15%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 42% 22%, rgba(255, 255, 255, 0.5) 50%, transparent 100%),
+        radial-gradient(1px 1px at 55% 5%, rgba(255, 255, 255, 0.4) 50%, transparent 100%),
+        radial-gradient(1px 1px at 72% 12%, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 88% 28%, rgba(255, 255, 255, 0.4) 50%, transparent 100%),
+        radial-gradient(1px 1px at 95% 60%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 60% 65%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 30% 90%, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+        radial-gradient(1px 1px at 78% 75%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+}
+
+/* ===== Typography ===== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-family: var(--ft2), var(--ft1), sans-serif;
+}
+
+p,
+span,
+small,
+label,
+li,
+td,
+th,
+div {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+a {
+    color: rgba(147, 197, 253, 0.9);
+}
+
+a:hover {
+    color: #fff;
+}
+
+/* ===== Headings with glow ===== */
+main>.container h1,
+main>.container-fluid h1 {
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+}
+
+/* ===== HR Divisor ===== */
+.hr_divisor {
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent) !important;
+    height: 3px !important;
+}
+
+/* ===== Cards — Glassmorphism ===== */
+.card {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(147, 197, 253, 0.1) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    border-color: rgba(147, 197, 253, 0.2) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-bottom: 1px solid rgba(147, 197, 253, 0.08) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.card-body {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.card-footer {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-top: 1px solid rgba(147, 197, 253, 0.08) !important;
+}
+
+/* ===== Accordion — Dark Glassmorphism ===== */
+.accordion-item {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(147, 197, 253, 0.08) !important;
+    border-radius: 12px !important;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.accordion-button {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-family: var(--ft2), sans-serif;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+.accordion-button::after {
+    filter: invert(1) brightness(2);
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+.accordion-body {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-top: 1px solid rgba(147, 197, 253, 0.06) !important;
+}
+
+/* ===== Form Elements ===== */
+.form-control,
+.form-select {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(147, 197, 253, 0.15) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.form-control::placeholder {
+    color: rgba(147, 197, 253, 0.4) !important;
+}
+
+/* MDB form outline label */
+.form-outline .form-control~.form-label {
+    color: rgba(147, 197, 253, 0.6) !important;
+}
+
+.form-outline .form-control:focus~.form-label {
+    color: rgba(59, 130, 246, 0.9) !important;
+}
+
+.form-outline .form-control~.form-notch .form-notch-leading,
+.form-outline .form-control~.form-notch .form-notch-middle,
+.form-outline .form-control~.form-notch .form-notch-trailing {
+    border-color: rgba(147, 197, 253, 0.15) !important;
+}
+
+.form-outline .form-control:focus~.form-notch .form-notch-leading,
+.form-outline .form-control:focus~.form-notch .form-notch-middle,
+.form-outline .form-control:focus~.form-notch .form-notch-trailing {
+    border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* trailing icons in forms */
+.form-outline i.trailing {
+    color: rgba(147, 197, 253, 0.5) !important;
+}
+
+/* ===== Nav Pills / Tabs ===== */
+.nav-pills .nav-link {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(147, 197, 253, 0.1) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    border-radius: 50px !important;
+    backdrop-filter: blur(8px);
+    transition: all 0.35s ease;
+    font-family: var(--ft2), sans-serif;
+}
+
+.nav-pills .nav-link:hover {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-color: rgba(147, 197, 253, 0.25) !important;
+    color: #fff !important;
+}
+
+.nav-pills .nav-link.active {
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    color: #fff !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* ===== Modals ===== */
+.modal-content {
+    background: rgba(10, 22, 40, 0.95) !important;
+    border: 1px solid rgba(147, 197, 253, 0.12) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(147, 197, 253, 0.1) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(147, 197, 253, 0.1) !important;
+}
+
+.modal-title {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.btn-close {
+    filter: invert(1) brightness(2) !important;
+}
+
+/* ===== Footer ===== */
+footer,
+footer.bg-body-tertiary {
+    background: rgba(10, 22, 40, 0.8) !important;
+    border-top: 1px solid rgba(147, 197, 253, 0.1) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px);
+}
+
+footer h6 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+footer p,
+footer a,
+footer .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+footer a:hover {
+    color: rgba(147, 197, 253, 0.9) !important;
+}
+
+footer .border-top,
+footer .border-bottom {
+    border-color: rgba(147, 197, 253, 0.1) !important;
+}
+
+footer i.text_detail {
+    color: rgba(147, 197, 253, 0.7) !important;
+}
+
+/* ===== Offcanvas (Mapa) ===== */
+.offcanvas {
+    background: rgba(10, 22, 40, 0.95) !important;
+    border: 1px solid rgba(147, 197, 253, 0.1) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(20px);
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid rgba(147, 197, 253, 0.08);
+}
+
+.offcanvas-title {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* ===== Settings Modal Tweaks ===== */
+.switch .slider {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#configModal .modal-body .btn-floating {
+    border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ===== Table / Grid Styles ===== */
+.grid-system .grid-item {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(147, 197, 253, 0.08);
+    transition: all 0.3s ease;
+}
+
+.grid-system .grid-item:hover {
+    border-color: rgba(147, 197, 253, 0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.grid-system .grid-item .item__details {
+    background: linear-gradient(to top, rgba(10, 22, 40, 0.9), transparent) !important;
+}
+
+.grid-system .grid-item .item__details h5 {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Blog Article ===== */
+.img_article .mask_white {
+    background: linear-gradient(to bottom, transparent 50%, #0a1628 100%) !important;
+}
+
+/* ===== About Page Images ===== */
+.shadow-2-strong {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ===== Buttons Styling ===== */
+.btn_detail {
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn_detail:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Secondary btn */
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(147, 197, 253, 0.15) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 12px !important;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(147, 197, 253, 0.3) !important;
+    color: #fff !important;
+}
+
+/* ===== Scrollbar ===== */
+*::-webkit-scrollbar-thumb {
+    background: rgba(147, 197, 253, 0.2) !important;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(10, 22, 40, 0.5) !important;
+}
+
+* {
+    scrollbar-color: rgba(147, 197, 253, 0.2) rgba(10, 22, 40, 0.5);
+}
+
+/* ===== MDB overrides for dark theme ===== */
+.bg-body-tertiary,
+.navbar-light.bg-body-tertiary {
+    background: transparent !important;
+}
+
+/* Remove old nav height to avoid spacing issues */
+nav.floating-nav {
+    height: auto !important;
+    padding-block: 0 !important;
+}
+
+/* ===== Calendar specific ===== */
+.fc {
+    --fc-border-color: rgba(147, 197, 253, 0.1);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(255, 255, 255, 0.03);
+    --fc-list-event-hover-bg-color: rgba(59, 130, 246, 0.1);
+    --fc-today-bg-color: rgba(59, 130, 246, 0.08);
+}
+
+.fc .fc-col-header-cell {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-col-header-cell-cushion {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.fc .fc-toolbar-title {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* ===== Dropdown Menu ===== */
+.dropdown-menu {
+    background: rgba(10, 22, 40, 0.95) !important;
+    border: 1px solid rgba(147, 197, 253, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dropdown-item {
+    color: rgba(255, 255, 255, 0.75) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: #fff !important;
+}
+
+/* ===== Selection Color ===== */
+::selection {
+    background: rgba(59, 130, 246, 0.3);
+    color: #fff;
+}
+
+/* ===== Ensure body content is above the pseudo-element stars ===== */
+body>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== Index page override: no double background ===== */
+.index-page {
+    z-index: 1;
+}
