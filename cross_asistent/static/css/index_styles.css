@@ -200,7 +200,6 @@
 /* ========================================================
    Hamburger Toggle (mobile only)
    ======================================================== */
-/* Hamburger Toggle (mobile only) */
 .nav-hamburger {
     display: none;
     flex-direction: column;
@@ -216,7 +215,7 @@
     cursor: pointer;
     padding: 0;
     position: relative;
-    z-index: 5;
+    z-index: 10000;
     transition: all 0.3s ease;
 }
 
@@ -255,113 +254,6 @@
     align-items: center;
 }
 
-/* Floating Navigation — SINGLE ROW */
-.floating-nav {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 16px 32px;
-    z-index: 2;
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-
-/* Mobile overrides */
-@media (max-width: 576px) {
-    .nav-hamburger {
-        display: flex;
-    }
-
-    .floating-nav-links {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        position: absolute;
-        bottom: calc(100% + 8px);
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background: rgba(10, 22, 40, 0.92);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(147, 197, 253, 0.12);
-        border-radius: 20px;
-        padding: 12px;
-        min-width: 200px;
-        width: max-content;
-        max-width: 85vw;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 10;
-        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
-    }
-
-    .floating-nav-links.open {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(-50%) translateY(0);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.nav-hamburger:hover {
-    background: rgba(59, 130, 246, 0.15);
-    border-color: rgba(147, 197, 253, 0.4);
-}
-
-.hamburger-line {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 2px;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-}
-
-.nav-hamburger.active .hamburger-line:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-}
-
-.nav-hamburger.active .hamburger-line:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0);
-}
-
-.nav-hamburger.active .hamburger-line:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-}
-
-/* Nav links container — desktop: inline flex row */
-.floating-nav-links {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 10px;
-    align-items: center;
-}
-
-
-
-
 /* ========================================================
    Floating Navigation — SINGLE ROW
    ======================================================== */
@@ -376,14 +268,6 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-}
-
-padding: 16px 16px 32px;
-z-index: 2;
-width: 100%;
-overflow-x: auto;
--webkit-overflow-scrolling: touch;
-scrollbar-width: none;
 }
 
 .floating-nav::-webkit-scrollbar {
@@ -815,56 +699,61 @@ scrollbar-width: none;
         justify-content: center;
     }
 
+    /* Full-screen slide-up nav panel */
     .floating-nav-links {
+        position: fixed;
+        inset: 0;
         display: flex;
         flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        position: absolute;
-        bottom: calc(100% + 8px);
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background: rgba(10, 22, 40, 0.92);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(147, 197, 253, 0.12);
-        border-radius: 20px;
-        padding: 12px;
-        min-width: 200px;
-        width: max-content;
-        max-width: 85vw;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(10, 22, 40, 0.97);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        padding: 40px 24px 80px;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 10;
-        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
+        transform: translateY(100%);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 9999;
     }
 
     .floating-nav-links.open {
         opacity: 1;
         visibility: visible;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
 
     .floating-nav-links .floating-nav-btn {
+        width: 80%;
+        max-width: 280px;
         justify-content: flex-start;
-        border-radius: 14px;
-        padding: 12px 18px;
-        font-size: 0.85rem;
+        border-radius: 16px;
+        padding: 16px 24px;
+        font-size: 1rem;
     }
 
     .floating-nav-links .floating-nav-btn span {
         display: inline;
     }
 
+    .floating-nav-links .floating-nav-btn i {
+        font-size: 1.15rem;
+        width: 28px;
+    }
+
     .floating-nav-links .floating-dropdown {
-        width: 100%;
+        width: 80%;
+        max-width: 280px;
     }
 
     .floating-nav-links .floating-dropdown>.floating-nav-btn {
         width: 100%;
         justify-content: flex-start;
-        border-radius: 14px;
+        border-radius: 16px;
+        padding: 16px 24px;
+        font-size: 1rem;
     }
 
     .floating-dropdown-menu {
@@ -874,9 +763,15 @@ scrollbar-width: none;
         bottom: auto !important;
         border: none;
         background: rgba(255, 255, 255, 0.04);
-        border-radius: 12px;
-        margin-top: 4px;
+        border-radius: 14px;
+        margin-top: 6px;
         box-shadow: none;
+        width: 100%;
+    }
+
+    .floating-dropdown-menu .floating-dropdown-item {
+        padding: 12px 24px;
+        font-size: 0.95rem;
     }
 
     .chat-panel-inner {
