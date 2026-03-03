@@ -1,0 +1,310 @@
+/* ==============================================
+   VigIA — Floating Navigation (shared across all views)
+   ============================================== */
+
+/* --- Ensure content doesn't hide behind fixed nav --- */
+body {
+    padding-bottom: 90px;
+}
+
+/* ========================================================
+   Hamburger Toggle (mobile only)
+   ======================================================== */
+.nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(147, 197, 253, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    z-index: 5;
+    transition: all 0.3s ease;
+}
+
+.nav-hamburger:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(147, 197, 253, 0.4);
+}
+
+.hamburger-line {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.nav-hamburger.active .hamburger-line:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.nav-hamburger.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.nav-hamburger.active .hamburger-line:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Nav links container — desktop: inline flex */
+.floating-nav-links {
+    display: contents;
+}
+
+/* ========================================================
+   Floating Navigation — SINGLE ROW, FIXED BOTTOM
+   ======================================================== */
+.floating-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 16px 24px;
+    z-index: 1050;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: linear-gradient(to top, rgba(10, 22, 40, 0.95) 0%, rgba(10, 22, 40, 0.8) 60%, transparent 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.floating-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.floating-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 50px;
+    border: 1px solid rgba(147, 197, 253, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: var(--ft2), var(--ft1), sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.floating-nav-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.08));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.floating-nav-btn:hover::before {
+    opacity: 1;
+}
+
+.floating-nav-btn:hover {
+    border-color: rgba(147, 197, 253, 0.5);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(147, 197, 253, 0.1) inset;
+}
+
+.floating-nav-btn:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.floating-nav-btn i {
+    font-size: 0.85rem;
+    position: relative;
+    z-index: 1;
+}
+
+.floating-nav-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+.floating-nav-btn.is-active {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+}
+
+/* Dropdown within floating nav */
+.floating-dropdown {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: stretch;
+}
+
+.floating-dropdown>.floating-nav-btn {
+    height: auto;
+}
+
+.floating-dropdown-menu {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 22, 40, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(147, 197, 253, 0.15);
+    border-radius: 16px;
+    padding: 8px;
+    min-width: 150px;
+    z-index: 20;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.floating-dropdown-menu.show {
+    display: block;
+    animation: dropUp 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes dropUp {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(8px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.floating-dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    transition: var(--transitionEase);
+}
+
+.floating-dropdown-item:hover {
+    background: rgba(59, 130, 246, 0.2);
+    color: #fff;
+}
+
+/* ========================================================
+   Responsive
+   ======================================================== */
+
+/* --- Mobile: Hamburger + collapsible nav --- */
+@media (max-width: 576px) {
+    .nav-hamburger {
+        display: flex;
+    }
+
+    .floating-nav {
+        position: fixed;
+        padding: 12px 16px 24px;
+        justify-content: center;
+    }
+
+    .floating-nav-links {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: rgba(10, 22, 40, 0.92);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(147, 197, 253, 0.12);
+        border-radius: 20px;
+        padding: 12px;
+        min-width: 200px;
+        width: max-content;
+        max-width: 85vw;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .floating-nav-links.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .floating-nav-links .floating-nav-btn {
+        justify-content: flex-start;
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-size: 0.85rem;
+    }
+
+    .floating-nav-links .floating-nav-btn span {
+        display: inline;
+    }
+
+    .floating-nav-links .floating-dropdown {
+        width: 100%;
+    }
+
+    .floating-nav-links .floating-dropdown>.floating-nav-btn {
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: 14px;
+    }
+
+    .floating-dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        left: auto !important;
+        bottom: auto !important;
+        border: none;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        margin-top: 4px;
+        box-shadow: none;
+    }
+}
+
+/* --- Tablet and up --- */
+@media (min-width: 577px) {
+    .nav-hamburger {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .floating-nav-btn {
+        padding: 12px 22px;
+        font-size: 0.85rem;
+    }
+}

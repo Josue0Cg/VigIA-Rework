@@ -1,6 +1,7 @@
 {% extends 'base/widget.html' %}
 {% load static %}
 {% block title %}Preguntas 💬{% endblock %}
+{% block active_faq %}is-active{% endblock %}
 {% block content %}
 <main class="container container-fluid mb-100 my-5">
     <div class="mb-5">
@@ -10,12 +11,13 @@
 
     <!-- Tabs navs -->
     <div class="nav nav-pills nav-justified mb-4 col-12 col-md-8 mx-auto" id="questions-tabs" role="tablist">
-        <button data-mdb-pill-init class="nav-link active" id="pills-search-quest-tab" data-mdb-target="#pills-search-quest" type="button" role="tab"
-            aria-controls="pills-search-quest" aria-selected="true">
+        <button data-mdb-pill-init class="nav-link active" id="pills-search-quest-tab"
+            data-mdb-target="#pills-search-quest" type="button" role="tab" aria-controls="pills-search-quest"
+            aria-selected="true">
             Preguntas Frecuentes
         </button>
-        <button data-mdb-pill-init class="nav-link" id="pills-create-quest-tab" data-mdb-target="#pills-create-quest" type="button" role="tab"
-            aria-controls="pills-create-quest" aria-selected="false">
+        <button data-mdb-pill-init class="nav-link" id="pills-create-quest-tab" data-mdb-target="#pills-create-quest"
+            type="button" role="tab" aria-controls="pills-create-quest" aria-selected="false">
             Enviar Pregunta
         </button>
     </div>
@@ -24,7 +26,8 @@
     <!-- Tabs content -->
     <div class="tab-content mt-5" id="ex2-content">
         <!-- Preguntas Frecuentes -->
-        <section class="tab-pane fade show active" id="pills-search-quest" role="tabpanel" aria-labelledby="pills-search-quest">
+        <section class="tab-pane fade show active" id="pills-search-quest" role="tabpanel"
+            aria-labelledby="pills-search-quest">
             <div class="card">
                 <div class="card-body">
                     {% if quest_all %}
@@ -36,12 +39,14 @@
                         {% for quest in quest_all %}
                         <div class="accordion-item results_item" data-submit-click="btn_frequence_{{quest.id}}">
                             <h2 class="accordion-header" id="heading{{ quest.id }}">
-                                <button data-mdb-collapse-init class="accordion-button" type="button" data-mdb-toggle="collapse"
-                                    data-mdb-target="#quest-{{ quest.id }}" aria-expanded="true" aria-controls="quest-{{ quest.id }}">
+                                <button data-mdb-collapse-init class="accordion-button" type="button"
+                                    data-mdb-toggle="collapse" data-mdb-target="#quest-{{ quest.id }}"
+                                    aria-expanded="true" aria-controls="quest-{{ quest.id }}">
                                     <i class="fas fa-question-circle fa-sm me-2 opacity-70"></i>{{ quest.titulo }}
                                 </button>
                             </h2>
-                            <div id="quest-{{ quest.id }}" class="accordion-collapse collapse {% if quest.id == 1 %}show{% endif %}"
+                            <div id="quest-{{ quest.id }}"
+                                class="accordion-collapse collapse {% if quest.id == 1 %}show{% endif %}"
                                 aria-labelledby="heading{{ quest.id }}" data-mdb-parent="#accordionExampleY">
                                 <div class="accordion-body">
                                     {% autoescape off %} {{ quest.informacion }}{% endautoescape %}
@@ -55,14 +60,16 @@
 
                                     {% if quest.documento %}
                                     <div>
-                                        <a href="{{ quest.documento }}" target="_blank" rel="noopener noreferrer" class="btn btn_detail">
+                                        <a href="{{ quest.documento }}" target="_blank" rel="noopener noreferrer"
+                                            class="btn btn_detail">
                                             Ver PDF Relacionado <i class="fa-regular fa-file-pdf ms-1"></i></a>
                                     </div>
                                     {% endif %}
 
                                     {% if quest.redirigir %}
                                     <div>
-                                        <a href="{{ quest.redirigir }}" target="_blank" rel="noopener noreferrer" class="btn btn_detail">
+                                        <a href="{{ quest.redirigir }}" target="_blank" rel="noopener noreferrer"
+                                            class="btn btn_detail">
                                             Saber más <i class="fa-solid fa-up-right-from-square ms-1"></i></a>
                                     </div>
                                     {% endif %}
@@ -77,7 +84,8 @@
                     </div>
                     {% else %}
                     <div class="text-center">
-                        <p class="lead m-0">No hay preguntas frecuentes disponibles en este momento. ¡Vuelve pronto para más actualizaciones!</p>
+                        <p class="lead m-0">No hay preguntas frecuentes disponibles en este momento. ¡Vuelve pronto para
+                            más actualizaciones!</p>
                     </div>
                     {% endif %}
                 </div>
@@ -85,7 +93,8 @@
         </section>
 
         <!-- Hacer una Pregunta -->
-        <section class="tab-pane fade mt-5" id="pills-create-quest" role="tabpanel" aria-labelledby="pills-create-quest">
+        <section class="tab-pane fade mt-5" id="pills-create-quest" role="tabpanel"
+            aria-labelledby="pills-create-quest">
             <div class="card col-md-8 mx-auto">
                 <div class="card-body">
                     <h6 class="text-center mb-4">
@@ -94,19 +103,24 @@
                     <h3 class="text-center mb-4">
                         Envianos todas tus Preguntas!
                     </h3>
-                    <form method="POST" id="hacerPregunta" action="{% url 'enviar_preguntas' %}" class="text-center" autocomplete="off" data-submit-form>
+                    <form method="POST" id="hacerPregunta" action="{% url 'enviar_preguntas' %}" class="text-center"
+                        autocomplete="off" data-submit-form>
                         {% csrf_token %}
                         <div class="form-outline mb-4" data-mdb-input-init>
-                            <input type="text" id="preguntaPOST" name="pregunta" class="form-control mx-auto" required />
+                            <input type="text" id="preguntaPOST" name="pregunta" class="form-control mx-auto"
+                                required />
                             <label class="form-label" for="preguntaPOST">Escribe tu Pregunta:</label>
                         </div>
                         <div data-mdb-input-init class="form-outline position-relative mb-4">
-                            <button type="button" class="position-absolute top-0 end-0 btn p-0 fs-12 m-2 mt-1 none" data-clear="descripcion"><i
-                                    class="fa-solid fa-xmark m-0 p-0"></i></button>
-                            <textarea class="form-control" id="descripcion" rows="4" name="descripcion" data-init-clear></textarea>
-                            <label class="form-label" for="descripcion">Escribe más detalles: <small>( OPCIONAL )</small></label>
+                            <button type="button" class="position-absolute top-0 end-0 btn p-0 fs-12 m-2 mt-1 none"
+                                data-clear="descripcion"><i class="fa-solid fa-xmark m-0 p-0"></i></button>
+                            <textarea class="form-control" id="descripcion" rows="4" name="descripcion"
+                                data-init-clear></textarea>
+                            <label class="form-label" for="descripcion">Escribe más detalles: <small>( OPCIONAL
+                                    )</small></label>
                         </div>
-                        <button type="submit" class="btn btn_detail btn-block" data-reset_form="hacerPregunta">Enviar <i class="fa-solid fa-paper-plane ms-1"></i></button>
+                        <button type="submit" class="btn btn_detail btn-block" data-reset_form="hacerPregunta">Enviar <i
+                                class="fa-solid fa-paper-plane ms-1"></i></button>
                     </form>
                 </div>
             </div>
