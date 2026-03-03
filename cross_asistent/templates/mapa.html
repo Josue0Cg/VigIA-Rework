@@ -3,6 +3,18 @@
 {% block title %}Mapa del Campus 🗺️{% endblock %}
 {% block active_map %}is-active{% endblock %}
 {% block extra_head %}
+<!-- Override floating_nav.css body padding specifically for full-screen maps -->
+<style>
+    body {
+        padding-bottom: 0 !important;
+    }
+
+    #map {
+        height: 100vh !important;
+    }
+
+    /* Adjust depending on top navbar if exists */
+</style>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css"
     rel="stylesheet">
