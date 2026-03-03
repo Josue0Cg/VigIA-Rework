@@ -442,6 +442,126 @@ body>* {
     z-index: 1;
 }
 
+/* ===== Map "Como ir a..." Panel ===== */
+.controls_route.card {
+    background: rgba(10, 22, 40, 0.92) !important;
+    border: 1px solid rgba(147, 197, 253, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.controls_route .card-header {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-bottom: 1px solid rgba(147, 197, 253, 0.1) !important;
+}
+
+.controls_route .card-header h6 {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.controls_route .card-body {
+    background: transparent !important;
+}
+
+.controls_route .card-footer {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-top: 1px solid rgba(147, 197, 253, 0.08) !important;
+}
+
+.controls_route select.form-control,
+.controls_route .form-control {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(147, 197, 253, 0.18) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(8px);
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.controls_route select.form-control:focus,
+.controls_route .form-control:focus {
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.controls_route select.form-control option {
+    background: #0d2847 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 8px 12px;
+}
+
+.controls_route select.form-control option:hover,
+.controls_route select.form-control option:checked {
+    background: rgba(59, 130, 246, 0.3) !important;
+    color: #fff !important;
+}
+
+.controls_route .btn-close {
+    filter: invert(1) brightness(2) !important;
+}
+
+/* Route info text */
+#route-info,
+#route-info * {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ===== Mapbox GL Controls ===== */
+.mapboxgl-ctrl-group {
+    background: rgba(10, 22, 40, 0.85) !important;
+    border: 1px solid rgba(147, 197, 253, 0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.mapboxgl-ctrl-group button {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(147, 197, 253, 0.08) !important;
+}
+
+.mapboxgl-ctrl-group button:hover {
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.mapboxgl-ctrl-group button span,
+.mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
+    filter: invert(1) brightness(2) !important;
+}
+
+.mapboxgl-ctrl-group button:last-child {
+    border-bottom: none !important;
+}
+
+/* Mapbox popup */
+.mapboxgl-popup-content {
+    background: rgba(10, 22, 40, 0.95) !important;
+    border: 1px solid rgba(147, 197, 253, 0.15) !important;
+    border-radius: 14px !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(16px);
+}
+
+.mapboxgl-popup-tip {
+    border-top-color: rgba(10, 22, 40, 0.95) !important;
+}
+
+.mapboxgl-popup-close-button {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 1.2rem;
+}
+
+.mapboxgl-popup-close-button:hover {
+    color: #fff !important;
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-radius: 50%;
+}
+
 /* ===== Index page override: no double background ===== */
 .index-page {
     z-index: 1;
