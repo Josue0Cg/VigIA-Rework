@@ -337,7 +337,8 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Active Button — expands to show text with highlighted pill background */
+/* Active Button and Hover — expands to show text with highlighted pill background */
+.floating-nav-btn:hover,
 .floating-nav-btn.is-active {
     background: rgba(255, 255, 255, 0.15);
     color: white;
@@ -345,6 +346,7 @@
     flex-shrink: 0;
 }
 
+.floating-nav-btn:hover span,
 .floating-nav-btn.is-active span {
     max-width: 120px;
     opacity: 1;
