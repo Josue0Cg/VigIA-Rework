@@ -19,82 +19,56 @@
     <link rel="stylesheet" href="{% static 'css/mdb_fontawesome.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/styles.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/dark_theme.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/floating_nav.css' %}" />
 </head>
 
 <body>
     {% block navbar %}
-    <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-0 border-0 sticky-top">
-        <div class="container-fluid">
-            <a href="/" class="nav_title">
-                <img src="{% static 'img/UTC_logo-plano.webp' %}" alt="UTC logo" />
-            </a>
-            <div class="flex-grow-1"></div>
-            <div class="m-0 d-flex align-items-center">
-                <div class="order-lg-last">
-                    <button type="button" class="btn btn-floating btn_detail me-2 me-md-0 ms-md-2"
-                        title="Configuraciones" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#configModal">
-                        <i class="fa-solid fa-gear fs-14"></i>
-                    </button>
-                    {% block qrBTN %}{% endblock %}
-                </div>
-                <button data-mdb-collapse-init class="navbar-toggler" type="button" data-mdb-target="#navbarText"
-                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation"
-                    data-btn_closed="overlayMenu"></button>
-                <div class="collapse navbar-collapse position-absolute top-100 navbar-light bg-body-tertiary flex-grow-0"
-                    id="navbarText">
-                    <ul class="navbar-nav mb-lg-0 px-2 px-lg-0">
-                        {% block link_default %}
-                        <li class="nav-item">
-                            <a class="btn {% if active_page == 'inicio' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
-                                href="/">Inicio <i class="fa-solid fa-house-chimney ms-1"></i></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn {% if active_page == 'faq' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
-                                href="{% url 'faq' %}">Preguntas <i class="fa-solid fa-clipboard-question ms-1"></i></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn {% if active_page == 'map' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
-                                href="{% url 'map' %}">Mapa
-                                <i class="fa-solid fa-map-location-dot ms-1"></i></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn {% if active_page == 'calendario' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
-                                href="{% url 'calendario' %}">Calendario <i
-                                    class="fa-solid fa-calendar-days ms-1"></i></i></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn {% if active_page == 'blog' %}btn_secondary{% else %}btn_detail{% endif %} m-1 my-lg-0 d-block"
-                                href="{% url 'blog' %}">Blog <i class="fa-solid fa-newspaper ms-1"></i></i></a>
-                        </li>
-                        <li class="nav-item">
-                            <div class="dropdown">
-                                <a class="btn btn_detail m-1 my-lg-0 d-block dropdown-toggle" href="" role="button"
-                                    id="dropdownMenuLink" data-mdb-dropdown-init data-mdb-ripple-init
-                                    aria-expanded="false">
-                                    Otros <i class="fa-solid fa-users ms-1"></i>
-                                </a>
+    <!-- Floating Navigation (fixed bottom, shared across views) -->
+    <nav class="floating-nav" aria-label="Navegación principal">
+        <!-- Hamburger toggle (mobile only) -->
+        <button type="button" class="nav-hamburger" id="navToggle" aria-label="Menú">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
 
-                                <ul class="dropdown-menu mx-100" aria-labelledby="dropdownMenuLink">
-                                    <li>
-                                        <a href="{% url 'about' %}"
-                                            class="dropdown-item {% if active_page|default:'' == 'about' %}active{% endif %}"
-                                            aria-current="true">Acerca de</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'singin' %}"
-                                            class="dropdown-item {% if active_page|default:'' == 'singin' %}active{% endif %}"
-                                            aria-current="true">Acceder</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        {% endblock %}
-                    </ul>
+        <!-- Nav links -->
+        <div class="floating-nav-links" id="navLinks">
+            <a href="/" class="floating-nav-btn {% block active_inicio %}{% endblock %}">
+                <i class="fa-solid fa-house-chimney"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="{% url 'faq' %}" class="floating-nav-btn {% block active_faq %}{% endblock %}">
+                <i class="fa-solid fa-clipboard-question"></i>
+                <span>Preguntas</span>
+            </a>
+            <a href="{% url 'map' %}" class="floating-nav-btn {% block active_map %}{% endblock %}">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Mapa</span>
+            </a>
+            <a href="{% url 'calendario' %}" class="floating-nav-btn {% block active_calendario %}{% endblock %}">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>Calendario</span>
+            </a>
+            <a href="{% url 'blog' %}" class="floating-nav-btn {% block active_blog %}{% endblock %}">
+                <i class="fa-solid fa-newspaper"></i>
+                <span>Blog</span>
+            </a>
+            <div class="floating-dropdown">
+                <button type="button" class="floating-nav-btn" id="otrosDropdownBtn">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Otros</span>
+                </button>
+                <div class="floating-dropdown-menu" id="otrosDropdownMenu">
+                    <a href="{% url 'about' %}" class="floating-dropdown-item">Acerca de</a>
+                    <a href="{% url 'singin' %}" class="floating-dropdown-item">Acceder</a>
                 </div>
             </div>
         </div>
     </nav>
     {% endblock %}
+
     {% block content %}{% endblock %}
 
     <!-- Configuraciones -->
@@ -155,6 +129,52 @@
     <div id="overlayMenu" class="menu_overlay"></div>
     <script src="{% static 'js/libraries.min.js' %}"></script>
     <script src="{% static 'js/settings.min.js' %}"></script>
+    <script>
+        (function () {
+            // --- Hamburger toggle ---
+            var navToggle = document.getElementById('navToggle');
+            var navLinks = document.getElementById('navLinks');
+            if (navToggle && navLinks) {
+                navToggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navToggle.classList.toggle('active');
+                    navLinks.classList.toggle('open');
+                });
+                document.addEventListener('click', function (ev) {
+                    if (!navLinks.contains(ev.target) && !navToggle.contains(ev.target)) {
+                        navToggle.classList.remove('active');
+                        navLinks.classList.remove('open');
+                    }
+                });
+                navLinks.addEventListener('click', function (ev) {
+                    if (ev.target === navLinks) {
+                        navToggle.classList.remove('active');
+                        navLinks.classList.remove('open');
+                    }
+                });
+                navLinks.querySelectorAll('a.floating-nav-btn, a.floating-dropdown-item').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        navToggle.classList.remove('active');
+                        navLinks.classList.remove('open');
+                    });
+                });
+            }
+
+            // --- Floating dropdown toggle ---
+            var dropBtn = document.getElementById('otrosDropdownBtn');
+            var dropMenu = document.getElementById('otrosDropdownMenu');
+            if (dropBtn && dropMenu) {
+                dropBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    dropMenu.classList.toggle('show');
+                });
+                document.addEventListener('click', function () {
+                    dropMenu.classList.remove('show');
+                });
+            }
+        })();
+    </script>
     {% block scripts_end %} {% endblock %}
 </body>
 

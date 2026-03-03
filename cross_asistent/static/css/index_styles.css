@@ -259,89 +259,99 @@
    ======================================================== */
 .floating-nav {
     display: flex;
-    flex-wrap: nowrap;
     justify-content: center;
-    gap: 10px;
-    padding: 16px 16px 32px;
+    padding: 0 16px 32px;
     z-index: 2;
     width: 100%;
+    pointer-events: none;
+    /* Let clicks pass through empty areas */
+}
+
+/* Nav links container — The Dark Pill */
+.floating-nav-links {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: center;
+    background: #1f2229;
+    /* Dark pill color matching image */
+    padding: 8px 12px;
+    border-radius: 50px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    pointer-events: auto;
+    /* Re-enable clicks inside the pill */
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 }
 
-.floating-nav::-webkit-scrollbar {
+.floating-nav-links::-webkit-scrollbar {
     display: none;
 }
 
+/* Base button (inactive mode matches icons from image) */
 .floating-nav-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 20px;
-    border-radius: 50px;
-    border: 1px solid rgba(147, 197, 253, 0.15);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    color: rgba(255, 255, 255, 0.8);
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.65);
+    /* Faded inactive color */
     font-family: var(--ft2), var(--ft1), sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    letter-spacing: 0.02em;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    border-radius: 50px;
+    padding: 12px;
+    height: 44px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    overflow: hidden;
     white-space: nowrap;
     flex-shrink: 0;
 }
 
-.floating-nav-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.08));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.floating-nav-btn:hover::before {
-    opacity: 1;
-}
-
 .floating-nav-btn:hover {
-    border-color: rgba(147, 197, 253, 0.5);
     color: #fff;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(147, 197, 253, 0.1) inset;
-}
-
-.floating-nav-btn:active {
-    transform: translateY(-1px) scale(0.98);
 }
 
 .floating-nav-btn i {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     position: relative;
     z-index: 1;
 }
 
+/* Text is hidden by default using max-width animation trick */
 .floating-nav-btn span {
     position: relative;
     z-index: 1;
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Active Button — expands to show text with highlighted pill background */
 .floating-nav-btn.is-active {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+    /* Lighter highlight pill */
     color: #fff;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+    padding: 12px 20px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
-/* Dropdown within floating nav */
+.floating-nav-btn.is-active span {
+    max-width: 120px;
+    opacity: 1;
+    margin-left: 8px;
+    /* Space between icon and text */
+}
+
+/* Dropdown styling */
 .floating-dropdown {
     position: relative;
     flex-shrink: 0;
@@ -350,7 +360,7 @@
 }
 
 .floating-dropdown>.floating-nav-btn {
-    height: auto;
+    height: 44px;
 }
 
 .floating-dropdown-menu {

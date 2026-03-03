@@ -1,10 +1,27 @@
 /* ==============================================
    VigIA — Floating Navigation (shared across all views)
+   Used by widget.html for all pages except index
+   (index overrides {% block navbar %} with its own nav)
    ============================================== */
 
-/* --- Ensure content doesn't hide behind fixed nav --- */
+/* --- Content padding to avoid nav overlap --- */
 body {
-    padding-bottom: 90px;
+    padding-bottom: 100px;
+}
+
+/* ========================================================
+   Gradient fade above navbar (non-index views)
+   ======================================================== */
+.floating-nav::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(10, 22, 40, 0.6) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* ========================================================
@@ -25,7 +42,7 @@ body {
     cursor: pointer;
     padding: 0;
     position: relative;
-    z-index: 5;
+    z-index: 10000;
     transition: all 0.3s ease;
 }
 
@@ -56,105 +73,107 @@ body {
     transform: translateY(-7px) rotate(-45deg);
 }
 
-/* Nav links container — desktop: inline flex */
-.floating-nav-links {
-    display: contents;
-}
-
 /* ========================================================
    Floating Navigation — SINGLE ROW, FIXED BOTTOM
    ======================================================== */
 .floating-nav {
     position: fixed;
-    bottom: 0;
+    bottom: 30px;
     left: 0;
     right: 0;
     display: flex;
-    flex-wrap: nowrap;
     justify-content: center;
-    gap: 10px;
-    padding: 16px 16px 24px;
+    padding: 0 16px;
     z-index: 1050;
+    pointer-events: none;
+    /* Let clicks pass through empty areas */
+}
+
+/* Nav links container — The Dark Pill */
+.floating-nav-links {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: center;
+    background: #1f2229;
+    /* Dark pill color matching image */
+    padding: 8px 12px;
+    border-radius: 50px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    pointer-events: auto;
+    /* Re-enable clicks inside the pill */
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    background: linear-gradient(to top, rgba(10, 22, 40, 0.95) 0%, rgba(10, 22, 40, 0.8) 60%, transparent 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
 }
 
-.floating-nav::-webkit-scrollbar {
+.floating-nav-links::-webkit-scrollbar {
     display: none;
 }
 
+/* Base button (inactive mode matches icons from image) */
 .floating-nav-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 20px;
-    border-radius: 50px;
-    border: 1px solid rgba(147, 197, 253, 0.15);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    color: rgba(255, 255, 255, 0.8);
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.65);
+    /* Faded inactive color */
     font-family: var(--ft2), var(--ft1), sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    letter-spacing: 0.02em;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    border-radius: 50px;
+    padding: 12px;
+    height: 44px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    overflow: hidden;
     white-space: nowrap;
     flex-shrink: 0;
 }
 
-.floating-nav-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.08));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.floating-nav-btn:hover::before {
-    opacity: 1;
-}
-
 .floating-nav-btn:hover {
-    border-color: rgba(147, 197, 253, 0.5);
     color: #fff;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(147, 197, 253, 0.1) inset;
-}
-
-.floating-nav-btn:active {
-    transform: translateY(-1px) scale(0.98);
 }
 
 .floating-nav-btn i {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     position: relative;
     z-index: 1;
 }
 
+/* Text is hidden by default using max-width animation trick */
 .floating-nav-btn span {
     position: relative;
     z-index: 1;
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Active Button — expands to show text with highlighted pill background */
 .floating-nav-btn.is-active {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+    /* Lighter highlight pill */
     color: #fff;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+    padding: 12px 20px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
-/* Dropdown within floating nav */
+.floating-nav-btn.is-active span {
+    max-width: 120px;
+    opacity: 1;
+    margin-left: 8px;
+    /* Space between icon and text */
+}
+
+/* Dropdown styling */
 .floating-dropdown {
     position: relative;
     flex-shrink: 0;
@@ -163,7 +182,7 @@ body {
 }
 
 .floating-dropdown>.floating-nav-btn {
-    height: auto;
+    height: 44px;
 }
 
 .floating-dropdown-menu {
@@ -218,68 +237,72 @@ body {
    Responsive
    ======================================================== */
 
-/* --- Mobile: Hamburger + collapsible nav --- */
+/* --- Mobile: Hamburger + full-screen slide-up --- */
 @media (max-width: 576px) {
     .nav-hamburger {
         display: flex;
     }
 
     .floating-nav {
-        position: fixed;
-        padding: 12px 16px 24px;
+        padding: 12px 16px 32px;
         justify-content: center;
     }
 
+    /* Full-screen slide-up nav panel */
     .floating-nav-links {
+        position: fixed;
+        inset: 0;
         display: flex;
         flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        position: absolute;
-        bottom: calc(100% + 8px);
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background: rgba(10, 22, 40, 0.92);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(147, 197, 253, 0.12);
-        border-radius: 20px;
-        padding: 12px;
-        min-width: 200px;
-        width: max-content;
-        max-width: 85vw;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(10, 22, 40, 0.97);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        padding: 40px 24px 80px;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 10;
-        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
+        transform: translateY(100%);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 9999;
     }
 
     .floating-nav-links.open {
         opacity: 1;
         visibility: visible;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
 
     .floating-nav-links .floating-nav-btn {
+        width: 80%;
+        max-width: 280px;
         justify-content: flex-start;
-        border-radius: 14px;
-        padding: 12px 18px;
-        font-size: 0.85rem;
+        border-radius: 16px;
+        padding: 16px 24px;
+        font-size: 1rem;
     }
 
     .floating-nav-links .floating-nav-btn span {
         display: inline;
     }
 
+    .floating-nav-links .floating-nav-btn i {
+        font-size: 1.15rem;
+        width: 28px;
+    }
+
     .floating-nav-links .floating-dropdown {
-        width: 100%;
+        width: 80%;
+        max-width: 280px;
     }
 
     .floating-nav-links .floating-dropdown>.floating-nav-btn {
         width: 100%;
         justify-content: flex-start;
-        border-radius: 14px;
+        border-radius: 16px;
+        padding: 16px 24px;
+        font-size: 1rem;
     }
 
     .floating-dropdown-menu {
@@ -289,9 +312,15 @@ body {
         bottom: auto !important;
         border: none;
         background: rgba(255, 255, 255, 0.04);
-        border-radius: 12px;
-        margin-top: 4px;
+        border-radius: 14px;
+        margin-top: 6px;
         box-shadow: none;
+        width: 100%;
+    }
+
+    .floating-dropdown-menu .floating-dropdown-item {
+        padding: 12px 24px;
+        font-size: 0.95rem;
     }
 }
 
