@@ -13,7 +13,19 @@
         height: 100vh !important;
     }
 
-    /* Adjust depending on top navbar if exists */
+    /* Force offcanvas above the floating navbar (z-index 1050) */
+    .offcanvas {
+        z-index: 1100 !important;
+    }
+
+    .offcanvas-backdrop {
+        z-index: 1090 !important;
+    }
+
+    /* Lower the navbar when offcanvas is open */
+    .floating-nav {
+        z-index: 1050;
+    }
 </style>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css"

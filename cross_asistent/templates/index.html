@@ -207,6 +207,10 @@
                 e.stopPropagation();
                 dropMenu.classList.toggle('show');
             });
+            // Prevent clicks inside the dropdown menu from closing it
+            dropMenu.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
             document.addEventListener('click', function () {
                 dropMenu.classList.remove('show');
             });

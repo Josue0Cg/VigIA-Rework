@@ -283,8 +283,7 @@
     width: 94%;
     max-width: 450px;
     pointer-events: auto;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
     scrollbar-width: none;
 }
 
@@ -372,13 +371,13 @@
     bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(10, 22, 40, 0.9);
+    background: rgba(10, 22, 40, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(147, 197, 253, 0.15);
     border-radius: 16px;
     padding: 8px;
     min-width: 150px;
-    z-index: 20;
+    z-index: 1100;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
