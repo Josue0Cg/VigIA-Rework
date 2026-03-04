@@ -387,27 +387,8 @@ nav.floating-nav {
     padding-block: 0 !important;
 }
 
-/* ===== Calendar specific ===== */
-.fc {
-    --fc-border-color: rgba(147, 197, 253, 0.1);
-    --fc-page-bg-color: transparent;
-    --fc-neutral-bg-color: rgba(255, 255, 255, 0.03);
-    --fc-list-event-hover-bg-color: rgba(59, 130, 246, 0.1);
-    --fc-today-bg-color: rgba(59, 130, 246, 0.08);
-}
-
-.fc .fc-col-header-cell {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.fc .fc-daygrid-day-number,
-.fc .fc-col-header-cell-cushion {
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-.fc .fc-toolbar-title {
-    color: rgba(255, 255, 255, 0.95) !important;
-}
+/* ===== Custom Calendar overrides ===== */
+/* Extra dark-theme tweaks for the custom calendar */
 
 /* ===== Dropdown Menu ===== */
 .dropdown-menu {

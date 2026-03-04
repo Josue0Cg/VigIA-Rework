@@ -2,10 +2,16 @@
 {% load static %}
 {% block title %}Calendario de la Universidad 📰{% endblock %}
 {% block active_calendario %}is-active{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/calendario_custom.css' %}" />
+{% endblock %}
+
 {% block content %}
 <main class="container container-fluid py-5">
-    <section id="calendar" data-events="{% url 'calendario_eventos' %}" data-show_btnyear="{{show_btns_year}}">
-    </section>
+    <div id="calendarApp" class="cal-container" data-events="{% url 'calendario_eventos' %}">
+        <!-- JS renders content here -->
+    </div>
 
     <!-- Modal: Ver info del Evento -->
     <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
@@ -52,5 +58,5 @@
 {% include 'base/widget_footer.html' %}
 {% endblock %}
 {% block scripts_end %}
-<script src="{% static 'js/settings_fullcalendar.js' %}"></script>
+<script src="{% static 'js/calendario_custom.js' %}"></script>
 {% endblock %}
