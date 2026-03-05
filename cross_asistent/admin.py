@@ -1,8 +1,6 @@
 from django.contrib import admin
 from . import models
 
-class BannersAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'expiracion')
 
 class CategoriasAdmin(admin.ModelAdmin):
     list_display = ('categoria', 'descripcion')
@@ -29,7 +27,6 @@ class UserProfileAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__email')
 
 # Register your models here.
-admin.site.register(models.Banners, BannersAdmin)
 admin.site.register(models.Categorias, CategoriasAdmin)
 admin.site.register(models.Database, DatabaseAdmin)
 admin.site.register(models.Articulos, ArticulosAdmin)

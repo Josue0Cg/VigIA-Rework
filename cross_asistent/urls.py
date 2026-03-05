@@ -36,13 +36,6 @@ urlpatterns = [
     path('administracion/usuarios/editar/<int:user_id>/', functions.editar_usuario, name='editar_usuario'),
     path('administracion/usuarios/eliminar/<int:user_id>/', functions.eliminar_usuario, name='eliminar_usuario'),
     
-    # Banners ----------------------------------------------------------
-    path('administracion/banners/', views.banners_page, name='upload_banner'),
-    path('administracion/banners/lista/', functions.banners_list, name='list_banners'),
-    path('administracion/banners/editar/', functions.banner_update, name='edit_banner'),
-    path('administracion/banners/eliminar/', functions.banner_delete, name='delete_banner'),
-    path('administracion/banners/informacion/', functions.banners_getitem, name='getitem_banner'),
-    path('administracion/banners/actualizar_visibilidad/', functions.banners_visibility_now, name='update_banner_visibility'),
 
     # Categorias ----------------------------------------------------------
     path('administracion/categorias/crear/', functions.categorias_create, name='categorias_create'),
@@ -60,6 +53,9 @@ urlpatterns = [
     path('administracion/calendario/', views.calendario_page, name='calendario_page'),
     
     path('administracion/preguntas/eliminar/', functions.preguntas_deleted, name='question_deleted'),
+    path('administracion/preguntas/responder/', views.responder_pregunta, name='responder_pregunta'),
+    path('administracion/preguntas/toggle-faq/', views.toggle_pregunta_frecuente, name='toggle_pregunta_frecuente'),
+    path('administracion/preguntas/', views.admin_preguntas_page, name='admin_preguntas_page'),
     path('database/actualizar_frecuencia/', functions.frequesnce_update, name='update_frequencies_database'),
 
     # Blog ----------------------------------------------------------

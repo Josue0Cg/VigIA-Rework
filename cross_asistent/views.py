@@ -44,8 +44,15 @@ def fqt_questions(request):
     
     categoria_Preguntas = models.Categorias.objects.get(categoria="Preguntas")
     questall = models.Database.objects.filter(frecuencia__gt=0, categoria=categoria_Preguntas).order_by('-frecuencia')
+    
+    # Preguntas respondidas marcadas como frecuentes
+    preguntas_faq = models.Preguntas.objects.filter(
+        es_frecuente=True, respondida=True
+    ).order_by('orden', '-fecha')
+    
     return render(request, 'frecuentes.html', {
         'quest_all': questall,
+        'preguntas_faq': preguntas_faq,
         'active_page': 'faq',
         **configuraciones
     })
@@ -53,16 +60,42 @@ def fqt_questions(request):
 def fqt_questions_send(request):    
     if request.method == "POST":
         try:
-            preguntaPOST = request.POST.get('pregunta')
-            descripcionPOST = request.POST.get('descripcion')
+            # Anti-spam: honeypot field
+            if request.POST.get('website', ''):
+                return JsonResponse({'success': True, 'message': 'Gracias por tu pregunta. \u2764\ufe0f'}, status=200)
+            
+            nombre_personaPOST = request.POST.get('nombre_persona', 'An\u00f3nimo').strip() or 'An\u00f3nimo'
+            preguntaPOST = request.POST.get('pregunta', '').strip()
+            descripcionPOST = request.POST.get('descripcion', '').strip()
 
-            pregunta = models.Preguntas(pregunta=preguntaPOST, descripcion=descripcionPOST)
+            # Validaci\u00f3n de longitud
+            if len(preguntaPOST) < 10:
+                return JsonResponse({'success': False, 'message': 'Tu pregunta es muy corta. Escribe al menos 10 caracteres. \ud83e\udd14'}, status=400)
+            if len(preguntaPOST) > 300:
+                return JsonResponse({'success': False, 'message': 'Tu pregunta es muy larga. M\u00e1ximo 300 caracteres. \ud83d\ude25'}, status=400)
+            if len(descripcionPOST) > 1000:
+                return JsonResponse({'success': False, 'message': 'La descripci\u00f3n es muy larga. M\u00e1ximo 1000 caracteres. \ud83d\ude25'}, status=400)
+            if len(nombre_personaPOST) > 100:
+                return JsonResponse({'success': False, 'message': 'El nombre es muy largo. M\u00e1ximo 100 caracteres.'}, status=400)
+
+            # Rate limiting por sesi\u00f3n
+            preguntas_count = request.session.get('preguntas_enviadas', 0)
+            if preguntas_count >= 3:
+                return JsonResponse({'success': False, 'message': 'Has enviado muchas preguntas. Int\u00e9ntalo m\u00e1s tarde. \u23f3'}, status=429)
+
+            pregunta = models.Preguntas(
+                nombre_persona=nombre_personaPOST,
+                pregunta=preguntaPOST,
+                descripcion=descripcionPOST
+            )
             pregunta.save()
 
-            return JsonResponse({'success': True, 'message': 'Gracias por tu pregunta. ❤️💕😁👍 <br>Te responderemos lo más pronto posible. 😁😊🫡'}, status=200)
+            request.session['preguntas_enviadas'] = preguntas_count + 1
+
+            return JsonResponse({'success': True, 'message': 'Gracias por tu pregunta. \u2764\ufe0f\ud83d\udc95\ud83d\ude01\ud83d\udc4d <br>Te responderemos lo m\u00e1s pronto posible. \ud83d\ude01\ud83d\ude0a\ud83e\udee1'}, status=200)
         except Exception as e:
             print(f'Hay un error en: {e}')
-            return JsonResponse({'error':True, 'success': False, 'message': 'Ups! 😥😯 hubo un error y tu pregunta no se pudo registrar. Por favor intente de nuevo más tarde.'}, status=400)
+            return JsonResponse({'error':True, 'success': False, 'message': 'Ups! \ud83d\ude25\ud83d\ude2f hubo un error y tu pregunta no se pudo registrar. Por favor intente de nuevo m\u00e1s tarde.'}, status=400)
 
 def blogs(request):
     if not request.user.is_staff:
@@ -233,9 +266,9 @@ def singout(request):
 @login_required
 @never_cache
 def vista_programador(request):
-    banners_all = models.Banners.objects.all()
     users = User.objects.all().order_by('-id')
-    configuraciones = obtener_configuraciones()
+    all_questions = models.Preguntas.objects.all().order_by('-id')
+    preguntas_pendientes = models.Preguntas.objects.filter(respondida=False).count()
     
     if request.user.is_staff:
         num_blogs = models.Articulos.objects.all().count()
@@ -243,35 +276,80 @@ def vista_programador(request):
         num_blogs = models.Articulos.objects.filter(autor=request.user).count()
     
     contexto = {
-        'users':users,
-        'user':request.user,
-        'active_page':'home',
-        'pages':functions.pages,
-        'banners_all':banners_all,
-        'settingsall':settingsall,
-        'categorias':categoriasFilter,
-        'preguntas_sending':questions_all[:8], # limitar a los primeros 8 registros
-        'num_preguntas':databaseall.count(),
+        'users': users,
+        'user': request.user,
+        'preguntas_sending': all_questions[:20],
+        'preguntas_pendientes': preguntas_pendientes,
+        'num_registros': databaseall.count(),
         'num_blogs': num_blogs,
-        **configuraciones
     }
-     
-    if request.method == 'POST':
-        response = functions.create_newuser(
-            first_name=request.POST.get('first_name'),
-            last_name=request.POST.get('last_name'),
-            username=request.POST.get('username'),
-            email=request.POST.get('email'),
-            password1=request.POST.get('password'),
-            is_staff=request.POST.get('is_staff', False),
-            is_active=request.POST.get('is_active', False),
-        )
-        response['position'] = 'top'
-        response['functions'] = 'reload'
-        status = 200 if response['success'] else 400
-        return JsonResponse(response, status=status)
 
-    return render(request, 'admin/vista_programador.html', contexto)
+    return render(request, 'admin/admin_dashboard.html', contexto)
+
+
+@login_required
+@never_cache
+def responder_pregunta(request):
+    """AJAX endpoint para que admins respondan preguntas de usuarios."""
+    if request.method == 'POST':
+        try:
+            from django.utils import timezone
+            question_id = request.POST.get('question_id')
+            respuesta_text = request.POST.get('respuesta', '').strip()
+
+            pregunta = get_object_or_404(models.Preguntas, id=question_id)
+            pregunta.respuesta = respuesta_text
+            pregunta.respondida = bool(respuesta_text)
+            pregunta.fecha_respuesta = timezone.now() if respuesta_text else None
+            pregunta.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': f'Respuesta enviada para la pregunta #{question_id}. 🫡✅'
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error al responder: {str(e)}'
+            }, status=400)
+    return JsonResponse({'success': False, 'message': 'Método no permitido.'}, status=405)
+
+
+@login_required
+@never_cache
+def toggle_pregunta_frecuente(request):
+    """AJAX endpoint para marcar/desmarcar una pregunta como FAQ."""
+    if request.method == 'POST':
+        try:
+            question_id = request.POST.get('question_id')
+            pregunta = get_object_or_404(models.Preguntas, id=question_id)
+            pregunta.es_frecuente = not pregunta.es_frecuente
+            pregunta.save()
+            estado = 'marcada como frecuente' if pregunta.es_frecuente else 'removida de frecuentes'
+            return JsonResponse({
+                'success': True,
+                'es_frecuente': pregunta.es_frecuente,
+                'message': f'Pregunta #{question_id} {estado}. \u2705'
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error: {str(e)}'}, status=400)
+    return JsonResponse({'success': False, 'message': 'Método no permitido.'}, status=405)
+
+
+@login_required
+@never_cache
+def admin_preguntas_page(request):
+    """Vista dedicada para administrar preguntas."""
+    todas_preguntas = models.Preguntas.objects.all().order_by('-fecha')
+    preguntas_faq = models.Preguntas.objects.filter(es_frecuente=True).order_by('orden', '-fecha')
+    preguntas_pendientes = models.Preguntas.objects.filter(respondida=False).count()
+    
+    return render(request, 'admin/admin_preguntas.html', {
+        'todas_preguntas': todas_preguntas,
+        'preguntas_faq': preguntas_faq,
+        'preguntas_pendientes': preguntas_pendientes,
+        'user': request.user,
+    })
 
 @login_required
 @never_cache
@@ -290,63 +368,6 @@ def ver_perfil(request):
         'active_page': 'perfil',
         'pages': functions.pages
     })
-
-# Banners ----------------------------------------------------------
-@login_required
-@never_cache
-def banners_page(request):    
-    if request.method == 'POST':
-        tituloPOST = request.POST.get('contenidoWord')
-        soloImagenPOST = request.POST.get('soloImagen')
-        expiracionPOST = request.POST.get('expiracion')
-        if soloImagenPOST == None:
-            soloImagenPOST = False
-        if not expiracionPOST:
-            expiracionPOST = None
-        
-        if tituloPOST:
-            banner = models.Banners(
-                titulo = request.POST.get('contenidoWord'),
-                descripcion = request.POST.get('descripcion'),
-                redirigir = request.POST.get('redirigir'),
-                imagen = request.FILES.get('imagen'),
-                solo_imagen = soloImagenPOST,
-                expiracion = expiracionPOST
-            )
-            banner.save()
-            
-            return JsonResponse({
-                'success': True,
-                'functions': 'reload',
-                'message': f'El banner <span>{tituloPOST}</span> fue creado exitosamente 🥳🎉🎈.'
-            }, status=200)
-        else:
-            return JsonResponse({
-                'success': False,
-                'message': f'El parecer no se envio contenido ⚠️😯🤔😥.'
-            }, status=400)
-    
-    configuraciones = obtener_configuraciones()
-    banners_all = models.Banners.objects.all()
-    banners_modificados = []
-
-    for banner in banners_all:
-        banners_modificados.append({
-            'id': banner.id,
-            'titulo': banner.titulo,
-            'descripcion': banner.descripcion,
-            'redirigir': banner.redirigir,
-            'imagen': banner.imagen.url or '/static/img/default_image.webp',
-            'expiracion': banner.expiracion if not banner.expiracion == None else '',
-            'visible': banner.visible,
-            'onlyImg': banner.solo_imagen,
-        })
-    context = { 'banners': banners_modificados,
-               **configuraciones,
-               'active_page': 'banner',
-               'pages': functions.pages,
-               'banners_cound': banners_all.count() }
-    return render(request, 'admin/banners.html', context)
 
 # Base de Datos ----------------------------------------------------------
 @login_required

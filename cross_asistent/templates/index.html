@@ -199,22 +199,6 @@
             });
         }
 
-        // --- Floating dropdown toggle ---
-        const dropBtn = document.getElementById('otrosDropdownBtn');
-        const dropMenu = document.getElementById('otrosDropdownMenu');
-        if (dropBtn && dropMenu) {
-            dropBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                dropMenu.classList.toggle('show');
-            });
-            // Prevent clicks inside the dropdown menu from closing it
-            dropMenu.addEventListener('click', function (e) {
-                e.stopPropagation();
-            });
-            document.addEventListener('click', function () {
-                dropMenu.classList.remove('show');
-            });
-        }
 
         // --- Sphere click: 1st = voice greeting, 2nd = open chat ---
         const sphereTrigger = document.getElementById('sphereTrigger');

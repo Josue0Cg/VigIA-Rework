@@ -70,7 +70,7 @@
                                     <div>
                                         <a href="{{ quest.redirigir }}" target="_blank" rel="noopener noreferrer"
                                             class="btn btn_detail">
-                                            Saber más <i class="fa-solid fa-up-right-from-square ms-1"></i></a>
+                                            Saber m\u00e1s <i class="fa-solid fa-up-right-from-square ms-1"></i></a>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -82,10 +82,40 @@
                         </form>
                         {% endfor %}
                     </div>
-                    {% else %}
+                    {% endif %}
+
+                    {% if preguntas_faq %}
+                    <hr class="hr_divisor my-4">
+                    <h5 class="mb-3"><i class="fa-solid fa-clipboard-question me-2"></i>Preguntas de Usuarios</h5>
+                    <div class="accordion" id="accordionFAQ">
+                        {% for pf in preguntas_faq %}
+                        <div class="accordion-item results_item">
+                            <h2 class="accordion-header" id="headingFaq{{ pf.id }}">
+                                <button data-mdb-collapse-init class="accordion-button collapsed" type="button"
+                                    data-mdb-toggle="collapse" data-mdb-target="#faq-{{ pf.id }}" aria-expanded="false"
+                                    aria-controls="faq-{{ pf.id }}">
+                                    <i class="fas fa-comment-dots fa-sm me-2 opacity-70"></i>{{ pf.pregunta }}
+                                </button>
+                            </h2>
+                            <div id="faq-{{ pf.id }}" class="accordion-collapse collapse"
+                                aria-labelledby="headingFaq{{ pf.id }}" data-mdb-parent="#accordionFAQ">
+                                <div class="accordion-body">
+                                    {{ pf.respuesta }}
+                                    {% if pf.nombre_persona and pf.nombre_persona != 'An\u00f3nimo' %}
+                                    <small class="d-block mt-2 opacity-60">Pregunta de: {{ pf.nombre_persona }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if not quest_all and not preguntas_faq %}
                     <div class="text-center">
-                        <p class="lead m-0">No hay preguntas frecuentes disponibles en este momento. ¡Vuelve pronto para
-                            más actualizaciones!</p>
+                        <p class="lead m-0">No hay preguntas frecuentes disponibles en este momento. \u00a1Vuelve pronto
+                            para
+                            m\u00e1s actualizaciones!</p>
                     </div>
                     {% endif %}
                 </div>
@@ -106,18 +136,28 @@
                     <form method="POST" id="hacerPregunta" action="{% url 'enviar_preguntas' %}" class="text-center"
                         autocomplete="off" data-submit-form>
                         {% csrf_token %}
+                        <!-- Honeypot anti-spam -->
+                        <div style="position:absolute;left:-9999px;">
+                            <input type="text" name="website" tabindex="-1" autocomplete="off">
+                        </div>
                         <div class="form-outline mb-4" data-mdb-input-init>
-                            <input type="text" id="preguntaPOST" name="pregunta" class="form-control mx-auto"
-                                required />
-                            <label class="form-label" for="preguntaPOST">Escribe tu Pregunta:</label>
+                            <input type="text" id="nombrePOST" name="nombre_persona" class="form-control mx-auto"
+                                maxlength="100" />
+                            <label class="form-label" for="nombrePOST">Tu Nombre: <small>( OPCIONAL )</small></label>
+                        </div>
+                        <div class="form-outline mb-4" data-mdb-input-init>
+                            <input type="text" id="preguntaPOST" name="pregunta" class="form-control mx-auto" required
+                                minlength="10" maxlength="300" />
+                            <label class="form-label" for="preguntaPOST">Escribe tu Pregunta: <small>(mín. 10
+                                    caracteres)</small></label>
                         </div>
                         <div data-mdb-input-init class="form-outline position-relative mb-4">
                             <button type="button" class="position-absolute top-0 end-0 btn p-0 fs-12 m-2 mt-1 none"
                                 data-clear="descripcion"><i class="fa-solid fa-xmark m-0 p-0"></i></button>
-                            <textarea class="form-control" id="descripcion" rows="4" name="descripcion"
+                            <textarea class="form-control" id="descripcion" rows="4" name="descripcion" maxlength="1000"
                                 data-init-clear></textarea>
-                            <label class="form-label" for="descripcion">Escribe más detalles: <small>( OPCIONAL
-                                    )</small></label>
+                            <label class="form-label" for="descripcion">Escribe más detalles: <small>( OPCIONAL, máx.
+                                    1000 )</small></label>
                         </div>
                         <button type="submit" class="btn btn_detail btn-block" data-reset_form="hacerPregunta">Enviar <i
                                 class="fa-solid fa-paper-plane ms-1"></i></button>

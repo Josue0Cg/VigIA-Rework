@@ -258,13 +258,15 @@
    Floating Navigation — SINGLE ROW
    ======================================================== */
 .floating-nav {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0 16px 25px;
-    z-index: 2;
+    z-index: 1050;
     width: 100%;
     pointer-events: none;
+    overflow: visible;
 }
 
 /* Nav links container — The Dark Pill */
