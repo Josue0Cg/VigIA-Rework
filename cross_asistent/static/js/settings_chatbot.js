@@ -336,7 +336,20 @@ function displayChatbotResponse(varAnswer) {
     }
 
     lastText = varAnswer.informacion;
-    chatText = varAnswer.informacion.replace(/\n/g, "<br>");
+    // Convert response text to HTML
+    chatText = varAnswer.informacion
+        // First: convert markdown links [text](url) if any
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a class="btn bg_detail mb-2 mt-2" href="$2"><i class="fa-solid fa-map-location-dot me-1"></i>$1</a>')
+        // Convert **bold** to <strong> (fallback if Gemini still uses it)
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        // Convert plain text map link: 📍 ... /mapa/
+        .replace(/📍([^]*?)(\/mapa\/)/g, '<br><a class="btn bg_detail mb-2 mt-2" href="/mapa/"><i class="fa-solid fa-map-location-dot me-1"></i>📍 Ver en el mapa</a>')
+        // Convert newlines to <br>
+        .replace(/\n/g, "<br>")
+        // Convert lines starting with * to bullet (fallback)
+        .replace(/(^|<br>)\*\s/g, '$1• ')
+        // Convert lines starting with - to bullet
+        .replace(/(^|<br>)-\s/g, '$1• ');
     const htmlBlock = `<div class="chat_msg asistent_response" data-tokeid="${valID}">${chatText} ${viewImage} ${btnRedir}</div>`;
 
     contOutput.insertAdjacentHTML("beforeend", htmlBlock);

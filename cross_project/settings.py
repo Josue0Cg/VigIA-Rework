@@ -17,7 +17,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'), overwrite=True)
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
 # Cambiar la clave secreta en produccion ---------------------------------------------------------

@@ -295,6 +295,7 @@ nav .navbar-collapse {
         box-shadow: none;
         z-index: auto;
     }
+
     .menu_overlay.show {
         clip-path: ellipse(100% 0% at 50% 100%);
         z-index: 0;
@@ -1070,7 +1071,7 @@ main.main_anchor {
     transition-delay: 0.1s;
 }
 
-.table_odd .table_odd_items:hover div .text_detail{
+.table_odd .table_odd_items:hover div .text_detail {
     background: unset !important;
 }
 
@@ -2293,6 +2294,7 @@ img.img-rounded {
 /*################ Alerts customClass Sweetalert ################*/
 .title_alert {
     word-break: break-word;
+    color: #1a1a1a !important;
 }
 
 .title_alert p {
