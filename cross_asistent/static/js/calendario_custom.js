@@ -161,11 +161,14 @@
     function makeDayCell(day, extraClass, dateStr, year, month) {
         const evts = getEventsForDate(dateStr);
         let dotsHtml = '';
+        let eventClass = '';
         if (evts.length > 0) {
+            eventClass = ' has-events';
             const dotCount = Math.min(evts.length, 3);
-            dotsHtml = '<div class="cal-day-dot">' + '<span></span>'.repeat(dotCount) + '</div>';
+            dotsHtml = '<div class="cal-day-bar"></div>'
+                + '<div class="cal-day-dot">' + '<span></span>'.repeat(dotCount) + '</div>';
         }
-        return `<div class="cal-day-cell ${extraClass}" data-date="${dateStr}">
+        return `<div class="cal-day-cell ${extraClass}${eventClass}" data-date="${dateStr}">
                     <span>${day}</span>${dotsHtml}
                 </div>`;
     }

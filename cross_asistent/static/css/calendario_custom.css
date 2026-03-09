@@ -310,30 +310,75 @@
     font-weight: 800;
 }
 
+/* ===== Day cells WITH events ===== */
+.cal-day-cell.has-events {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(219, 234, 254, 0.92));
+    border: 1.5px solid rgba(59, 130, 246, 0.25);
+}
+
+.cal-day-cell.has-events:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(191, 219, 254, 0.95));
+    border-color: rgba(59, 130, 246, 0.45);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+}
+
+.cal-day-cell.has-events.is-today {
+    background: rgba(59, 130, 246, 0.35);
+    border-color: rgba(59, 130, 246, 0.7);
+}
+
+.cal-day-cell.has-events.other-month {
+    background: rgba(219, 234, 254, 0.35);
+    border-color: rgba(59, 130, 246, 0.12);
+}
+
+/* Event bar indicator (bottom colored bar) */
+.cal-day-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 0 0 12px 12px;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+    opacity: 0.9;
+}
+
+.cal-day-cell.other-month .cal-day-bar {
+    opacity: 0.35;
+}
+
+.cal-day-cell.is-selected .cal-day-bar {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.4));
+}
+
 /* Event dot indicator */
 .cal-day-dot {
     position: absolute;
-    bottom: 6px;
+    bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 3px;
+    gap: 4px;
 }
 
 .cal-day-dot span {
-    width: 5px;
-    height: 5px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: rgba(59, 130, 246, 0.8);
+    background: #3b82f6;
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
 }
 
 .cal-day-cell.other-month .cal-day-dot span {
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.35);
+    box-shadow: none;
 }
 
 .cal-day-cell.is-selected .cal-day-dot span,
 .cal-day-cell.is-today .cal-day-dot span {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
 }
 
 /* ===== Empty cell (no day) ===== */

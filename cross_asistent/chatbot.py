@@ -90,6 +90,23 @@ def similarity_score(input_tokens, entry_tokens):
     return score
 
 
+# Palabras clave que indican pregunta sobre el calendario escolar
+CALENDAR_KEYWORDS = {
+    'calendario', 'festivo', 'festivos', 'vacaciones', 'receso', 'asueto',
+    'cuatrimestre', 'inicio', 'inscripcion', 'inscripciones', 'graduacion',
+    'examen', 'ingreso', 'suspension', 'feriado', 'descanso', 'dia libre',
+    'semana santa', 'navidad', 'independencia', 'revolucion', 'constitucion',
+    'trabajo', 'maestro', 'juarez', 'estadias', 'incorporacion', 'clases',
+    'cuando empiezan', 'cuando terminan', 'dias festivos', 'dias libres',
+}
+
+
+def is_calendar_question(text):
+    """Detecta si la pregunta es sobre el calendario escolar."""
+    text_lower = text.lower()
+    return any(kw in text_lower for kw in CALENDAR_KEYWORDS)
+
+
 def find_best_matches(question, max_results=5):
     """Busca las mejores coincidencias en la DB."""
     entries = Database.objects.all()
@@ -97,6 +114,15 @@ def find_best_matches(question, max_results=5):
     
     if not input_tokens:
         return [], None
+    
+    # Si preguntan sobre el calendario, incluir todos los eventos
+    calendar_entries = []
+    if is_calendar_question(question):
+        calendar_entries = list(
+            Database.objects.filter(
+                categoria__categoria='Calendario'
+            ).exclude(evento_fecha_inicio=None)
+        )
     
     scored_entries = []
     for entry in entries:
@@ -114,6 +140,16 @@ def find_best_matches(question, max_results=5):
     
     top_entries = [e for e, s in scored_entries[:max_results]]
     best_match = scored_entries[0][0] if scored_entries else None
+    
+    # Merge calendar events (avoid duplicates)
+    if calendar_entries:
+        existing_ids = {e.id for e in top_entries}
+        for cal_entry in calendar_entries:
+            if cal_entry.id not in existing_ids:
+                top_entries.append(cal_entry)
+                existing_ids.add(cal_entry.id)
+        if not best_match and calendar_entries:
+            best_match = calendar_entries[0]
     
     return top_entries, best_match
 
