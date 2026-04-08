@@ -17,7 +17,6 @@ $(document).ready(function () {
         $("#chatMicBtn").click(function () {
             if (recognizing) {
                 stopRecording();
-                setTimeout(() => { submitButton.click(); }, 500);
             } else {
                 try {
                     $("#btn_controls_icon").addClass("fa-stop").removeClass("fa-microphone fa-microphone-slash");
@@ -127,102 +126,191 @@ try {
     alertSToast("top", 10000, "warning", error);
 }
 
-// Dictado de texto ##################################
+// Dictado de texto — Modo Híbrido (OpenAI + Navegador) ##################################
 const speakButton = $(".speak_btn");
 const voiceSelect = document.getElementById("voice_select");
 const rateInput = document.getElementById("rate_input");
+let currentAudio = null;
+let browserVoicesMap = {}; // índice → voice object del navegador
+const synth = window.speechSynthesis || null;
 
-if ("speechSynthesis" in window) {
-    const synth = window.speechSynthesis;
+// Voces de OpenAI (requieren API key con créditos)
+const openaiVoices = [
+    { value: 'openai:nova', label: '✨ Nova (Femenina, cálida)' },
+    { value: 'openai:alloy', label: '✨ Alloy (Neutral)' },
+    { value: 'openai:echo', label: '✨ Echo (Masculina)' },
+    { value: 'openai:fable', label: '✨ Fable (Narrativa)' },
+    { value: 'openai:onyx', label: '✨ Onyx (Masculina, grave)' },
+    { value: 'openai:shimmer', label: '✨ Shimmer (Femenina, suave)' },
+];
 
-    let voices = [];
-    let utterance;
+function populateVoiceSelector() {
+    if (!voiceSelect) return;
+    voiceSelect.innerHTML = '';
 
-    function loadVoices() {
-        voices = synth.getVoices();
-        voiceSelect.innerHTML = "";
+    // Grupo 1: OpenAI
+    const openaiGroup = document.createElement('optgroup');
+    openaiGroup.label = '🤖 OpenAI (Natural)';
+    openaiVoices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.value;
+        opt.textContent = v.label;
+        voiceSelect.appendChild(opt);
+    });
+    voiceSelect.appendChild(openaiGroup);
 
-        let defaultOptionAdded = false;
+    // Grupo 2: Voces del navegador (español)
+    if (synth) {
+        const voices = synth.getVoices();
+        const browserGroup = document.createElement('optgroup');
+        browserGroup.label = '🌐 Navegador (Gratis)';
+        let hasVoices = false;
 
         voices.forEach((voice, index) => {
-            if (voice.lang.startsWith("es")) {
-                const option = document.createElement("option");
-                option.textContent = `${voice.name} (${voice.lang})`;
-                option.value = index;
-                voiceSelect.appendChild(option);
-
-                // Check for the specific voice and set it as selected if available
-                if (voice.name.includes("Microsoft Sebastian Online") && voice.lang === "es-VE") {
-                    voiceSelect.value = index;
-                    defaultOptionAdded = true;
-                }
+            if (voice.lang.startsWith('es')) {
+                const opt = document.createElement('option');
+                opt.value = `browser:${index}`;
+                opt.textContent = `${voice.name} (${voice.lang})`;
+                browserGroup.appendChild(opt);
+                browserVoicesMap[index] = voice;
+                hasVoices = true;
             }
         });
 
-        // If the default voice is not found, select the first Spanish voice available
-        if (!defaultOptionAdded && voiceSelect.options.length > 0) {
-            voiceSelect.value = 0;
+        if (hasVoices) {
+            voiceSelect.appendChild(browserGroup);
         }
     }
 
-    if (synth.onvoiceschanged !== undefined) {
-        synth.onvoiceschanged = loadVoices;
+    voiceSelect.value = 'openai:nova';
+}
+
+// Poblar al inicio y cuando se carguen las voces del navegador
+populateVoiceSelector();
+if (synth && synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = populateVoiceSelector;
+}
+
+function removeEmojis(text) {
+    return text
+        .replace(/[*#()@><]/g, "")
+        .replace(/<br>/g, "")
+        .replace(/[\u{1F600}-\u{1F64F}]/gu, "")
+        .replace(/[\u{1F300}-\u{1F5FF}]/gu, "")
+        .replace(/[\u{1F680}-\u{1F6FF}]/gu, "")
+        .replace(/[\u{2600}-\u{26FF}]/gu, "")
+        .replace(/[\u{2700}-\u{27BF}]/gu, "")
+        .replace(/[\u{1F900}-\u{1F9FF}]/gu, "")
+        .replace(/[\u{1FA70}-\u{1FAFF}]/gu, "");
+}
+
+function stopCurrentPlayback() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
     }
-    loadVoices();
+    if (synth) synth.cancel();
+    isSpeaking = false;
+    $("#speak_btn_icon").addClass("fa-regular fa-circle-play").removeClass("fa-solid fa-circle-pause fa-spinner fa-spin-pulse");
+    if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+}
 
-    function removeEmojis(text) {
-        return text
-            .replace("*", "")
-            .replace("#", "")
-            .replace("(", "")
-            .replace(")", "")
-            .replace("@", "")
-            .replace(">", "")
-            .replace("<", "")
-            .replace("br", "")
-            .replace("<br>", "")
-            .replace(/[\u{1F600}-\u{1F64F}]/gu, "") // Emoticonos
-            .replace(/[\u{1F300}-\u{1F5FF}]/gu, "") // Símbolos y pictogramas
-            .replace(/[\u{1F680}-\u{1F6FF}]/gu, "") // Transporte y símbolos de mapa
-            .replace(/[\u{2600}-\u{26FF}]/gu, "") // Otros símbolos
-            .replace(/[\u{2700}-\u{27BF}]/gu, "") // Símbolos de dingbats
-            .replace(/[\u{1F900}-\u{1F9FF}]/gu, "") // Símbolos suplementarios
-            .replace(/[\u{1FA70}-\u{1FAFF}]/gu, ""); // Objetos misceláneos
+function ttsCustom(valuetext) {
+    // Si ya está reproduciendo, detener
+    if (isSpeaking) {
+        stopCurrentPlayback();
+        return;
     }
 
-    function ttsCustom(valuetext) {
-        if (isSpeaking) {
-            $("#speak_btn_icon").addClass("fa-regular fa-circle-play").removeClass("fa-solid fa-circle-pause");
-            synth.cancel();
-            isSpeaking = false;
-            // Stop sphere reactivity
-            if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
-        } else {
-            $("#speak_btn_icon").removeClass("fa-regular fa-circle-play").addClass("fa-solid fa-circle-pause");
+    const cleanText = removeEmojis(valuetext);
+    if (!cleanText.trim()) return;
 
-            valuetext = removeEmojis(valuetext);
-            utterance = new SpeechSynthesisUtterance(valuetext);
-            const selectedVoice = voices[voiceSelect.value];
-            utterance.voice = selectedVoice;
-            utterance.rate = parseFloat(rateInput.value) || 1;
+    const selected = voiceSelect ? voiceSelect.value : 'openai:nova';
 
-            synth.speak(utterance);
-            isSpeaking = true;
+    if (selected.startsWith('openai:')) {
+        // ═══ OpenAI TTS ═══
+        const voiceName = selected.replace('openai:', '');
+        $("#speak_btn_icon").removeClass("fa-regular fa-circle-play fa-solid fa-circle-pause").addClass("fa-solid fa-spinner fa-spin-pulse");
 
-            // Start sphere reactivity when AI speaks
-            if (window.sphereStartTTSPulse) window.sphereStartTTSPulse();
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
-            utterance.onend = () => {
-                isSpeaking = false;
-                $("#speak_btn_icon").addClass("fa-regular fa-circle-play").removeClass("fa-solid fa-circle-pause");
-                // Stop sphere reactivity
-                if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+        fetch('/tts/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ text: cleanText, voice: voiceName }),
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Error al generar audio');
+            return response.blob();
+        })
+        .then(blob => {
+            const audioUrl = URL.createObjectURL(blob);
+            currentAudio = new Audio(audioUrl);
+            currentAudio.playbackRate = parseFloat(rateInput?.value) || 1;
+
+            currentAudio.onplay = () => {
+                isSpeaking = true;
+                $("#speak_btn_icon").removeClass("fa-spinner fa-spin-pulse fa-regular fa-circle-play").addClass("fa-solid fa-circle-pause");
+                if (window.sphereStartTTSPulse) window.sphereStartTTSPulse();
             };
-        }
+
+            currentAudio.onended = () => {
+                isSpeaking = false;
+                currentAudio = null;
+                $("#speak_btn_icon").addClass("fa-regular fa-circle-play").removeClass("fa-solid fa-circle-pause");
+                if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+                URL.revokeObjectURL(audioUrl);
+            };
+
+            currentAudio.onerror = () => {
+                isSpeaking = false;
+                currentAudio = null;
+                $("#speak_btn_icon").addClass("fa-regular fa-circle-play").removeClass("fa-solid fa-circle-pause fa-spinner fa-spin-pulse");
+                if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+                console.error('Error al reproducir audio TTS');
+            };
+
+            currentAudio.play();
+        })
+        .catch(err => {
+            stopCurrentPlayback();
+            console.error('TTS Error:', err);
+            alertSToast('top', 5000, 'error', 'No se pudo generar el audio. Verifica tu conexión.');
+        });
+
+    } else if (selected.startsWith('browser:') && synth) {
+        // ═══ Navegador SpeechSynthesis ═══
+        const voiceIndex = parseInt(selected.replace('browser:', ''), 10);
+        const voice = browserVoicesMap[voiceIndex];
+
+        $("#speak_btn_icon").removeClass("fa-regular fa-circle-play").addClass("fa-solid fa-circle-pause");
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        if (voice) utterance.voice = voice;
+        utterance.rate = parseFloat(rateInput?.value) || 1;
+        utterance.lang = voice ? voice.lang : 'es-MX';
+
+        isSpeaking = true;
+        if (window.sphereStartTTSPulse) window.sphereStartTTSPulse();
+
+        utterance.onend = () => {
+            isSpeaking = false;
+            $("#speak_btn_icon").addClass("fa-regular fa-circle-play").removeClass("fa-solid fa-circle-pause");
+            if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+        };
+
+        utterance.onerror = () => {
+            isSpeaking = false;
+            $("#speak_btn_icon").addClass("fa-regular fa-circle-play").removeClass("fa-solid fa-circle-pause");
+            if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+        };
+
+        synth.speak(utterance);
     }
-} else {
-    console.warn("Este navegador no soporta API de síntesis de voz");
-    alertSToast("center", 7000, "warning", "Al parecer tu navegador no permite la API de síntesis de voz. ");
 }
 
 // Espera a que el DOM se cargue para manejar el botón de hablar

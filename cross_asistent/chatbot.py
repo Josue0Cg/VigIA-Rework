@@ -1,4 +1,5 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.conf import settings
 from .models import Database
@@ -266,3 +267,45 @@ def chatbot(request):
             return JsonResponse({'success': False, 'message': f'Error inesperado: {error_msg}'})
     
     return JsonResponse({'success': False, 'message': 'Método no permitido.'}, status=405)
+
+
+# ─── TTS con OpenAI ──────────────────────────────────────────────────────────
+ALLOWED_TTS_VOICES = {'alloy', 'echo', 'fable', 'nova', 'onyx', 'shimmer'}
+
+
+@require_POST
+def tts_audio(request):
+    """Genera audio MP3 usando OpenAI TTS y lo retorna al frontend."""
+    try:
+        data = json.loads(request.body)
+        text = data.get('text', '').strip()
+        voice = data.get('voice', 'nova').strip().lower()
+
+        if not text:
+            return JsonResponse({'error': 'No se proporcionó texto.'}, status=400)
+
+        if voice not in ALLOWED_TTS_VOICES:
+            voice = 'nova'
+
+        # Limitar texto para controlar costos
+        text = text[:4096]
+
+        client = get_openai_client()
+        response = client.audio.speech.create(
+            model='tts-1',
+            voice=voice,
+            input=text,
+        )
+
+        audio_content = response.content
+        return HttpResponse(audio_content, content_type='audio/mpeg')
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'JSON inválido.'}, status=400)
+    except Exception as e:
+        error_msg = str(e)
+        try:
+            print(f'TTS Error: {error_msg}')
+        except (UnicodeEncodeError, OSError):
+            pass
+        return JsonResponse({'error': f'Error al generar audio: {error_msg}'}, status=500)

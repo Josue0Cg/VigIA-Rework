@@ -20,17 +20,16 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'), overwrite=True)
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
-# Cambiar la clave secreta en produccion ---------------------------------------------------------
-SECRET_KEY = 'django-insecure-32wpj55%1@sy+hqt(v6b87!04o3m2(+1##sf@^%45$0@@fdynj'
-#SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'clave-secreta')
+# Seguridad -------------------------------------------------------------------------
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-32wpj55%1@sy+hqt(v6b87!04o3m2(+1##sf@^%45$0@@fdynj')
+DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
-# Camibiar debug en produccion IMPORTANTE ---------------------------------------------------------
-
-#DEBUG = False
-DEBUG = True
-
-ALLOWED_HOSTS = []
-#ALLOWED_HOSTS = ['tu-dominio.com', 'www.tu-dominio.com']
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=[
+    'localhost',
+    '127.0.0.1',
+    # Descomenta y reemplaza con tu usuario de PythonAnywhere:
+    # '<TU-USUARIO>.pythonanywhere.com',
+])
 
 
 INSTALLED_APPS = [
@@ -121,12 +120,10 @@ USE_TZ = True
 
 # Documentos estaticos ##########################
 MEDIA_URL = '/media/'
-#MEDIA_ROOT = '/var/www/html/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = env('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
 
 STATIC_URL = '/static/'
-#STATIC_ROOT = '/var/www/html/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = env('STATIC_ROOT', default=os.path.join(BASE_DIR, 'static'))
 
 # destruccion de la sesion #######################
 LOGIN_URL = '/acceder/'

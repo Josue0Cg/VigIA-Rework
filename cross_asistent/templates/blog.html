@@ -41,7 +41,52 @@
                 </div>
             </div>
         </div>
+
+        {% if user.is_staff %}
+        <div class="mt-5 pt-4 text-center" style="border-top: 1px solid rgba(147, 197, 253, 0.15);">
+            <button type="button" class="btn btn-danger" data-mdb-ripple-init
+                onclick="document.getElementById('blogDeleteModal').style.display='block'; document.getElementById('blogDeleteModal').classList.add('show'); document.body.classList.add('modal-open');">
+                <i class="fa-regular fa-trash-can me-2"></i> Eliminar esta publicación
+            </button>
+        </div>
+        {% endif %}
+
     </section>
 </main>
+
+{% if user.is_staff %}
+<!-- Modal: Eliminar Blog -->
+<div class="modal fade" id="blogDeleteModal" tabindex="-1" aria-labelledby="blogDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blogDeleteModalLabel">Eliminar Publicación</h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init
+                    onclick="document.getElementById('blogDeleteModal').style.display='none'; document.getElementById('blogDeleteModal').classList.remove('show'); document.body.classList.remove('modal-open');"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 class="text-center">¿Deseas eliminar la publicación:</h4>
+                <h4 class="text-center fw-bold">"{{ articulo.titulo }}"</h4>
+                <p class="mb-0 mt-4 text-center opacity-70">Esta acción es permanente y no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn_detail" data-mdb-ripple-init
+                    onclick="document.getElementById('blogDeleteModal').style.display='none'; document.getElementById('blogDeleteModal').classList.remove('show'); document.body.classList.remove('modal-open');">
+                    Cancelar
+                </button>
+                <form action="{% url 'blog_delete' %}" method="post" data-submit-form>
+                    {% csrf_token %}
+                    <input type="hidden" name="blogIdDelete" value="{{ articulo.id }}">
+                    <button type="submit" class="btn btn-danger" data-mdb-ripple-init>
+                        Eliminar <i class="fa-regular fa-trash-can ms-1"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% include 'base/widget_footer.html' %}
 {% endblock %}

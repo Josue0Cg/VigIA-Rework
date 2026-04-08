@@ -1,0 +1,49 @@
+Total registros: 191
+Categorias: ['Mapa', 'Informacion', 'Personal', 'Calendario', 'Preguntas', 'Información General', 'Oferta Educativa', 'Trámites y Servicios', 'Instalaciones', 'Vida Universitaria']
+
+Registros con "carrera" en titulo: 1
+  - [Oferta Educativa] Carreras TSU (Técnico Superior Universitario)
+
+Registros con "ingenier" en titulo: 19
+  - [Calendario] Examen de ingreso ingenieria
+  - [Calendario] Ceremonia de graduación T.S.U. e Ingeniería
+  - [Calendario] Exámen de ingreso de ingeniería
+  - [Calendario] Nuevo periodo de Incorporación nuevo ingreso T.S.U e Ingenierías
+  - [Informacion] Energias Renovables - Ingenieria 
+  - [Informacion] Confiabilidad De Planta - Ingeniería 
+  - [Informacion] Biotecnologia - Ingenieria
+  - [Informacion] Entornos Virtuales y Negocios Digitales - Ingenieria
+  - [Informacion] Desarrollo y Gestion de Software -  Ingenieria
+  - [Informacion] Mecatronico - Ingenieria
+
+Primeros 30 registros:
+  - [Informacion] Diseño y Gestion de Redes Logisticas - Tecnico Superior Universitario(T.S.U.)
+  - [Informacion] Diseño y Gestión de Redes Logisticas - Licenciatura
+  - [Calendario] Examen de ingreso ingenieria
+  - [Calendario] Periodo de incorporacionnuevo ingreso T.S.U.
+  - [Calendario] Evaluaciones extraordinarios
+  - [Calendario] Fin de cuatrimestre y de estadias
+  - [Calendario] Día inhábil - Independecia de México 🎉🥳
+  - [Calendario] Ceremonia de graduación T.S.U. e Ingeniería
+  - [Calendario] Evaluación docente
+  - [Calendario] Exámen de ingreso de ingeniería
+  - [Calendario] Exámen de ingreso de T.S.U.
+  - [Calendario] Día inhábil
+  - [Calendario] Resultados de exámen de admisión
+  - [Calendario] Cierre cuatrimestral Septiembre - Diciembre
+  - [Calendario] Evaluaciones extraordinarios
+  - [Calendario] Fin de cuatrimestre y de estadías empresariales. Agosto - Diciembre
+  - [Calendario] Nuevo periodo de Incorporación nuevo ingreso T.S.U e Ingenierías
+  - [Calendario] Inicio de actividades académicas y administativas
+  - [Calendario] Inicio de cuatrimestre Enero - Abril 2024
+  - [Calendario] Inicio de cuatrimestre y estadia empresariales.
+  - [Calendario] Día inhábil
+  - [Calendario] Evaluacion docente Enero - Abril
+  - [Preguntas] ¿Cuándo puedo aplicar para una beca?
+  - [Calendario] Periodo de reincorporación extemporánea septiembre
+  - [Calendario] Receso institucional 
+  - [Calendario] Periodo de reincorporacion con descuento para cuatrimestre Abril-Agosto
+  - [Calendario] Cierre del cuareimestre Abril-Agosto
+  - [Calendario] Evaluaciones extraordinarios del cuatrimestre Enero - Abril
+  - [Calendario] Fin del cuatrimestre y de estadias empresariales Enero - Abril
+  - [Calendario] Inicio de cuatrimestre Abril-Agosto

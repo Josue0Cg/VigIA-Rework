@@ -20,6 +20,7 @@ urlpatterns = [
     
     # Chatbot ----------------------------------------------------------
     path('chatbot/', chatbot.chatbot, name='chatbot'),
+    path('tts/', chatbot.tts_audio, name='tts'),
     
     # Sesion y registro ----------------------------------------------------------
     path('logout/', views.singout, name='singout'),

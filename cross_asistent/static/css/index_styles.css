@@ -828,3 +828,59 @@
         max-width: 70%;
     }
 }
+
+/* ========================================================
+   Settings Modal — Dark Theme Overrides
+   ======================================================== */
+#configModal .modal-content {
+    background: rgba(13, 27, 52, 0.97);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(147, 197, 253, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#configModal .modal-header {
+    border-bottom: 1px solid rgba(147, 197, 253, 0.1);
+}
+
+#configModal .modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+#configModal .modal-title,
+#configModal h5,
+#configModal h6,
+#configModal label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#configModal .form-select,
+#configModal .form-control {
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(147, 197, 253, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 10px 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#configModal .form-select:focus,
+#configModal .form-control:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    color: #fff;
+    outline: none;
+}
+
+#configModal .form-select option {
+    background-color: #0d1b34;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#configModal .form-select optgroup {
+    background-color: #0a1628;
+    color: rgba(147, 197, 253, 0.8);
+    font-weight: 600;
+    font-style: normal;
+}

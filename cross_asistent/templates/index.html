@@ -210,24 +210,9 @@
             sphereTrigger.addEventListener('click', function () {
                 if (!sphereClicked) {
                     sphereClicked = true;
-                    const greeting = "¡Hola! Soy Hawky, tu asistente virtual de la Universidad Tecnológica de Coahuila. Tócame de nuevo para chatear.";
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const utter = new SpeechSynthesisUtterance(greeting);
-                        const voiceSel = document.getElementById('voice_select');
-                        const rateSel = document.getElementById('rate_input');
-                        if (voiceSel && window.speechSynthesis.getVoices().length > 0) {
-                            const voices = window.speechSynthesis.getVoices();
-                            const idx = parseInt(voiceSel.value, 10);
-                            if (voices[idx]) utter.voice = voices[idx];
-                        }
-                        utter.rate = rateSel ? parseFloat(rateSel.value) || 1.2 : 1.2;
-                        utter.lang = 'es-MX';
-                        if (window.sphereStartTTSPulse) window.sphereStartTTSPulse();
-                        utter.onend = function () {
-                            if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
-                        };
-                        window.speechSynthesis.speak(utter);
+                    const greeting = "¡Hola! Soy Hawky, tu asistente virtual de la Universidad Tecnológica de Coahuila. Vuelve a presionar para chatear.";
+                    if (typeof ttsCustom === 'function') {
+                        ttsCustom(greeting);
                     }
                 } else {
                     chatPanel.classList.add('open');
@@ -244,8 +229,8 @@
             closeBtn.addEventListener('click', function () {
                 chatPanel.classList.remove('open');
                 document.body.style.overflow = '';
-                if (window.speechSynthesis) window.speechSynthesis.cancel();
-                if (window.sphereStopTTSPulse) window.sphereStopTTSPulse();
+                // Detener cualquier audio TTS (OpenAI o navegador)
+                if (typeof stopCurrentPlayback === 'function') stopCurrentPlayback();
             });
         }
 
