@@ -1,163 +1,163 @@
-{% extends 'base/widget.html' %}
+{% extends 'base/admin_base.html' %}
 {% load static %}
-{% block title %}Crear Nuevo Articulo | Administracion{% endblock %}
-{% block link_home %}{% url 'vista_programador' %}{% endblock %}
-{% block link_default %}
-{% include 'base/widget_links-admin.html' %}
-{% endblock %}
-{% block content %}
-<main class="container container-fluid py-5 {% if not user.is_authenticated %}main_container{% endif %}">
+{% block admin_title %}Blogs{% endblock %}
+{% block admin_active_blog %}active{% endblock %}
+{% block admin_content %}
+<main class="container py-5 {% if not user.is_authenticated %}main_container{% endif %}">
     <div class="mb-5">
-        <h1 class="text-center">Articulo <i class="fa-solid fa-newspaper ms-1"></i></h1>
+        <h1 class="text-center">Blog <i class="fa-solid fa-newspaper ms-1"></i></h1>
         <hr class="hr_divisor mx-4 mx-md-0" />
     </div>
-    <form method="post" id="formularioArticulo" data-submit-form class="row pt-2" autocomplete="off">
-        {% csrf_token %}
-        <div class="col-12 col-md-6 col-xl-4 mb-4 mb-md-0 position-relative">
-            <div class="row sticky-md sticky-top-4">
-                <div class="col mb-4">
-                    <div class="card card_mxh-450 min_h200">
-                        <img src="{% static 'img/default_image.webp' %}" id="imgArticle" class="card-img" data-img_dom />
-                        <div class="card-img-overlay mask mask_dark">
-                            <div class="d-flex flex-column justify-content-end h-100">
-                                <div class="form-outline mb-4" data-mdb-input-init>
-                                    <input type="text" id="titulo" name="titulo" class="form-control text-white" required />
-                                    <label class="form-label text-white" for="titulo">Titulo / Encabezado:</label>
-                                </div>
-                                <div class="d-flex gap_10 text-white">
-                                    <div>
-                                        <p class="m-0">Escrito por:</p>
-                                    </div>
-                                    <div>
-                                        <p class="m-0 text-capitalize" id="firmaPerfilTexto">
-                                            {% if user.userprofile.blog_firma %}
-                                            {{user.userprofile.blog_firma}}
-                                            {% else %}
-                                            {{user.first_name}} {{user.last_name}}
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="form-outline mb-3">
-                                <select class="form-select" id="blogNewUpdate" name="blogNewUpdate" data-get-blog="{% url 'blog_get' %}">
-                                    <option selected disabled hidden>Modificar Artículo:</option>
-                                    <option value="newBlog">Crear Nuevo Artículo:</option>
+
+    <!-- Contenedor central simétrico (estilo hoja vertical) -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-9">
+            <div class="card shadow-lg" style="border-radius: 12px; background-color: #1a273a;">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <form method="post" id="formularioArticulo" data-submit-form autocomplete="off">
+                        {% csrf_token %}
+                        
+                        <!-- Header Form: Selección y Firma -->
+                        <div class="row mb-4">
+                            <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                <label class="form-label text-white" for="blogNewUpdate">Acción:</label>
+                                <select class="form-select bg-dark text-white border-secondary" id="blogNewUpdate" name="blogNewUpdate" data-get-blog="{% url 'blog_get' %}">
+                                    <option style="background-color: #1a273a; color: white;" selected disabled hidden>Modificar Artículo:</option>
+                                    <option style="background-color: #1a273a; color: white;" value="newBlog">Crear Nuevo Artículo</option>
                                     {% if user.is_staff %}
-                                    {% for blog in allblogs %}
-                                    <option value="{{ blog.id }}">({{blog.autor}}): {{ blog.titulo }}</option>
-                                    {% endfor %}
+                                        {% for blog in allblogs %}
+                                            <option style="background-color: #1a273a; color: white;" value="{{ blog.id }}">({{blog.autor}}) {{ blog.titulo }}</option>
+                                        {% endfor %}
                                     {% else %}
-                                    {% for blog in blogsTiple %}
-                                    <option value="{{ blog.id }}">{{ blog.titulo }}</option>
-                                    {% endfor %}
+                                        {% for blog in blogsTiple %}
+                                            <option style="background-color: #1a273a; color: white;" value="{{ blog.id }}">{{ blog.titulo }}</option>
+                                        {% endfor %}
                                     {% endif %}
                                 </select>
                             </div>
 
-                            <input type="text" id="autor" name="autor" class="d-none" readonly aria-label="readonly" value="{{user.username}}" required />
-                            <div class="mb-3" data-mdb-input-init>
-                                <label class="form-label" for="new_firma">
-                                    {% if user.userprofile.blog_firma %}
-                                    Cambiar
-                                    {% else %}
-                                    Personalizar
-                                    {% endif %}
-                                    firma:<span class="fs-8"> (opcional)</span>
+                            <input type="text" id="autor" name="autor" class="d-none" readonly value="{{user.username}}" required />
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-white" for="new_firma">
+                                    Firma visible <span class="fs-8 text-muted">(Opcional)</span>
                                 </label>
-                                <input type="text" id="new_firma" name="new_firma" class="form-control text-white"
-                                    placeholder="Ej: Ing. / Lic. {{user.first_name}}" />
+                                <input type="text" id="new_firma" name="new_firma" class="form-control bg-dark text-white border-secondary" placeholder="Ej: Ing. / Lic. {{user.first_name}}" />
                             </div>
+                        </div>
 
-                            <label class="form-label" for="encabezadoImg">Imagen de Encabezado: <span class="fs-8">(opcional)</span> </label>
-                            <input type="file" class="form-control text-right" id="encabezadoImg" name="encabezadoImg" accept="image/*" data-img_dom-change />
-                            <div class="d-none d-md-block">
-                                <button type="button" class="btn btn-danger btn-block mt-4 btnModal none" data-mdb-ripple-init data-mdb-modal-init
-                                    data-mdb-target="#blogDelete">
-                                    Eliminar Blog <i class="fa-regular fa-trash-can"></i>
+                        <hr class="border-secondary mb-4">
+
+                        <div class="mb-4 text-center">
+                            <label class="form-label text-white text-start w-100 fw-bold fs-5" for="encabezadoImg">1. Portada del Blog</label>
+                            <img src="{% static 'img/banner utc.jpg' %}" id="imgArticle" class="img-fluid rounded mb-3 shadow-sm" style="min-height: 350px; max-height: 500px; width: 100%; object-fit: cover; background-color: #0b1525;" data-img_dom />
+                            <input type="file" class="form-control bg-dark text-white border-secondary" id="encabezadoImg" name="encabezadoImg" accept="image/*" data-img_dom-change />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-white fw-bold fs-5" for="titulo">2. Título Principal</label>
+                            <input type="text" id="titulo" name="titulo" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="Escribe un título llamativo..." required />
+                        </div>
+
+                        <!-- Paso 2: Meta Descripción -->
+                        <div class="mb-4">
+                            <label class="form-label text-white fw-bold fs-5" for="descripcion_breve">
+                                3. Descripción Breve 
+                                <span class="fs-6 fw-normal text-muted blockquote-footer d-block mt-1">Este resumen será lo primero que la gente vea en las tarjetas antes de entrar al blog. Alrededor de dos oraciones.</span>
+                            </label>
+                            <textarea id="descripcion_breve" name="descripcion_breve" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Redacta un pequeño gancho introductorio (Opcional, max ~200 caractéres)..." maxlength="250"></textarea>
+                        </div>
+
+                        <!-- Paso 3: Contenido TinyMCE -->
+                        <div class="mb-5">
+                            <label class="form-label text-white fw-bold fs-5" for="mainTiny">4. Contenido Completo del Artículo</label>
+                            <div class="bg-dark p-1 rounded">
+                                <textarea id="mainTiny" name="contenidoWord" placeholder="Escribe tu articulo..." data-list-imgs="{% url 'lista_imagenes' %}" data-upload-imgs="{% url 'send_imgsblog' %}"></textarea>
+                            </div>
+                        </div>
+
+                        <hr class="border-secondary mb-4">
+                        
+                        <!-- Paso 4.5: Álbum de fotos -->
+                        <div class="mb-4">
+                            <label class="form-label text-white fw-bold fs-5" for="album_imagenes">5. Añadir Álbum Fotográfico Extras (Opcional)</label>
+                            <p class="text-muted small mb-2">Selecciona múltiples imágenes al mismo tiempo para crear una galería interactiva al final de tu noticia.</p>
+                            <input type="file" min="0" class="form-control bg-dark text-white border-secondary" id="album_imagenes" name="album_imagenes" accept="image/*" multiple />
+                        </div>
+
+                        <hr class="border-secondary mb-4">
+
+                        <!-- Paso 6: Publicación e Interfaz de Fechas -->
+                        <div class="mb-4 row align-items-end">
+                            <div class="col-12 col-md-8 mb-3 mb-md-0">
+                                <label class="form-label text-white fw-bold fs-5">6. Fecha de Publicación (Programación)</label>
+                                <p class="text-muted small mb-2">Por defecto será ahora. Si eliges una fecha futura (ej. en 5 días), el artículo estará oculto y se publicará ese día automáticamente a la hora seleccionada.</p>
+                                <input type="datetime-local" id="fecha_publicacion" name="fecha_publicacion" class="form-control bg-dark text-white border-secondary" />
+                            </div>
+                            
+                            <div class="col-12 col-md-4 d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-danger btnModal none" id="btnEliminarTop" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#blogDelete">
+                                    <i class="fa-solid fa-trash-can"></i>
                                 </button>
-                                <button type="submit" class="btn btn_detail btn-block mt-4 blogSubmit" id="blogSubmit">
-                                    Publicar <i class="fa-regular fa-paper-plane ms-1"></i>
+                                <button type="submit" class="btn btn-success fw-bold flex-grow-1" id="blogSubmit" style="background-color: #10b981; border-color: #10b981;">
+                                    Publicar / Guardar <i class="fa-regular fa-paper-plane ms-1"></i>
                                 </button>
                             </div>
                         </div>
-                    </div>
+
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-6 col-xl-8">
-            <textarea id="mainTiny" name="contenidoWord" placeholder="Escribe tu articulo..." data-list-imgs="{% url 'lista_imagenes' %}"
-                data-upload-imgs="{% url 'send_imgsblog' %}"></textarea>
-            <div class="card d-md-none mt-4">
-                <div class="card-body row">
-                    <div class="col btnModal none">
-                        <button type="button" class="btn btn-danger btn-block" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#blogDelete">
-                            Eliminar Blog <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </div>
-                    <div class="col">
-                        <button type="submit" class="btn btn_detail btn-block blogSubmit" id="blogSubmit">
-                            Publicar <i class="fa-regular fa-paper-plane ms-1"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+    </div>
 </main>
 
 <!-- Modal: seleccionar imágenes -->
 <div class="modal fade" id="selectImageModal" tabindex="-1" aria-labelledby="selectImageModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content text-white" style="background-color: #1a273a;">
+            <div class="modal-header border-secondary">
                 <h5 class="modal-title" id="selectImageModalLabel">Galería, Seleccionar Imagen</h5>
-                <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-mdb-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div id="imageContainer" class="row">
                     <!-- Aquí se insertarán las imágenes mediante AJAX -->
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer border-secondary">
                 <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal: Elimiinar Blog -->
+<!-- Modal: Eliminar Blog -->
 <div class="modal fade" id="blogDelete" tabindex="-1" aria-labelledby="blogDeleteLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content text-white" style="background-color: #1a273a;">
+            <div class="modal-header border-secondary">
                 <h5 class="modal-title" id="blogDeleteLabel">Eliminar Blog</h5>
-                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <h4 class="text-center">Deseas eliminar el blog titulado:</h4>
-                <h4 class="text-center" id="blogDeleteTitle"></h4>
-                <p class="mb-0 mt-4">Esta acción es permanente, se eliminará la imágen de encabezado pero las imágenes del artículo se mantienen en la galería
-                    global</p>
+                <h4 class="text-center text-danger" id="blogDeleteTitle"></h4>
+                <p class="mb-0 mt-4 text-muted">Esta acción es permanente, se eliminará la imágen de encabezado pero las imágenes del artículo se mantienen en la galería global</p>
             </div>
-            <div class="modal-footer d-flex justify-content-between">
-                <button type="button" class="btn btn_detail" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
-                <form action="{% url 'blog_delete' %}" method="post" id="formularioArticulo" data-submit-form>
+            <div class="modal-footer d-flex justify-content-between border-secondary">
+                <button type="button" class="btn btn-secondary" data-mdb-ripple-init data-mdb-dismiss="modal">Cancelar</button>
+                <form action="{% url 'blog_delete' %}" method="post" id="formularioBorrarArticulo" data-submit-form>
+                    {% csrf_token %}
                     <input type="text" name="blogIdDelete" id="blogIdDelete" class="d-none">
-                    <button type="submit" class="btn btn-danger" data-mdb-ripple-init>eliminar</button>
+                    <button type="submit" class="btn btn-danger" data-mdb-ripple-init>Eliminar Permanentemente</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-{% block scripts_end %}
+{% block admin_scripts %}
 <script src="{% static 'tinymce/tinymce.min.js' %}"></script>
 <script src="{% static 'js/settings_tinymce.js' %}"></script>
 

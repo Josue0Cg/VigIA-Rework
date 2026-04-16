@@ -1,11 +1,11 @@
-{% extends 'base/widget.html' %}
+{% extends 'base/admin_base.html' %}
 {% load static %}
-{% block title %}Modificar Calendario | Administracion{% endblock %}
-{% block link_home %}{% url 'vista_programador' %}{% endblock %}
-{% block link_default %}
-{% include 'base/widget_links-admin.html' %}
+{% block admin_title %}Calendario{% endblock %}
+{% block admin_active_calendario %}active{% endblock %}
+{% block admin_extra_head %}
+<link rel="stylesheet" href="{% static 'css/calendario_custom.css' %}?v=6" />
 {% endblock %}
-{% block content %}
+{% block admin_content %}
 <main class="container container-fluid py-5 {% if not user.is_staff %}main_container{% endif %}">
     <div class="mb-5">
         <h1 class="text-center">Calendario <i class="fa-solid fa-calendar-days ms-1"></i></h1>
@@ -76,6 +76,9 @@
                         <div class="mb-4">
                             <label for="imagen" class="form-label">Imágen: <small>(opcional)</small></label>
                             <input type="file" class="form-control" id="imagen" name="imagen" accept="image/jpeg, image/png, image/webp*">
+                            <div id="imgPreviewCreate" class="img-preview-container" style="display:none;">
+                                <img id="imgPreviewCreateSrc" src="" alt="Vista previa">
+                            </div>
                         </div>
                         <div>
                             <button type="submit" class="btn btn_detail btn-block">Guardar <i class="fa-solid fa-paper-plane ms-1"></i></button>
@@ -213,6 +216,25 @@
 </main>
 
 {% endblock %}
-{% block scripts_end %}
+{% block admin_scripts %}
 <script src="{% static 'js/settings_fullcalendar.js' %}"></script>
+<script>
+// Image preview for the Create Event form
+document.getElementById('imagen').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('imgPreviewCreate');
+    const previewImg = document.getElementById('imgPreviewCreateSrc');
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            previewImg.src = ev.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.style.display = 'none';
+        previewImg.src = '';
+    }
+});
+</script>
 {% endblock %}

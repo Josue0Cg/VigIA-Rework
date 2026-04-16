@@ -22,6 +22,9 @@ urlpatterns = [
     path('chatbot/', chatbot.chatbot, name='chatbot'),
     path('tts/', chatbot.tts_audio, name='tts'),
     
+    # API Móvil --------------------------------------------------------
+    path('api/get_table/<str:table_name>/', views.api_get_table, name='api_get_table'),
+    
     # Sesion y registro ----------------------------------------------------------
     path('logout/', views.singout, name='singout'),
     path('acceder/', views.singinpage, name='singin'),

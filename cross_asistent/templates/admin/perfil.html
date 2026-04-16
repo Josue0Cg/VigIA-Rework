@@ -1,11 +1,8 @@
-{% extends 'base/widget.html' %}
+{% extends 'base/admin_base.html' %}
 {% load static %}
-{% block title %}{{ user.username }} | Tu perfil {% endblock %}
-{% block link_home %}{% url 'vista_programador' %}{% endblock %}
-{% block link_default %}
-{% include 'base/widget_links-admin.html' %}
-{% endblock %}
-{% block content %}
+{% block admin_title %}{{ user.username }} | Perfil{% endblock %}
+{% block admin_active_perfil %}active{% endblock %}
+{% block admin_content %}
 <main class="container container-fluid py-4 px-4 {% if not user.is_authenticated %}main_container{% endif %}">
     <form action="{% url 'editprofile' %}" method="post" class="row" autocomplete="off" data-validate-profile>
         {% csrf_token %}
@@ -104,6 +101,6 @@
 </main>
 {% endblock %}
 
-{% block scripts_end %}
+{% block admin_scripts %}
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 {% endblock %}

@@ -11,6 +11,8 @@
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
     const WEEKDAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const WEEKDAYS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const WEEKDAYS_MIN = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
     let currentYear, currentMonth; // 0-indexed month
     let selectedDate = null;
@@ -87,10 +89,19 @@
 
     // ===== Render weekdays =====
     function renderWeekdays() {
-        $weekdays.innerHTML = WEEKDAYS.map(d =>
+        // Use the actual grid panel width (not window, since body can be wider than viewport)
+        const gridPanel = document.querySelector('.cal-grid-panel');
+        const w = gridPanel ? gridPanel.offsetWidth : window.innerWidth;
+        const names = w <= 320 ? WEEKDAYS_MIN : w <= 500 ? WEEKDAYS_SHORT : WEEKDAYS;
+        $weekdays.innerHTML = names.map(d =>
             `<div class="cal-weekday">${d}</div>`
         ).join('');
     }
+
+    // Re-render weekday names on resize
+    window.addEventListener('resize', renderWeekdays);
+    // Also check after layout settles
+    setTimeout(renderWeekdays, 100);
 
     // ===== Render monthly grid =====
     function renderGrid() {
@@ -292,24 +303,62 @@
             $btnDiv.classList.add('none');
         }
 
-        // Show modal (MDB)
-        if (typeof mdb !== 'undefined' && mdb.Modal) {
-            const modal = new mdb.Modal($modal);
-            modal.show();
-        } else {
-            // Fallback: manual toggle
-            $modal.classList.add('show');
-            $modal.style.display = 'block';
-            document.body.classList.add('modal-open');
-            const closeBtn = $modal.querySelector('.btn-close');
-            if (closeBtn) {
-                closeBtn.onclick = () => {
-                    $modal.classList.remove('show');
-                    $modal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                };
-            }
+        // === SHOW MODAL — Pure JS, NO MDB ===
+        // Remove any existing MDB backdrop that might be lingering
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+        // Create our own backdrop
+        let backdrop = document.getElementById('vigiaModalBackdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.id = 'vigiaModalBackdrop';
+            backdrop.style.cssText = 'position:fixed;inset:0;background:transparent;z-index:1040;';
+            document.body.appendChild(backdrop);
         }
+        backdrop.style.display = 'block';
+
+        // Show the modal itself
+        $modal.style.display = 'block';
+        $modal.style.zIndex = '1050';
+        $modal.style.position = 'fixed';
+        $modal.style.inset = '0';
+        $modal.style.overflow = 'auto';
+        $modal.classList.add('show');
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+
+        // Close function
+        const closeModal = () => {
+            $modal.classList.remove('show');
+            $modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            if (backdrop) backdrop.style.display = 'none';
+            // Also remove any MDB backdrops that might have appeared
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.removeEventListener('keydown', escHandler);
+        };
+
+        // Close button (the X)
+        const closeBtn = $modal.querySelector('.btn-close');
+        if (closeBtn) {
+            closeBtn.removeAttribute('data-mdb-dismiss'); // Remove MDB binding
+            closeBtn.onclick = (e) => { e.stopPropagation(); closeModal(); };
+        }
+
+        // Click on backdrop closes modal
+        backdrop.onclick = closeModal;
+
+        // Click outside the dialog content closes modal
+        $modal.onclick = (e) => {
+            if (e.target === $modal) closeModal();
+        };
+
+        // ESC key closes modal
+        const escHandler = (e) => {
+            if (e.key === 'Escape') closeModal();
+        };
+        document.addEventListener('keydown', escHandler);
     }
 
     // ===== Fetch events =====

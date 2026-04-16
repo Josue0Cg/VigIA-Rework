@@ -620,3 +620,45 @@ body>* {
 .swal2-popup:not(.swal2-toast) .swal2-content {
     color: #1a1a1a !important;
 }
+
+/* ===== Dark Select Dropdown ===== */
+.form-select,
+select.form-select {
+    background-color: #0d1b2a !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(147, 197, 253, 0.2) !important;
+    border-radius: 8px;
+}
+
+.form-select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+.form-select option {
+    background-color: #0d1b2a;
+    color: #e2e8f0;
+    padding: 8px 12px;
+}
+
+.form-select option:checked,
+.form-select option:hover {
+    background-color: #1e3a5f;
+    color: #fff;
+}
+
+/* ===== Image Preview in Calendar Admin ===== */
+.img-preview-container {
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(147, 197, 253, 0.15);
+    max-width: 100%;
+}
+
+.img-preview-container img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    display: block;
+}

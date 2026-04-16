@@ -1,444 +1,415 @@
+{% extends 'base/admin_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
+{% block admin_title %}Gestión de Preguntas{% endblock %}
+{% block admin_active_preguntas %}active{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VigIA — Gestión de Preguntas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
-    <style>
-        .admin-tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 24px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 4px;
-            border-radius: 14px;
-        }
+{% block admin_extra_head %}
+<style>
+    .admin-tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 24px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 4px;
+        border-radius: 14px;
+    }
 
-        .admin-tab {
-            flex: 1;
-            padding: 12px 20px;
-            text-align: center;
-            border: none;
-            background: transparent;
-            color: var(--admin-text-muted);
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
+    .admin-tab {
+        flex: 1;
+        padding: 12px 20px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        color: var(--admin-text-muted);
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
 
-        .admin-tab.active {
-            background: rgba(99, 102, 241, 0.2);
-            color: var(--admin-primary);
-        }
+    .admin-tab.active {
+        background: rgba(99, 102, 241, 0.2);
+        color: var(--admin-primary);
+    }
 
-        .admin-tab:hover:not(.active) {
-            color: var(--admin-text);
-            background: rgba(255, 255, 255, 0.05);
-        }
+    .admin-tab:hover:not(.active) {
+        color: var(--admin-text);
+        background: rgba(255, 255, 255, 0.05);
+    }
 
-        .tab-content {
-            display: none;
-        }
+    .tab-content {
+        display: none;
+    }
 
-        .tab-content.active {
-            display: block;
-        }
+    .tab-content.active {
+        display: block;
+    }
 
-        .question-card {
-            background: var(--admin-card);
-            border: 1px solid var(--admin-border);
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 14px;
-            transition: all 0.3s;
-        }
+    .question-card {
+        background: var(--admin-card);
+        border: 1px solid var(--admin-border);
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 14px;
+        transition: all 0.3s;
+    }
 
-        .question-card:hover {
-            border-color: rgba(99, 102, 241, 0.3);
-        }
+    .question-card:hover {
+        border-color: rgba(99, 102, 241, 0.3);
+    }
 
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
 
-        .question-meta {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            font-size: 0.82rem;
-            color: var(--admin-text-muted);
-        }
+    .question-meta {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 0.82rem;
+        color: var(--admin-text-muted);
+    }
 
-        .question-title {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--admin-text);
-            margin-bottom: 6px;
-        }
+    .question-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--admin-text);
+        margin-bottom: 6px;
+    }
 
-        .question-desc {
-            font-size: 0.88rem;
-            color: var(--admin-text-muted);
-            margin-bottom: 12px;
-        }
+    .question-desc {
+        font-size: 0.88rem;
+        color: var(--admin-text-muted);
+        margin-bottom: 12px;
+    }
 
-        .question-answer {
-            background: rgba(34, 197, 94, 0.08);
-            border-left: 3px solid var(--admin-success);
-            padding: 12px 16px;
-            border-radius: 0 10px 10px 0;
-            margin-top: 10px;
-            font-size: 0.88rem;
-            color: var(--admin-text);
-        }
+    .question-answer {
+        background: rgba(34, 197, 94, 0.08);
+        border-left: 3px solid var(--admin-success);
+        padding: 12px 16px;
+        border-radius: 0 10px 10px 0;
+        margin-top: 10px;
+        font-size: 0.88rem;
+        color: var(--admin-text);
+    }
 
-        .question-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+    .question-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
 
-        .btn-sm {
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+    .btn-sm {
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-        .btn-respond {
-            background: rgba(99, 102, 241, 0.15);
-            color: var(--admin-primary);
-        }
+    .btn-respond {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--admin-primary);
+    }
 
-        .btn-respond:hover {
-            background: rgba(99, 102, 241, 0.3);
-        }
+    .btn-respond:hover {
+        background: rgba(99, 102, 241, 0.3);
+    }
 
-        .btn-faq {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--admin-warning);
-        }
+    .btn-faq {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--admin-warning);
+    }
 
-        .btn-faq:hover {
-            background: rgba(245, 158, 11, 0.3);
-        }
+    .btn-faq:hover {
+        background: rgba(245, 158, 11, 0.3);
+    }
 
-        .btn-faq.is-faq {
-            background: rgba(34, 197, 94, 0.15);
-            color: var(--admin-success);
-        }
+    .btn-faq.is-faq {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--admin-success);
+    }
 
-        .btn-delete {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--admin-danger);
-        }
+    .btn-delete {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--admin-danger);
+    }
 
-        .btn-delete:hover {
-            background: rgba(239, 68, 68, 0.3);
-        }
+    .btn-delete:hover {
+        background: rgba(239, 68, 68, 0.3);
+    }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--admin-text-muted);
-        }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--admin-text-muted);
+    }
 
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            opacity: 0.3;
-        }
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.3;
+    }
 
-        .faq-order-badge {
-            background: rgba(99, 102, 241, 0.15);
-            color: var(--admin-primary);
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
+    .faq-order-badge {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--admin-primary);
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
 
-        .respond-inline {
-            margin-top: 12px;
-            display: none;
-        }
+    .respond-inline {
+        margin-top: 12px;
+        display: none;
+    }
 
-        .respond-inline.show {
-            display: block;
-        }
+    .respond-inline.show {
+        display: block;
+    }
 
-        .respond-inline textarea {
-            width: 100%;
-            background: var(--admin-surface);
-            border: 1px solid var(--admin-border);
-            color: var(--admin-text);
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 0.88rem;
-            min-height: 80px;
-            resize: vertical;
-        }
+    .respond-inline textarea {
+        width: 100%;
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border);
+        color: var(--admin-text);
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 0.88rem;
+        min-height: 80px;
+        resize: vertical;
+    }
 
-        .respond-inline .btn-send {
-            margin-top: 8px;
-            background: var(--admin-primary);
-            color: #fff;
-            padding: 8px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
+    .respond-inline .btn-send {
+        margin-top: 8px;
+        background: var(--admin-primary);
+        color: #fff;
+        padding: 8px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
 
-        .respond-inline .btn-send:hover {
-            filter: brightness(1.15);
-        }
+    .respond-inline .btn-send:hover {
+        filter: brightness(1.15);
+    }
+</style>
+{% endblock %}
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--admin-text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            transition: color 0.3s;
-        }
+{% block admin_content %}
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Gestión de Preguntas</h1>
+    <p class="admin-page-subtitle">Administra las preguntas de los usuarios y las preguntas frecuentes</p>
+</div>
 
-        .back-link:hover {
-            color: var(--admin-primary);
-        }
-    </style>
-</head>
+<!-- Tabs -->
+<div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchTab('recibidas')">
+        <i class="fa-solid fa-inbox"></i> Recibidas
+        {% if preguntas_pendientes > 0 %}
+        <span class="sidebar-badge" style="margin-left:6px;">{{ preguntas_pendientes }}</span>
+        {% endif %}
+    </button>
+    <button class="admin-tab" onclick="switchTab('frecuentes')">
+        <i class="fa-solid fa-star"></i> Frecuentes ({{ preguntas_faq.count }})
+    </button>
+</div>
 
-<body class="admin-body">
-    <div class="admin-layout" style="display: block;">
-        <main class="admin-main" style="margin-left: 0; padding: 30px 40px;">
-
-            <a href="{% url 'vista_programador' %}" class="back-link">
-                <i class="fa-solid fa-arrow-left"></i> Volver al Dashboard
-            </a>
-
-            <div class="admin-page-header">
-                <h1 class="admin-page-title">Gestión de Preguntas</h1>
-                <p class="admin-page-subtitle">Administra las preguntas de los usuarios y las preguntas frecuentes</p>
-            </div>
-
-            <!-- Tabs -->
-            <div class="admin-tabs">
-                <button class="admin-tab active" onclick="switchTab('recibidas')">
-                    <i class="fa-solid fa-inbox"></i> Recibidas
-                    {% if preguntas_pendientes > 0 %}
-                    <span class="sidebar-badge" style="margin-left:6px;">{{ preguntas_pendientes }}</span>
+<!-- Tab: Recibidas -->
+<div id="tab-recibidas" class="tab-content active">
+    {% if todas_preguntas %}
+    {% for q in todas_preguntas %}
+    <div class="question-card" id="question-{{ q.id }}">
+        <div class="question-header">
+            <div>
+                <div class="question-title">{{ q.pregunta }}</div>
+                <div class="question-meta">
+                    <span><i class="fa-solid fa-user"></i> {{ q.nombre_persona }}</span>
+                    <span><i class="fa-regular fa-calendar"></i> {{ q.fecha|date:"d M Y, H:i" }}</span>
+                    {% if q.respondida %}
+                    <span style="color: var(--admin-success);"><i class="fa-solid fa-check-circle"></i>
+                        Respondida</span>
+                    {% else %}
+                    <span style="color: var(--admin-warning);"><i class="fa-solid fa-clock"></i>
+                        Pendiente</span>
                     {% endif %}
-                </button>
-                <button class="admin-tab" onclick="switchTab('frecuentes')">
-                    <i class="fa-solid fa-star"></i> Frecuentes ({{ preguntas_faq.count }})
-                </button>
-            </div>
-
-            <!-- Tab: Recibidas -->
-            <div id="tab-recibidas" class="tab-content active">
-                {% if todas_preguntas %}
-                {% for q in todas_preguntas %}
-                <div class="question-card" id="question-{{ q.id }}">
-                    <div class="question-header">
-                        <div>
-                            <div class="question-title">{{ q.pregunta }}</div>
-                            <div class="question-meta">
-                                <span><i class="fa-solid fa-user"></i> {{ q.nombre_persona }}</span>
-                                <span><i class="fa-regular fa-calendar"></i> {{ q.fecha|date:"d M Y, H:i" }}</span>
-                                {% if q.respondida %}
-                                <span style="color: var(--admin-success);"><i class="fa-solid fa-check-circle"></i>
-                                    Respondida</span>
-                                {% else %}
-                                <span style="color: var(--admin-warning);"><i class="fa-solid fa-clock"></i>
-                                    Pendiente</span>
-                                {% endif %}
-                                {% if q.es_frecuente %}
-                                <span class="faq-order-badge"><i class="fa-solid fa-star"></i> FAQ</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% if q.descripcion %}
-                    <div class="question-desc">{{ q.descripcion|truncatewords:40 }}</div>
+                    {% if q.es_frecuente %}
+                    <span class="faq-order-badge"><i class="fa-solid fa-star"></i> FAQ</span>
                     {% endif %}
-                    {% if q.respuesta %}
-                    <div class="question-answer">
-                        <strong><i class="fa-solid fa-reply"></i> Respuesta:</strong><br>
-                        {{ q.respuesta }}
-                    </div>
-                    {% endif %}
-
-                    <div class="question-actions" style="margin-top: 12px;">
-                        <button class="btn-sm btn-respond" onclick="toggleRespond({{ q.id }})">
-                            <i class="fa-solid fa-reply"></i> {{ q.respondida|yesno:"Editar Resp.,Responder" }}
-                        </button>
-                        <button class="btn-sm btn-faq {% if q.es_frecuente %}is-faq{% endif %}"
-                            onclick="toggleFaq({{ q.id }}, this)" {% if not q.respondida %}disabled
-                            title="Responde primero" {% endif %}>
-                            <i class="fa-solid fa-star"></i> {{ q.es_frecuente|yesno:"Quitar FAQ,Marcar FAQ" }}
-                        </button>
-                        <button class="btn-sm btn-delete" onclick="deleteQuestion({{ q.id }})">
-                            <i class="fa-solid fa-trash"></i> Eliminar
-                        </button>
-                    </div>
-
-                    <!-- Respond inline -->
-                    <div class="respond-inline" id="respond-{{ q.id }}">
-                        <textarea id="respuesta-{{ q.id }}"
-                            placeholder="Escribe tu respuesta...">{{ q.respuesta|default_if_none:"" }}</textarea>
-                        <button class="btn-send" onclick="sendResponse({{ q.id }})">
-                            <i class="fa-solid fa-paper-plane"></i> Enviar Respuesta
-                        </button>
-                    </div>
                 </div>
-                {% endfor %}
-                {% else %}
-                <div class="empty-state">
-                    <i class="fa-solid fa-inbox"></i>
-                    <p>No hay preguntas recibidas.</p>
-                </div>
-                {% endif %}
             </div>
+        </div>
+        {% if q.descripcion %}
+        <div class="question-desc">{{ q.descripcion|truncatewords:40 }}</div>
+        {% endif %}
+        {% if q.respuesta %}
+        <div class="question-answer">
+            <strong><i class="fa-solid fa-reply"></i> Respuesta:</strong><br>
+            {{ q.respuesta }}
+        </div>
+        {% endif %}
 
-            <!-- Tab: Frecuentes -->
-            <div id="tab-frecuentes" class="tab-content">
-                {% if preguntas_faq %}
-                {% for q in preguntas_faq %}
-                <div class="question-card">
-                    <div class="question-header">
-                        <div>
-                            <span class="faq-order-badge">#{{ forloop.counter }}</span>
-                            <span class="question-title" style="display:inline; margin-left: 10px;">{{ q.pregunta
-                                }}</span>
-                        </div>
-                        <button class="btn-sm btn-faq is-faq" onclick="toggleFaq({{ q.id }}, this)">
-                            <i class="fa-solid fa-star"></i> Quitar
-                        </button>
-                    </div>
-                    {% if q.respuesta %}
-                    <div class="question-answer">
-                        <strong><i class="fa-solid fa-reply"></i> Respuesta:</strong><br>
-                        {{ q.respuesta }}
-                    </div>
-                    {% endif %}
-                    <div class="question-meta" style="margin-top: 10px;">
-                        <span><i class="fa-solid fa-user"></i> {{ q.nombre_persona }}</span>
-                        <span><i class="fa-regular fa-calendar"></i> {{ q.fecha|date:"d M Y" }}</span>
-                    </div>
-                </div>
-                {% endfor %}
-                {% else %}
-                <div class="empty-state">
-                    <i class="fa-solid fa-star"></i>
-                    <p>No hay preguntas marcadas como frecuentes.<br>Responde y marca preguntas desde la pestaña
-                        "Recibidas".</p>
-                </div>
-                {% endif %}
-            </div>
+        <div class="question-actions" style="margin-top: 12px;">
+            <button class="btn-sm btn-respond" onclick="toggleRespond({{ q.id }})">
+                <i class="fa-solid fa-reply"></i> {{ q.respondida|yesno:"Editar Resp.,Responder" }}
+            </button>
+            <button class="btn-sm btn-faq {% if q.es_frecuente %}is-faq{% endif %}"
+                onclick="toggleFaq({{ q.id }}, this)" {% if not q.respondida %}disabled
+                title="Responde primero" {% endif %}>
+                <i class="fa-solid fa-star"></i> {{ q.es_frecuente|yesno:"Quitar FAQ,Marcar FAQ" }}
+            </button>
+            <button class="btn-sm btn-delete" onclick="deleteQuestion({{ q.id }})">
+                <i class="fa-solid fa-trash"></i> Eliminar
+            </button>
+        </div>
 
-        </main>
+        <!-- Respond inline -->
+        <div class="respond-inline" id="respond-{{ q.id }}">
+            <textarea id="respuesta-{{ q.id }}"
+                placeholder="Escribe tu respuesta...">{{ q.respuesta|default_if_none:"" }}</textarea>
+            <button class="btn-send" onclick="sendResponse({{ q.id }})">
+                <i class="fa-solid fa-paper-plane"></i> Enviar Respuesta
+            </button>
+        </div>
     </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-inbox"></i>
+        <p>No hay preguntas recibidas.</p>
+    </div>
+    {% endif %}
+</div>
 
-    <script>
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
-            event.target.closest('.admin-tab').classList.add('active');
+<!-- Tab: Frecuentes -->
+<div id="tab-frecuentes" class="tab-content">
+    {% if preguntas_faq %}
+    {% for q in preguntas_faq %}
+    <div class="question-card">
+        <div class="question-header">
+            <div>
+                <span class="faq-order-badge">#{{ forloop.counter }}</span>
+                <span class="question-title" style="display:inline; margin-left: 10px;">{{ q.pregunta
+                    }}</span>
+            </div>
+            <button class="btn-sm btn-faq is-faq" onclick="toggleFaq({{ q.id }}, this)">
+                <i class="fa-solid fa-star"></i> Quitar
+            </button>
+        </div>
+        {% if q.respuesta %}
+        <div class="question-answer">
+            <strong><i class="fa-solid fa-reply"></i> Respuesta:</strong><br>
+            {{ q.respuesta }}
+        </div>
+        {% endif %}
+        <div class="question-meta" style="margin-top: 10px;">
+            <span><i class="fa-solid fa-user"></i> {{ q.nombre_persona }}</span>
+            <span><i class="fa-regular fa-calendar"></i> {{ q.fecha|date:"d M Y" }}</span>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-star"></i>
+        <p>No hay preguntas marcadas como frecuentes.<br>Responde y marca preguntas desde la pestaña
+            "Recibidas".</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        event.target.closest('.admin-tab').classList.add('active');
+    }
+
+    function toggleRespond(id) {
+        const el = document.getElementById('respond-' + id);
+        el.classList.toggle('show');
+        if (el.classList.contains('show')) {
+            el.querySelector('textarea').focus();
         }
+    }
 
-        function toggleRespond(id) {
-            const el = document.getElementById('respond-' + id);
-            el.classList.toggle('show');
-            if (el.classList.contains('show')) {
-                el.querySelector('textarea').focus();
-            }
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
+        return cookieValue;
+    }
 
-        async function sendResponse(id) {
-            const text = document.getElementById('respuesta-' + id).value.trim();
-            if (!text) return alert('Escribe una respuesta');
+    async function sendResponse(id) {
+        const text = document.getElementById('respuesta-' + id).value.trim();
+        if (!text) return alert('Escribe una respuesta');
 
-            const fd = new FormData();
-            fd.append('question_id', id);
-            fd.append('respuesta', text);
+        const fd = new FormData();
+        fd.append('question_id', id);
+        fd.append('respuesta', text);
 
-            try {
-                const res = await fetch('{% url "responder_pregunta" %}', {
-                    method: 'POST', body: fd,
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
-                });
-                const data = await res.json();
-                if (data.success) location.reload();
-                else alert(data.message);
-            } catch (e) { alert('Error al enviar'); }
-        }
+        try {
+            const res = await fetch('{% url "responder_pregunta" %}', {
+                method: 'POST', body: fd,
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else alert(data.message);
+        } catch (e) { alert('Error al enviar'); }
+    }
 
-        async function toggleFaq(id, btn) {
-            const fd = new FormData();
-            fd.append('question_id', id);
+    async function toggleFaq(id, btn) {
+        const fd = new FormData();
+        fd.append('question_id', id);
 
-            try {
-                const res = await fetch('{% url "toggle_pregunta_frecuente" %}', {
-                    method: 'POST', body: fd,
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
-                });
-                const data = await res.json();
-                if (data.success) location.reload();
-                else alert(data.message);
-            } catch (e) { alert('Error'); }
-        }
+        try {
+            const res = await fetch('{% url "toggle_pregunta_frecuente" %}', {
+                method: 'POST', body: fd,
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else alert(data.message);
+        } catch (e) { alert('Error'); }
+    }
 
-        async function deleteQuestion(id) {
-            if (!confirm('¿Eliminar esta pregunta?')) return;
-            const fd = new FormData();
-            fd.append('question_id', id);
+    async function deleteQuestion(id) {
+        if (!confirm('¿Eliminar esta pregunta?')) return;
+        const fd = new FormData();
+        fd.append('question_id', id);
 
-            try {
-                const res = await fetch('{% url "question_deleted" %}', {
-                    method: 'POST', body: fd,
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
-                });
-                const data = await res.json();
-                if (data.success) location.reload();
-                else alert(data.message);
-            } catch (e) { alert('Error'); }
-        }
-    </script>
-</body>
-
-</html>
+        try {
+            const res = await fetch('{% url "question_deleted" %}', {
+                method: 'POST', body: fd,
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else alert(data.message);
+        } catch (e) { alert('Error'); }
+    }
+</script>
+{% endblock %}

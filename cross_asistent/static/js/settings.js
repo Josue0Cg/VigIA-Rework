@@ -349,11 +349,19 @@ $(document).ready(function () {
                     type: "GET",
                     data: { id: blogIdGet },
                     success: function (data) {
-                        $("#formularioArticulo #imgArticle").attr("src", "/static/img/default_image.webp");
+                        $("#formularioArticulo #imgArticle").attr("src", "/static/img/banner utc.jpg");
                         if (data.encabezado) {
                             $("#formularioArticulo #imgArticle").attr("src", data.encabezado);
                         }
                         $("#formularioArticulo #titulo").addClass("active").val(data.titulo);
+                        $("#formularioArticulo #descripcion_breve").val(data.descripcion_breve || "");
+                        $("#formularioArticulo #new_firma").val(data.autor || "");
+                        if(data.creacion) {
+                            $("#formularioArticulo #fecha_publicacion").val(data.creacion);
+                        } else {
+                            $("#formularioArticulo #fecha_publicacion").val("");
+                        }
+                        $("#formularioArticulo #album_imagenes").val("");
                         const blogContent = data.contenido;
                         tinymce.get("mainTiny").setContent(blogContent);
                         $("#formularioArticulo .blogSubmit").html(
@@ -374,8 +382,12 @@ $(document).ready(function () {
                     },
                 });
             } else {
-                $("#formularioArticulo #imgArticle").attr("src", "/static/img/default_image.webp");
+                $("#formularioArticulo #imgArticle").attr("src", "/static/img/banner utc.jpg");
                 $("#formularioArticulo #titulo").removeClass("active").val("");
+                $("#formularioArticulo #descripcion_breve").val("");
+                $("#formularioArticulo #new_firma").val("");
+                $("#formularioArticulo #fecha_publicacion").val("");
+                $("#formularioArticulo #album_imagenes").val("");
                 tinymce.get("mainTiny").setContent("");
                 $("#formularioArticulo .blogSubmit").html('Publicar <i class="fa-regular fa-paper-plane ms-1"></i>');
                 $("#formularioArticulo .btnModal").slideUp("fast");

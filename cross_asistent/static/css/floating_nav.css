@@ -95,8 +95,15 @@ body {
     scrollbar-width: none;
 }
 
-.floating-nav-links::-webkit-scrollbar {
-    display: none;
+}
+
+/* Fix materialBoxed overlay overlapping issues against the floating nav */
+#materialbox-overlay {
+    z-index: 1100 !important;
+}
+
+.materialboxed.active {
+    z-index: 1101 !important;
 }
 
 /* Base button (inactive mode matches icons from image) */

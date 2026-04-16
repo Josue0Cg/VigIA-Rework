@@ -1,466 +1,357 @@
+{% extends 'base/admin_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VigIA â€” Panel de Administración</title>
+{% block admin_title %}Dashboard{% endblock %}
+{% block admin_active_dashboard %}active{% endblock %}
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% block admin_content %}
+<!-- Page Header -->
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Dashboard</h1>
+    <p class="admin-page-subtitle">Bienvenido de vuelta, <strong>{{user.first_name|default:user.username }}</strong></p>
+</div>
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- ──── Stat Cards ──── -->
+<div class="stats-grid">
+    <!-- Blogs -->
+    <a href="{% url 'create_blog' %}" class="stat-card">
+        <div class="stat-card-icon info">
+            <i class="fa-solid fa-newspaper"></i>
+        </div>
+        <div class="stat-card-value">{{ num_blogs }}</div>
+        <div class="stat-card-label">{{ user.is_staff|yesno:"Blogs,Tus Blogs" }}</div>
+        <div class="stat-card-glow" style="background: var(--admin-info);"></div>
+    </a>
 
-    <!-- Dashboard CSS -->
-    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+    {% if user.is_staff %}
+    <!-- Usuarios -->
+    <a href="#userSection" class="stat-card" onclick="scrollToSection('userSection')">
+        <div class="stat-card-icon warning">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="stat-card-value">{{ users.count }}</div>
+        <div class="stat-card-label">Usuarios</div>
+        <div class="stat-card-glow" style="background: var(--admin-warning);"></div>
+    </a>
+    {% endif %}
 
-    <!-- Favicon -->
-    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
-</head>
+    <!-- Preguntas Pendientes -->
+    <a href="#preguntasSection" class="stat-card" onclick="scrollToSection('preguntasSection')">
+        <div class="stat-card-icon danger">
+            <i class="fa-solid fa-clipboard-question"></i>
+        </div>
+        <div class="stat-card-value">{{ preguntas_pendientes }}</div>
+        <div class="stat-card-label">Preguntas Pendientes</div>
+        <div class="stat-card-glow" style="background: var(--admin-danger);"></div>
+    </a>
 
-<body>
-    <div class="admin-layout">
+    <!-- Registros DB -->
+    <a href="{% url 'database_page' %}" class="stat-card">
+        <div class="stat-card-icon success">
+            <i class="fa-solid fa-database"></i>
+        </div>
+        <div class="stat-card-value">{{ num_registros }}</div>
+        <div class="stat-card-label">Registros en DB</div>
+        <div class="stat-card-glow" style="background: var(--admin-success);"></div>
+    </a>
+</div>
 
-        <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-         SIDEBAR
-         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-        <aside class="admin-sidebar" id="adminSidebar">
-            <div class="sidebar-header">
-                <img src="{% static 'img/VigIA-Logo-Rem.png' %}" alt="VigIA" class="sidebar-logo">
-                <div class="sidebar-brand">
-                    VigIA
-                    <small>Panel de Administración</small>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <!-- Principal -->
-                <div class="sidebar-nav-section">
-                    <div class="sidebar-nav-label">Principal</div>
-                    <a href="{% url 'vista_programador' %}" class="sidebar-link active">
-                        <i class="fa-solid fa-gauge-high"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </div>
-
-                <!-- Contenido -->
-                <div class="sidebar-nav-section">
-                    <div class="sidebar-nav-label">Contenido</div>
-                    <a href="{% url 'database_page' %}" class="sidebar-link">
-                        <i class="fa-solid fa-database"></i>
-                        <span>Base de Datos</span>
-                    </a>
-                    <a href="{% url 'create_blog' %}" class="sidebar-link">
-                        <i class="fa-solid fa-newspaper"></i>
-                        <span>Blogs</span>
-                    </a>
-                    <a href="{% url 'calendario_page' %}" class="sidebar-link">
-                        <i class="fa-solid fa-calendar-days"></i>
-                        <span>Calendario</span>
-                    </a>
-                    {% if user.is_staff %}
-                    <a href="{% url 'update_mapa' %}" class="sidebar-link">
-                        <i class="fa-solid fa-map-location-dot"></i>
-                        <span>Mapa</span>
-                    </a>
-                    {% endif %}
-                </div>
-
-                <!-- Interacción -->
-                <div class="sidebar-nav-section">
-                    <div class="sidebar-nav-label">Interacción</div>
-                    <a href="{% url 'admin_preguntas_page' %}" class="sidebar-link">
-                        <i class="fa-solid fa-clipboard-question"></i>
-                        <span>Preguntas</span>
-                        {% if preguntas_pendientes > 0 %}
-                        <span class="sidebar-badge">{{ preguntas_pendientes }}</span>
-                        {% endif %}
-                    </a>
-                </div>
-
-                {% if user.is_staff %}
-                <!-- Sistema -->
-                <div class="sidebar-nav-section">
-                    <div class="sidebar-nav-label">Sistema</div>
-                    <a href="#userSection" class="sidebar-link" onclick="scrollToSection('userSection')">
-                        <i class="fa-solid fa-users"></i>
-                        <span>Usuarios</span>
-                    </a>
-                    <a href="/admin/" target="_blank" class="sidebar-link">
-                        <i class="fa-solid fa-screwdriver-wrench"></i>
-                        <span>Admin DB</span>
-                    </a>
-                </div>
-                {% endif %}
-            </nav>
-
-            <!-- Sidebar Footer / User -->
-            <div class="sidebar-footer">
-                <a href="{% url 'perfil' %}" class="sidebar-user" style="text-decoration:none;">
-                    <div class="sidebar-avatar">{{ user.username|first|upper }}</div>
-                    <div class="sidebar-user-info">
-                        <div class="sidebar-user-name">{{ user.username }}</div>
-                        <div class="sidebar-user-role">{{ user.is_staff|yesno:"Administrador,Editor" }}</div>
-                    </div>
-                </a>
-                <a href="{% url 'singout' %}" class="sidebar-link" style="margin-top:6px; color: var(--admin-danger);">
-                    <i class="fa-solid fa-door-open"></i>
-                    <span>Cerrar Sesión</span>
-                </a>
-            </div>
-        </aside>
-
-        <!-- Mobile Toggle -->
-        <button class="admin-sidebar-toggle" id="sidebarToggle">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-
-        <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-         MAIN CONTENT
-         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-        <main class="admin-main">
-
-            <!-- Page Header -->
-            <div class="admin-page-header">
-                <h1 class="admin-page-title">Dashboard</h1>
-                <p class="admin-page-subtitle">Bienvenido de vuelta, <strong>{{user.first_name|default:user.username }}</strong></p>
-            </div>
-
-            <!-- â”€â”€â”€â”€ Stat Cards â”€â”€â”€â”€ -->
-            <div class="stats-grid">
-                <!-- Blogs -->
-                <a href="{% url 'create_blog' %}" class="stat-card">
-                    <div class="stat-card-icon info">
-                        <i class="fa-solid fa-newspaper"></i>
-                    </div>
-                    <div class="stat-card-value">{{ num_blogs }}</div>
-                    <div class="stat-card-label">{{ user.is_staff|yesno:"Blogs,Tus Blogs" }}</div>
-                    <div class="stat-card-glow" style="background: var(--admin-info);"></div>
-                </a>
-
-
-                {% if user.is_staff %}
-                <!-- Usuarios -->
-                <a href="#userSection" class="stat-card" onclick="scrollToSection('userSection')">
-                    <div class="stat-card-icon warning">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <div class="stat-card-value">{{ users.count }}</div>
-                    <div class="stat-card-label">Usuarios</div>
-                    <div class="stat-card-glow" style="background: var(--admin-warning);"></div>
-                </a>
-                {% endif %}
-
-                <!-- Preguntas Pendientes -->
-                <a href="#preguntasSection" class="stat-card" onclick="scrollToSection('preguntasSection')">
-                    <div class="stat-card-icon danger">
-                        <i class="fa-solid fa-clipboard-question"></i>
-                    </div>
-                    <div class="stat-card-value">{{ preguntas_pendientes }}</div>
-                    <div class="stat-card-label">Preguntas Pendientes</div>
-                    <div class="stat-card-glow" style="background: var(--admin-danger);"></div>
-                </a>
-
-                <!-- Registros DB -->
-                <a href="{% url 'database_page' %}" class="stat-card">
-                    <div class="stat-card-icon success">
-                        <i class="fa-solid fa-database"></i>
-                    </div>
-                    <div class="stat-card-value">{{ num_registros }}</div>
-                    <div class="stat-card-label">Registros en DB</div>
-                    <div class="stat-card-glow" style="background: var(--admin-success);"></div>
-                </a>
-            </div>
-
-            <!-- â”€â”€â”€â”€ Preguntas de Usuarios â”€â”€â”€â”€ -->
-            <div class="admin-card" id="preguntasSection">
-                <div class="admin-card-header">
-                    <h2 class="admin-card-title">
-                        <i class="fa-solid fa-clipboard-question"></i>
-                        Preguntas de Usuarios
-                    </h2>
-                    <span class="status-badge pending" style="font-size:0.78rem;">
-                        {{ preguntas_pendientes }} pendiente{{ preguntas_pendientes|pluralize:"s" }}
-                    </span>
-                </div>
-                <div class="admin-card-body" style="padding: 0;">
-                    {% if preguntas_sending %}
-                    <div style="overflow-x: auto;">
-                        <table class="questions-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Persona</th>
-                                    <th>Pregunta</th>
-                                    <th>Fecha</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for question in preguntas_sending %}
-                                <tr>
-                                    <td>{{ question.id }}</td>
-                                    <td>
-                                        <span class="question-person">{{ question.nombre_persona }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="question-text" title="{{ question.pregunta }}">{{question.pregunta }}</div>
-                                        {% if question.descripcion %}
-                                        <div class="question-date" style="margin-top:2px;">{{ question.descripcion|truncatewords:12 }}</div>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="question-date">{{ question.fecha|date:"d M Y" }}</span>
-                                        <br>
-                                        <span class="question-date">{{ question.fecha|time:"H:i" }}</span>
-                                    </td>
-                                    <td>
-                                        {% if question.respondida %}
-                                        <span class="status-badge answered"><span class="dot"></span> Respondida</span>
-                                        {% else %}
-                                        <span class="status-badge pending"><span class="dot"></span> Pendiente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div style="display:flex; gap:6px; align-items:center;">
-                                            <button class="btn-admin btn-admin-primary btn-admin-sm"
-                                                onclick="openResponseModal({{ question.id }}, '{{ question.nombre_persona|escapejs }}', '{{ question.pregunta|escapejs }}', '{{ question.descripcion|escapejs }}', '{{ question.respuesta|default_if_none:""|escapejs }}', {{ question.respondida|yesno:'true,false' }})">
-                                                <i class="fa-solid fa-reply"></i>
-                                                {% if question.respondida %}Ver{% else %}Responder{% endif %}
-                                            </button>
-                                            <form method="post" action="{% url 'question_deleted' %}" style="margin:0;"
-                                                id="deleteForm{{ question.id }}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="question_id" value="{{ question.id }}">
-                                                <button type="button" class="btn-admin btn-admin-danger btn-admin-sm"
-                                                    onclick="confirmDelete({{ question.id }})">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="admin-empty-state">
-                        <i class="fa-solid fa-inbox"></i>
-                        <p>No hay preguntas por el momento.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            {% if user.is_staff %}
-            <!-- â”€â”€â”€â”€ Usuarios Registrados â”€â”€â”€â”€ -->
-            <div class="admin-card" id="userSection">
-                <div class="admin-card-header">
-                    <h2 class="admin-card-title">
-                        <i class="fa-solid fa-users"></i>
-                        Usuarios Registrados
-                    </h2>
-                    <span class="stat-card-label">{{ users.count }} total</span>
-                </div>
-                <div class="admin-card-body" style="padding: 0;">
-                    <div style="overflow-x: auto;">
-                        <table class="questions-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Usuario</th>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th>Rol</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for oneuser in users %}
-                                <tr>
-                                    <td>{{ oneuser.id }}</td>
-                                    <td><span class="question-person">{{ oneuser.username }}</span></td>
-                                    <td>{{ oneuser.first_name }} {{ oneuser.last_name }}</td>
-                                    <td>{{ oneuser.email }}</td>
-                                    <td>
-                                        {% if oneuser.is_staff %}
-                                        <span class="status-badge answered"><span class="dot"></span> Admin</span>
-                                        {% else %}
-                                        <span class="status-badge"
-                                            style="background:rgba(255,255,255,0.06); color:var(--admin-text-muted);"><span
-                                                class="dot"></span> Editor</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if oneuser.is_active %}
-                                        <span class="status-badge answered"><span class="dot"></span> Activo</span>
-                                        {% else %}
-                                        <span class="status-badge pending"><span class="dot"></span> Inactivo</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Spacer for bottom -->
-            <div style="height: 40px;"></div>
-        </main>
+<!-- ──── Preguntas de Usuarios ──── -->
+<div class="admin-card" id="preguntasSection">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">
+            <i class="fa-solid fa-clipboard-question"></i>
+            Preguntas de Usuarios
+        </h2>
+        <span class="status-badge pending" style="font-size:0.78rem;">
+            {{ preguntas_pendientes }} pendiente{{ preguntas_pendientes|pluralize:"s" }}
+        </span>
     </div>
+    <div class="admin-card-body" style="padding: 0;">
+        {% if preguntas_sending %}
+        <div style="overflow-x: auto;">
+            <table class="questions-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Persona</th>
+                        <th>Pregunta</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in preguntas_sending %}
+                    <tr>
+                        <td>{{ question.id }}</td>
+                        <td>
+                            <span class="question-person">{{ question.nombre_persona }}</span>
+                        </td>
+                        <td>
+                            <div class="question-text" title="{{ question.pregunta }}">{{question.pregunta }}</div>
+                            {% if question.descripcion %}
+                            <div class="question-date" style="margin-top:2px;">{{ question.descripcion|truncatewords:12 }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="question-date">{{ question.fecha|date:"d M Y" }}</span>
+                            <br>
+                            <span class="question-date">{{ question.fecha|time:"H:i" }}</span>
+                        </td>
+                        <td>
+                            {% if question.respondida %}
+                            <span class="status-badge answered"><span class="dot"></span> Respondida</span>
+                            {% else %}
+                            <span class="status-badge pending"><span class="dot"></span> Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <button class="btn-admin btn-admin-primary btn-admin-sm"
+                                    onclick="openResponseModal({{ question.id }}, '{{ question.nombre_persona|escapejs }}', '{{ question.pregunta|escapejs }}', '{{ question.descripcion|escapejs }}', '{{ question.respuesta|default_if_none:""|escapejs }}', {{ question.respondida|yesno:'true,false' }})">
+                                    <i class="fa-solid fa-reply"></i>
+                                    {% if question.respondida %}Ver{% else %}Responder{% endif %}
+                                </button>
+                                <form method="post" action="{% url 'question_deleted' %}" style="margin:0;"
+                                    id="deleteForm{{ question.id }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="question_id" value="{{ question.id }}">
+                                    <button type="button" class="btn-admin btn-admin-danger btn-admin-sm"
+                                        onclick="confirmDelete({{ question.id }})">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="admin-empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <p>No hay preguntas por el momento.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     RESPONSE MODAL
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-    <div class="admin-modal-overlay" id="responseModal">
-        <div class="admin-modal">
-            <div class="admin-modal-header">
-                <h3 class="admin-modal-title">
-                    <i class="fa-solid fa-reply" style="color:var(--admin-accent); margin-right:8px;"></i>
-                    Responder Pregunta
-                </h3>
-                <button class="admin-modal-close" onclick="closeResponseModal()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="admin-modal-body">
-                <!-- Question info -->
-                <div class="question-display">
-                    <div class="question-display-label">Persona</div>
-                    <div class="question-display-text" id="modalPersona"></div>
-                </div>
-                <div class="question-display">
-                    <div class="question-display-label">Pregunta</div>
-                    <div class="question-display-text" id="modalPregunta"></div>
-                </div>
-                <div class="question-display" id="modalDescBlock" style="display:none;">
-                    <div class="question-display-label">Descripción</div>
-                    <div class="question-display-text" id="modalDescripcion"></div>
-                </div>
-
-                <!-- Response form -->
-                <form id="responseForm">
-                    {% csrf_token %}
-                    <input type="hidden" name="question_id" id="modalQuestionId">
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Tu Respuesta</label>
-                        <textarea class="admin-form-textarea" name="respuesta" id="modalRespuesta"
-                            placeholder="Escribe tu respuesta aquÃ­..."></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="admin-modal-footer">
-                <button class="btn-admin btn-admin-ghost" onclick="closeResponseModal()">Cancelar</button>
-                <button class="btn-admin btn-admin-primary" onclick="submitResponse()" id="btnSubmitResponse">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Enviar Respuesta
-                </button>
-            </div>
+{% if user.is_staff %}
+<!-- ──── Usuarios Registrados ──── -->
+<div class="admin-card" id="userSection">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">
+            <i class="fa-solid fa-users"></i>
+            Usuarios Registrados
+        </h2>
+        <span class="stat-card-label">{{ users.count }} total</span>
+    </div>
+    <div class="admin-card-body" style="padding: 0;">
+        <div style="overflow-x: auto;">
+            <table class="questions-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for oneuser in users %}
+                    <tr>
+                        <td>{{ oneuser.id }}</td>
+                        <td><span class="question-person">{{ oneuser.username }}</span></td>
+                        <td>{{ oneuser.first_name }} {{ oneuser.last_name }}</td>
+                        <td>{{ oneuser.email }}</td>
+                        <td>
+                            {% if oneuser.is_staff %}
+                            <span class="status-badge answered"><span class="dot"></span> Admin</span>
+                            {% else %}
+                            <span class="status-badge"
+                                style="background:rgba(255,255,255,0.06); color:var(--admin-text-muted);"><span
+                                    class="dot"></span> Editor</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if oneuser.is_active %}
+                            <span class="status-badge answered"><span class="dot"></span> Activo</span>
+                            {% else %}
+                            <span class="status-badge pending"><span class="dot"></span> Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
+{% endif %}
 
-    <!-- Confirm Delete Modal -->
-    <div class="admin-modal-overlay" id="deleteModal">
-        <div class="admin-modal" style="max-width:400px;">
-            <div class="admin-modal-header">
-                <h3 class="admin-modal-title" style="color:var(--admin-danger);">
-                    <i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>
-                    Eliminar Pregunta
-                </h3>
-                <button class="admin-modal-close" onclick="closeDeleteModal()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+<!-- ═══════════════════════════════════════════
+ RESPONSE MODAL
+ ═══════════════════════════════════════════ -->
+<div class="admin-modal-overlay" id="responseModal">
+    <div class="admin-modal">
+        <div class="admin-modal-header">
+            <h3 class="admin-modal-title">
+                <i class="fa-solid fa-reply" style="color:var(--admin-accent); margin-right:8px;"></i>
+                Responder Pregunta
+            </h3>
+            <button class="admin-modal-close" onclick="closeResponseModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <div class="question-display">
+                <div class="question-display-label">Persona</div>
+                <div class="question-display-text" id="modalPersona"></div>
             </div>
-            <div class="admin-modal-body">
-                <p style="color:var(--admin-text-muted);">Â¿Estás seguro de que quieres eliminar esta pregunta? Esta
-                    acción no se puede deshacer.</p>
+            <div class="question-display">
+                <div class="question-display-label">Pregunta</div>
+                <div class="question-display-text" id="modalPregunta"></div>
             </div>
-            <div class="admin-modal-footer">
-                <button class="btn-admin btn-admin-ghost" onclick="closeDeleteModal()">Cancelar</button>
-                <button class="btn-admin btn-admin-danger" id="btnConfirmDelete">
-                    <i class="fa-solid fa-trash"></i>
-                    Eliminar
-                </button>
+            <div class="question-display" id="modalDescBlock" style="display:none;">
+                <div class="question-display-label">Descripción</div>
+                <div class="question-display-text" id="modalDescripcion"></div>
             </div>
+            <form id="responseForm">
+                {% csrf_token %}
+                <input type="hidden" name="question_id" id="modalQuestionId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Tu Respuesta</label>
+                    <textarea class="admin-form-textarea" name="respuesta" id="modalRespuesta"
+                        placeholder="Escribe tu respuesta aquí..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-ghost" onclick="closeResponseModal()">Cancelar</button>
+            <button class="btn-admin btn-admin-primary" onclick="submitResponse()" id="btnSubmitResponse">
+                <i class="fa-solid fa-paper-plane"></i>
+                Enviar Respuesta
+            </button>
         </div>
     </div>
+</div>
 
-    <script>
-        // â”€â”€ Sidebar Toggle (mobile) â”€â”€
-        document.getElementById('sidebarToggle').addEventListener('click', function () {
-            document.getElementById('adminSidebar').classList.toggle('mobile-open');
-        });
+<!-- Confirm Delete Modal -->
+<div class="admin-modal-overlay" id="deleteModal">
+    <div class="admin-modal" style="max-width:400px;">
+        <div class="admin-modal-header">
+            <h3 class="admin-modal-title" style="color:var(--admin-danger);">
+                <i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>
+                Eliminar Pregunta
+            </h3>
+            <button class="admin-modal-close" onclick="closeDeleteModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <p style="color:var(--admin-text-muted);">¿Estás seguro de que quieres eliminar esta pregunta? Esta
+                acción no se puede deshacer.</p>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-ghost" onclick="closeDeleteModal()">Cancelar</button>
+            <button class="btn-admin btn-admin-danger" id="btnConfirmDelete">
+                <i class="fa-solid fa-trash"></i>
+                Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-        // Close sidebar on outside click (mobile)
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('adminSidebar');
-            const toggle = document.getElementById('sidebarToggle');
-            if (window.innerWidth <= 991 && sidebar.classList.contains('mobile-open')) {
-                if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
-                    sidebar.classList.remove('mobile-open');
+{% block admin_scripts %}
+<script>
+    // ── Response Modal ──
+    let currentQuestionId = null;
+
+    function openResponseModal(id, persona, pregunta, descripcion, respuesta, respondida) {
+        currentQuestionId = id;
+        document.getElementById('modalQuestionId').value = id;
+        document.getElementById('modalPersona').textContent = persona;
+        document.getElementById('modalPregunta').textContent = pregunta;
+
+        if (descripcion) {
+            document.getElementById('modalDescBlock').style.display = 'block';
+            document.getElementById('modalDescripcion').textContent = descripcion;
+        } else {
+            document.getElementById('modalDescBlock').style.display = 'none';
+        }
+
+        document.getElementById('modalRespuesta').value = respuesta || '';
+
+        if (respondida) {
+            document.getElementById('btnSubmitResponse').innerHTML = '<i class="fa-solid fa-save"></i> Actualizar Respuesta';
+        } else {
+            document.getElementById('btnSubmitResponse').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Respuesta';
+        }
+
+        document.getElementById('responseModal').classList.add('show');
+    }
+
+    function closeResponseModal() {
+        document.getElementById('responseModal').classList.remove('show');
+        currentQuestionId = null;
+    }
+
+    function submitResponse() {
+        const form = document.getElementById('responseForm');
+        const formData = new FormData(form);
+        const btn = document.getElementById('btnSubmitResponse');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+        fetch("{% url 'responder_pregunta' %}", {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+            body: formData,
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error al enviar la respuesta.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Respuesta';
                 }
-            }
-        });
+            })
+            .catch(err => {
+                alert('Error de conexión.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Respuesta';
+            });
+    }
 
-        // â”€â”€ Scroll to section â”€â”€
-        function scrollToSection(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Close mobile sidebar
-                document.getElementById('adminSidebar').classList.remove('mobile-open');
-            }
-        }
+    // ── Delete Confirmation ──
+    let deleteFormId = null;
 
-        // â”€â”€ Response Modal â”€â”€
-        let currentQuestionId = null;
+    function confirmDelete(questionId) {
+        deleteFormId = questionId;
+        document.getElementById('deleteModal').classList.add('show');
+    }
 
-        function openResponseModal(id, persona, pregunta, descripcion, respuesta, respondida) {
-            currentQuestionId = id;
-            document.getElementById('modalQuestionId').value = id;
-            document.getElementById('modalPersona').textContent = persona;
-            document.getElementById('modalPregunta').textContent = pregunta;
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('show');
+        deleteFormId = null;
+    }
 
-            if (descripcion) {
-                document.getElementById('modalDescBlock').style.display = 'block';
-                document.getElementById('modalDescripcion').textContent = descripcion;
-            } else {
-                document.getElementById('modalDescBlock').style.display = 'none';
-            }
-
-            document.getElementById('modalRespuesta').value = respuesta || '';
-
-            if (respondida) {
-                document.getElementById('btnSubmitResponse').innerHTML = '<i class="fa-solid fa-save"></i> Actualizar Respuesta';
-            } else {
-                document.getElementById('btnSubmitResponse').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Respuesta';
-            }
-
-            document.getElementById('responseModal').classList.add('show');
-        }
-
-        function closeResponseModal() {
-            document.getElementById('responseModal').classList.remove('show');
-            currentQuestionId = null;
-        }
-
-        function submitResponse() {
-            const form = document.getElementById('responseForm');
+    document.getElementById('btnConfirmDelete').addEventListener('click', function () {
+        if (deleteFormId) {
+            const form = document.getElementById('deleteForm' + deleteFormId);
             const formData = new FormData(form);
-            const btn = document.getElementById('btnSubmitResponse');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
-            fetch("{% url 'responder_pregunta' %}", {
+            fetch(form.action, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -473,73 +364,28 @@
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert(data.message || 'Error al enviar la respuesta.');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Respuesta';
+                        alert(data.message || 'Error al eliminar.');
                     }
                 })
-                .catch(err => {
-                    alert('Error de conexión.');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Respuesta';
-                });
+                .catch(() => alert('Error de conexión.'));
         }
+        closeDeleteModal();
+    });
 
-        // â”€â”€ Delete Confirmation â”€â”€
-        let deleteFormId = null;
-
-        function confirmDelete(questionId) {
-            deleteFormId = questionId;
-            document.getElementById('deleteModal').classList.add('show');
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('show');
-            deleteFormId = null;
-        }
-
-        document.getElementById('btnConfirmDelete').addEventListener('click', function () {
-            if (deleteFormId) {
-                const form = document.getElementById('deleteForm' + deleteFormId);
-                const formData = new FormData(form);
-
-                fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                    },
-                    body: formData,
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert(data.message || 'Error al eliminar.');
-                        }
-                    })
-                    .catch(() => alert('Error de conexión.'));
-            }
-            closeDeleteModal();
-        });
-
-        // Close modals on overlay click
-        document.querySelectorAll('.admin-modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', function (e) {
-                if (e.target === this) {
-                    this.classList.remove('show');
-                }
-            });
-        });
-
-        // Close modals on Escape key
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.admin-modal-overlay.show').forEach(m => m.classList.remove('show'));
+    // Close modals on overlay click
+    document.querySelectorAll('.admin-modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.classList.remove('show');
             }
         });
-    </script>
-</body>
+    });
 
-</html>
+    // Close modals on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.admin-modal-overlay.show').forEach(m => m.classList.remove('show'));
+        }
+    });
+</script>
+{% endblock %}

@@ -1,15 +1,12 @@
-{% extends 'base/widget.html' %}
+{% extends 'base/admin_base.html' %}
 {% load static %}
-{% block title %}Base de Datos | Administracion{% endblock %}
-{% block link_home %}{% url 'vista_programador' %}{% endblock %}
-{% block link_default %}
-{% include 'base/widget_links-admin.html' %}
-{% endblock %}
-{% block extra_head %}
+{% block admin_title %}Base de Datos{% endblock %}
+{% block admin_active_database %}active{% endblock %}
+{% block admin_extra_head %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
 {% endblock %}
 
-{% block content %}
+{% block admin_content %}
 <main class="container container-fluid py-5 {% if not user.is_authenticated %}main_container{% endif %}">
     <div class="mb-5">
         <h1 class="text-center">Base de Datos <i class="fa-solid fa-database ms-1"></i></h1>
@@ -475,7 +472,7 @@
 
 {% endblock %}
 
-{% block scripts_end %}
+{% block admin_scripts %}
 <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
 <script src="{% static 'js/settings_datatable.js' %}"></script>

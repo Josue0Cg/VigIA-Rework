@@ -2,6 +2,7 @@ from django.db.models.signals import pre_save, post_delete, pre_delete
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.dispatch import receiver
+from django.utils import timezone
 from django.conf import settings
 from django.db import models
 import unicodedata
@@ -44,7 +45,10 @@ def set_imgDB_path(instance, filename):
     return create_filename_path(filename, newName, 'db', 35, 6, thispath)
 
 def set_imgBlog_path(instance, filename):
-    newName = instance.titulo.strip().replace(' ', '')
+    if hasattr(instance, 'titulo'):
+        newName = instance.titulo.strip().replace(' ', '')
+    else:
+        newName = getattr(instance.articulo, 'titulo', 'galeria').strip().replace(' ', '')
     thispath = os.path.join(settings.MEDIA_ROOT, 'imagenes/blogs/')
     return create_filename_path(filename, newName, 'blog', 18, 8, thispath)
 
@@ -119,9 +123,10 @@ class Database(models.Model):
 class Articulos(models.Model):
     encabezado = models.ImageField(upload_to=set_imgBlog_path, max_length=120, blank=True, null=True)
     titulo = models.CharField(max_length=200)
+    descripcion_breve = models.TextField(max_length=250, blank=True, null=True)
     contenido = models.TextField()
     autor = models.CharField(max_length=100)
-    creacion = models.DateField(auto_now_add=True)
+    creacion = models.DateTimeField(default=timezone.now)
     actualizacion = models.DateField(auto_now=True, blank=True, null=True)
     
     def __str__(self):
@@ -131,6 +136,15 @@ class Articulos(models.Model):
         if self.encabezado:
             self.encabezado.delete()
         super(Articulos, self).delete(*args, **kwargs)
+
+class ArticuloAlbum(models.Model):
+    articulo = models.ForeignKey(Articulos, related_name='album_imagenes', on_delete=models.CASCADE)
+    imagen = models.ImageField(upload_to=set_imgBlog_path, max_length=120)
+    
+    def delete(self, *args, **kwargs):
+        if self.imagen:
+            self.imagen.delete()
+        super(ArticuloAlbum, self).delete(*args, **kwargs)
 
 class Mapa(models.Model):
     uuid = models.CharField(max_length=25)
@@ -232,11 +246,13 @@ def delete_files(instance, fields):
 @receiver(pre_delete, sender=Database)
 @receiver(pre_delete, sender=Articulos)
 @receiver(pre_delete, sender=galeria)
+@receiver(pre_delete, sender=ArticuloAlbum)
 def delete_files_on_object_delete(sender, instance, **kwargs):
     fields_to_delete = {
         Database: ['imagen', 'documento'],
         Articulos: ['encabezado'],
         galeria: ['imagen'],
+        ArticuloAlbum: ['imagen'],
     }
     delete_files(instance, fields_to_delete[sender])
 

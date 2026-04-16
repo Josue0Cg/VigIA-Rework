@@ -91,7 +91,7 @@ tinymce.init({
     statusbar: false,
     resize: false,
     plugins:
-        "advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table wordcount quickbars autoresize",
+        "advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table wordcount quickbars autoresize",
     mobile: {
         toolbar_mode: "sliding",
         autoresize_min_height: 400,
@@ -119,7 +119,7 @@ tinymce.init({
     statusbar: false,
     resize: false,
     plugins:
-        "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table wordcount quickbars image pagebreak autoresize autosave",
+        "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table wordcount quickbars image pagebreak autoresize autosave",
     mobile: {
         menubar: true,
         toolbar_mode: "sliding",

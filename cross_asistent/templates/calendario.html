@@ -4,7 +4,7 @@
 {% block active_calendario %}is-active{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/calendario_custom.css' %}" />
+<link rel="stylesheet" href="{% static 'css/calendario_custom.css' %}?v=6" />
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
     </div>
 
     <!-- Modal: Ver info del Evento -->
-    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true" style="display:none;">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="eventModalLabel">Detalle del Evento</h5>
-                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body m-3">
                     <p id="eventDesc" class="mb-4"></p>
@@ -58,5 +58,5 @@
 {% include 'base/widget_footer.html' %}
 {% endblock %}
 {% block scripts_end %}
-<script src="{% static 'js/calendario_custom.js' %}"></script>
+<script src="{% static 'js/calendario_custom.js' %}?v=6"></script>
 {% endblock %}

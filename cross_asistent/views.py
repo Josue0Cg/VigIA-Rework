@@ -5,6 +5,8 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.http import JsonResponse
+from django.utils import timezone
+from django.utils.html import strip_tags
 from django.urls import reverse
 from . import functions, models
 
@@ -16,7 +18,7 @@ questions_all = models.Preguntas.objects.all().order_by('-id')
 categoriasFilter = models.Categorias.objects.exclude(categoria__in=['Mapa', 'Calendario'])
 
 def obtener_configuraciones():
-    for oneconfig in settingsall:
+    for oneconfig in models.Configuraciones.objects.all():
         return {
             'copyright_settings': oneconfig.copyright_year,
             'website_settings': oneconfig.utc_link,
@@ -27,6 +29,11 @@ def obtener_configuraciones():
             'about_textsecond': getattr(oneconfig, 'about_text_second', None),
         }
 
+def admin_context():
+    """Contexto compartido para todas las vistas admin (sidebar badge, etc.)"""
+    return {
+        'preguntas_pendientes': models.Preguntas.objects.filter(respondida=False).count(),
+    }
 
 def index(request):
     if not request.user.is_staff:
@@ -103,7 +110,8 @@ def blogs(request):
     
     configuraciones = obtener_configuraciones()
 
-    blogs = models.Articulos.objects.all().order_by('-id')
+    # Solo mostrar artículos donde 'creacion' es igual o anterior al tiempo actual
+    blogs = models.Articulos.objects.filter(creacion__lte=timezone.now()).order_by('-creacion', '-id')
     blogs_modificados = []
 
     for oneblog in blogs:
@@ -115,10 +123,28 @@ def blogs(request):
             img = '/static/img/default_image.webp'
             imgClass = 'item_title-full'
 
+        # Obtener firma del autor o fallback
+        try:
+            user_profile = models.UserProfile.objects.get(user__username=oneblog.autor)
+            userdef = User.objects.get(username=oneblog.autor)
+            if user_profile.blog_firma:
+                firma_autor = user_profile.blog_firma.title()
+            else:
+                firma_autor = f'{userdef.first_name} {userdef.last_name}'.title()
+        except Exception:
+            firma_autor = 'Editorial UTC'
+
+        if oneblog.descripcion_breve:
+            preview_text = oneblog.descripcion_breve
+        else:
+            preview_text = strip_tags(oneblog.contenido)
+        
         blogs_modificados.append({
             'id': oneblog.id,
             'titulo': oneblog.titulo,
-            'autor': oneblog.autor,
+            'autor': firma_autor,
+            'creacion': oneblog.creacion,
+            'contenido_preview': preview_text[:170] + '...' if len(preview_text) > 170 else preview_text,
             'imagen': img,
             'class': imgClass,
         })
@@ -363,17 +389,20 @@ def ver_perfil(request):
     if not perfil_extencion.blog_firma:
         perfil_extencion.blog_firma = ''
                 
-    return render(request, 'admin/perfil.html', {
+    ctx = {
         'user_profile': perfil_extencion,
         'active_page': 'perfil',
         'pages': functions.pages
-    })
+    }
+    ctx.update(admin_context())
+    return render(request, 'admin/perfil.html', ctx)
 
 # Base de Datos ----------------------------------------------------------
 @login_required
 @never_cache
 def database_page(request):
     context = { 'active_page':'database','pages':functions.pages, 'preguntas_sending':questions_all, 'categorias':categoriasFilter, 'categoriasall':categoriasall }
+    context.update(admin_context())
     return render(request, 'admin/database.html', context)
 
 # Calendario ----------------------------------------------------------
@@ -384,6 +413,7 @@ def calendario_page(request):
         btns_year = oneconfig.calendar_btnsYear
 
     context = { 'active_page': 'calendario', 'show_btns_year': btns_year, 'pages': functions.pages }
+    context.update(admin_context())
     return render(request, 'admin/calendario.html', context)
 
 # Blogs ----------------------------------------------------------
@@ -394,14 +424,20 @@ def blog_page(request):
         try:
             autorPOST = request.POST.get('autor')
             tituloPOST = request.POST.get('titulo')
+            descripcion_brevePOST = request.POST.get('descripcion_breve')
             contenidoWordPOST = request.POST.get('contenidoWord')
             encabezadoImgPOST = request.FILES.get('encabezadoImg')
+            fechaPubPOST = request.POST.get('fecha_publicacion')
             blogUpdate = request.POST.get('blogNewUpdate')
             
             if not blogUpdate == None and not blogUpdate == 'newBlog':
                 blogUpdate = get_object_or_404(models.Articulos, id=blogUpdate)
                 blogUpdate.autor = autorPOST
                 blogUpdate.titulo = tituloPOST
+                if descripcion_brevePOST is not None:
+                    blogUpdate.descripcion_breve = descripcion_brevePOST
+                if fechaPubPOST:
+                    blogUpdate.creacion = fechaPubPOST
                 blogUpdate.contenido = contenidoWordPOST
                 if encabezadoImgPOST:
                     blogUpdate.encabezado = encabezadoImgPOST
@@ -411,12 +447,22 @@ def blog_page(request):
                 articulo = models.Articulos(
                     autor=autorPOST,
                     titulo=tituloPOST,
+                    descripcion_breve=descripcion_brevePOST,
                     contenido=contenidoWordPOST,
                     encabezado=encabezadoImgPOST,
                 )
+                if fechaPubPOST:
+                    articulo.creacion = fechaPubPOST
                 articulo.save()
                 jsonMessage='Excelente 🥳🎈🎉. Tu artículo ya fue publicado. Puedes editarlo cuando gustes. 🧐😊'
+                blogUpdate = articulo # Use newly created instance to attach album images
                                 
+            # Guardar nuevas imagenes de galeria (álbum) si existen
+            album_files = request.FILES.getlist('album_imagenes')
+            if album_files:
+                for image in album_files:
+                    models.ArticuloAlbum.objects.create(articulo=blogUpdate, imagen=image)
+            
             user_perfil = request.user.userprofile
             if request.POST.get('new_firma'):
                 user_perfil.blog_firma = request.POST.get('new_firma')
@@ -424,7 +470,7 @@ def blog_page(request):
 
             return JsonResponse({'success': True, 'functions':'reload', 'message': jsonMessage}, status=200)
         except Exception as e:
-            return JsonResponse({'success': False, 'message': f'Ocurrió un error😯😥 <br>{str(e)}'}, status=400)
+            return JsonResponse({'success': False, 'message': f'Ocurrió un error😯😥 <br>{str(e)}', 'error': str(e)}, status=400)
         
     allblogs = models.Articulos.objects.all()
     yourBlogs = models.Articulos.objects.filter(autor = request.user)
@@ -435,7 +481,9 @@ def blog_page(request):
             'titulo': oneBlog.titulo,
         })
     
-    return render(request, 'admin/blog.html', {'active_page':'blog','pages':functions.pages, 'blogsTiple':blogsTiple, 'allblogs':allblogs})
+    ctx = {'active_page':'blog','pages':functions.pages, 'blogsTiple':blogsTiple, 'allblogs':allblogs}
+    ctx.update(admin_context())
+    return render(request, 'admin/blog.html', ctx)
 
 #Mapa ----------------------------------------------------------
 @login_required
@@ -444,7 +492,9 @@ def map_page(request):
     categoria_mapa = models.Categorias.objects.get(categoria="Mapa")
     map_inDB = models.Database.objects.filter(categoria=categoria_mapa)
     UID = f'mapa-pleace_{models.generate_random_string(11)}'
-    return render(request, 'admin/mapa.html', {'map_inDB': map_inDB, 'active_page': 'mapa', 'UID':UID,'pages': functions.pages})
+    ctx = {'map_inDB': map_inDB, 'active_page': 'mapa', 'UID':UID,'pages': functions.pages}
+    ctx.update(admin_context())
+    return render(request, 'admin/mapa.html', ctx)
 
 @login_required
 @never_cache
@@ -529,7 +579,11 @@ def update_create_pleace_map(request):
 def vista_galeria(request):
     imagenes_galeria = models.galeria.objects.exclude(imagen__exact='')
     imagenes_database = models.Database.objects.exclude(imagen__exact='')
-    imagenes_banners = models.Banners.objects.exclude(imagen__exact='')
+    
+    # Manejar caso de Banners si no existe el modelo o si existe
+    imagenes_banners = []
+    if hasattr(models, 'Banners'):
+        imagenes_banners = models.Banners.objects.exclude(imagen__exact='')
 
     return render(request, 'admin/vista_galeria.html', {
         'pages': functions.pages,
@@ -537,3 +591,103 @@ def vista_galeria(request):
         'imagenes_database': imagenes_database,
         'imagenes_banners': imagenes_banners,
     })
+
+# API for Mobile App -----------------------------------------------
+def api_get_table(request, table_name):
+    """
+    Simulates Supabase table queries by returning JSON from local SQLite models.
+    """
+    domain = request.build_absolute_uri('/')[:-1] # e.g. http://127.0.0.1:8000
+    
+    import re
+
+    if table_name == 'cross_asistent_articulos':
+        articulos = models.Articulos.objects.filter(creacion__lte=timezone.now()).order_by('-creacion', '-id')
+        data = []
+        for a in articulos:
+            # Lógica para sincronizar la misma Firma de Autor de la versión Web
+            try:
+                user_profile = models.UserProfile.objects.get(user__username=a.autor)
+                userdef = User.objects.get(username=a.autor)
+                if user_profile.blog_firma:
+                    firma_autor = user_profile.blog_firma.title()
+                else:
+                    firma_autor = f'{userdef.first_name} {userdef.last_name}'.title()
+            except Exception:
+                firma_autor = 'Editorial UTC'
+
+            # Lógica para procesar y purificar el HTML dirigido a los dispositivos móviles
+            raw_html = a.contenido if a.contenido else ""
+            raw_html = re.sub(r'<br\s*/?>', '\n', raw_html)
+            raw_html = re.sub(r'</div>', '\n', raw_html)
+            raw_html = re.sub(r'</p>', '\n\n', raw_html)
+            
+            import html
+            clean_text = html.unescape(strip_tags(raw_html).strip())
+            # Colapsar múltiples saltos de línea consecutivos a máximo 2 (un párrafo)
+            clean_text = re.sub(r'\n{3,}', '\n\n', clean_text)
+
+            # Asegurar que la descripción breve sea idéntica a la vista web
+            if a.descripcion_breve:
+                preview_text = a.descripcion_breve
+            else:
+                preview_text = clean_text[:170] + '...' if len(clean_text) > 170 else clean_text
+
+            # Extraer todas las imágenes del álbum asociadas
+            album_imgs = [f"{domain}{album.imagen.url}" for album in models.ArticuloAlbum.objects.filter(articulo=a)]
+
+            data.append({
+                'id': a.id,
+                'titulo': a.titulo,
+                'descripcion_breve': preview_text,
+                'contenido': clean_text,
+                'autor': firma_autor,
+                'creacion': a.creacion.strftime('%Y-%m-%d %H:%M') if a.creacion else None,
+                'actualizacion': a.actualizacion.strftime('%Y-%m-%d') if a.actualizacion else None,
+                'encabezado': f"{domain}{a.encabezado.url}" if a.encabezado else None,
+                'album': album_imgs
+            })
+        response = JsonResponse(data, safe=False)
+        
+    elif table_name == 'eventos_utc':
+        try:
+            cat_calendario = models.Categorias.objects.get(categoria='Calendario')
+            eventos = models.Database.objects.filter(categoria=cat_calendario)
+        except models.Categorias.DoesNotExist:
+            eventos = []
+            
+        data = []
+        for e in eventos:
+            data.append({
+                'id': e.id,
+                'titulo': e.titulo,
+                'informacion': e.informacion,
+                'evento_fecha_inicio': e.evento_fecha_inicio.isoformat() if e.evento_fecha_inicio else None,
+                'evento_fecha_fin': e.evento_fecha_fin.isoformat() if e.evento_fecha_fin else None,
+                'evento_allDay': e.evento_allDay,
+                'evento_lugar': e.evento_lugar,
+                'evento_className': e.evento_className,
+                'redirigir': e.redirigir,
+                'imagen': f"{domain}{e.imagen.url}" if e.imagen else None
+            })
+        response = JsonResponse(data, safe=False)
+        
+    elif table_name == 'preguntas_enviadas':
+        preguntas = models.Preguntas.objects.filter(es_frecuente=True, respondida=True).order_by('orden', '-fecha')
+        data = []
+        for p in preguntas:
+            data.append({
+                'id': p.id,
+                'pregunta': p.pregunta,
+                'respuesta': p.respuesta,
+                'descripcion': p.descripcion,
+                'orden': p.orden
+            })
+        response = JsonResponse(data, safe=False)
+        
+    else:
+        response = JsonResponse({'error': 'Tabla no soportada o inexistente'}, status=404)
+        
+    response["Access-Control-Allow-Origin"] = "*"
+    return response
+

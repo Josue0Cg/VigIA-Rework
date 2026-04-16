@@ -441,7 +441,10 @@ def blog_change(request):
                 blogEncabezado = ''
             data = {
                 'titulo': blogGet.titulo,
+                'autor': blogGet.autor,
+                'descripcion_breve': blogGet.descripcion_breve if blogGet.descripcion_breve else '',
                 'contenido': blogGet.contenido,
+                'creacion': blogGet.creacion.strftime('%Y-%m-%dT%H:%M') if blogGet.creacion else '',
                 'encabezado': blogEncabezado,
             }
             return JsonResponse(data)
