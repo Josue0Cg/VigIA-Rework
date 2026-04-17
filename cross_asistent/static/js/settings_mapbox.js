@@ -948,11 +948,7 @@ window.addEventListener("load", () => {
                 } else if (mapElement.classList.contains("map_editing")) {
                     const { color, door, uuid, ismarker, label } = feature.properties;
 
-                    if ($("#ismarker").is(":checked")) {
-                        $("#sizemarkerdiv").slideUp();
-                        $("[data-notmarker]").slideDown();
-                        $('[for="puertaCordsEdificio"]').text("Punto de entrada:");
-                    }
+                    // Reset marker UI state (will be properly set by ismarker .trigger('change') below)
                     $("#btnDeletedPleace").show();
                     $("#btnOpenGalery").slideDown();
                     $("[data-namePleace]").text(nombre);
@@ -960,16 +956,16 @@ window.addEventListener("load", () => {
                     $("#isNewEdif").val("notnew");
 
                     if (ismarker) {
-                        $("#ismarker").attr("checked", "checked");
+                        $("#ismarker").prop("checked", true).trigger("change");
                     } else {
-                        $("#ismarker").removeAttr("checked");
+                        $("#ismarker").prop("checked", false).trigger("change");
                     }
 
                     $("#hidename").slideDown();
                     if (label != "") {
-                        $("#hidename").attr("checked", "checked");
+                        $("#hidename").prop("checked", true);
                     } else {
-                        $("#hidename").removeAttr("checked");
+                        $("#hidename").prop("checked", false);
                     }
 
                     $("[data-uuid]").addClass("active").val(uuid);
