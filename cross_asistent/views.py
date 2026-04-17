@@ -164,7 +164,15 @@ def mostrar_blog(request, Articulos_id):
     articulo = get_object_or_404(models.Articulos, pk=Articulos_id)
     autor_username = articulo.autor
     if articulo.encabezado:
-        encabezado_url = articulo.encabezado.url
+        enc_name = str(articulo.encabezado.name)
+        if enc_name.startswith('/') and '/media/' in enc_name:
+            enc_name = enc_name.split('/media/', 1)[-1]
+            articulo.encabezado.name = enc_name
+            articulo.save(update_fields=['encabezado'])
+        try:
+            encabezado_url = articulo.encabezado.url
+        except Exception:
+            encabezado_url = f'/media/{enc_name}'
     else:
         encabezado_url = ''
     
@@ -441,6 +449,11 @@ def blog_page(request):
                 blogUpdate.contenido = contenidoWordPOST
                 if encabezadoImgPOST:
                     blogUpdate.encabezado = encabezadoImgPOST
+                else:
+                    # Fix absolute paths stored in DB (e.g. from PythonAnywhere)
+                    enc_name = str(blogUpdate.encabezado.name) if blogUpdate.encabezado else ''
+                    if enc_name.startswith('/') and '/media/' in enc_name:
+                        blogUpdate.encabezado.name = enc_name.split('/media/', 1)[-1]
                 blogUpdate.save()
                 jsonMessage='Excelente 🥳🎈🎉. Tu articulo fue <span>modificado</span> de forma exitosa. 😁🫡'                
             else:

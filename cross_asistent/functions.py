@@ -434,11 +434,18 @@ def blog_change(request):
         blogIdGET = request.GET.get('id')
         if (blogIdGET):
             blogGet = get_object_or_404(models.Articulos, id=blogIdGET)
-            blogEncabezado = blogGet.encabezado
-            if blogEncabezado:
-                blogEncabezado = blogGet.encabezado.url
-            else:
-                blogEncabezado = ''
+            blogEncabezado = ''
+            if blogGet.encabezado:
+                # Fix absolute paths stored in DB
+                enc_name = str(blogGet.encabezado.name)
+                if enc_name.startswith('/') and '/media/' in enc_name:
+                    enc_name = enc_name.split('/media/', 1)[-1]
+                    blogGet.encabezado.name = enc_name
+                    blogGet.save(update_fields=['encabezado'])
+                try:
+                    blogEncabezado = blogGet.encabezado.url
+                except Exception:
+                    blogEncabezado = f'/media/{enc_name}'
             data = {
                 'titulo': blogGet.titulo,
                 'autor': blogGet.autor,
