@@ -2,12 +2,12 @@
    Admin Dashboard — Core Layout
    ======================================================== */
 :root {
-    --admin-bg: #070d1a;
-    --admin-sidebar-bg: rgba(10, 22, 45, 0.95);
+    --admin-bg: #0a1628;
+    --admin-sidebar-bg: rgba(10, 22, 45, 0.85);
     --admin-card-bg: rgba(15, 30, 60, 0.7);
     --admin-card-border: rgba(147, 197, 253, 0.1);
-    --admin-accent: #26a69a;
-    --admin-accent-glow: rgba(38, 166, 154, 0.25);
+    --admin-accent: #93c5fd;
+    --admin-accent-glow: rgba(147, 197, 253, 0.12);
     --admin-text: #e2e8f0;
     --admin-text-muted: #8a9bb8;
     --admin-danger: #ef4444;
@@ -18,13 +18,41 @@
     --admin-sidebar-collapsed: 70px;
 }
 
-/* Reset & Base */
+/* Reset & Base — Starry Sky Background */
 .admin-layout {
     display: flex;
     min-height: 100vh;
-    background: var(--admin-bg);
+    background: linear-gradient(160deg,
+            #0a1628 0%,
+            #0d2847 40%,
+            #112e52 70%,
+            #0a1628 100%);
+    background-attachment: fixed;
     color: var(--admin-text);
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    position: relative;
+}
+
+/* Star particles overlay */
+.admin-layout::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        radial-gradient(1px 1px at 5% 8%, rgba(255, 255, 255, 0.5) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 12% 35%, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+        radial-gradient(1px 1px at 18% 72%, rgba(255, 255, 255, 0.4) 50%, transparent 100%),
+        radial-gradient(1px 1px at 25% 15%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 42% 22%, rgba(255, 255, 255, 0.5) 50%, transparent 100%),
+        radial-gradient(1px 1px at 55% 5%, rgba(255, 255, 255, 0.4) 50%, transparent 100%),
+        radial-gradient(1px 1px at 72% 12%, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 88% 28%, rgba(255, 255, 255, 0.4) 50%, transparent 100%),
+        radial-gradient(1px 1px at 95% 60%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 60% 65%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 30% 90%, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+        radial-gradient(1px 1px at 78% 75%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
 }
 
 /* ========================================================
@@ -66,10 +94,7 @@
 .sidebar-brand {
     font-size: 1.2rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--admin-accent), #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #e2e8f0;
     white-space: nowrap;
 }
 
@@ -126,8 +151,8 @@
 }
 
 .sidebar-link.active {
-    background: var(--admin-accent-glow);
-    color: var(--admin-accent);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
 }
 
 .sidebar-link.active::before {
@@ -139,7 +164,7 @@
     width: 3px;
     height: 60%;
     border-radius: 0 3px 3px 0;
-    background: var(--admin-accent);
+    background: rgba(147, 197, 253, 0.6);
 }
 
 .sidebar-link i,
@@ -221,6 +246,8 @@
     padding: 28px 32px;
     min-height: 100vh;
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
 }
 
 .admin-page-header {

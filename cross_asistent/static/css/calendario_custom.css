@@ -161,17 +161,13 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(160deg,
-            #0b2235 0%,
-            #0e3555 30%,
-            #134a6b 60%,
-            #1a6b7a 85%,
-            #1f8a8a 100%);
+    background: rgba(15, 30, 60, 0.5);
     border-radius: 20px;
     padding: 28px;
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(147, 197, 253, 0.08);
+    border: 1px solid rgba(147, 197, 253, 0.1);
+    backdrop-filter: blur(12px);
     box-sizing: border-box;
 }
 
@@ -237,8 +233,8 @@
 .cal-weekday {
     text-align: center;
     font-size: clamp(0.55rem, 1.5vw, 0.75rem);
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    color: rgba(147, 197, 253, 0.6);
     text-transform: capitalize;
     padding: 6px 0;
     letter-spacing: 0;
@@ -262,7 +258,7 @@
     justify-content: flex-start;
     padding: 6px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.05);
     cursor: pointer;
     transition: all 0.25s ease;
     position: relative;
@@ -272,77 +268,76 @@
 }
 
 .cal-day-cell:hover {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.1);
     transform: scale(1.03);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .cal-day-cell span {
     font-size: clamp(0.65rem, 1.5vw, 0.95rem);
-    font-weight: 700;
-    color: #1a2a3a;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* Other month days */
 .cal-day-cell.other-month {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .cal-day-cell.other-month span {
-    color: rgba(26, 42, 58, 0.4);
+    color: rgba(255, 255, 255, 0.25);
 }
 
 .cal-day-cell.other-month:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 /* Today */
 .cal-day-cell.is-today {
-    background: rgba(59, 130, 246, 0.25);
-    border: 2px solid rgba(59, 130, 246, 0.6);
+    background: rgba(147, 197, 253, 0.15);
+    border: 1px solid rgba(147, 197, 253, 0.3);
 }
 
 .cal-day-cell.is-today span {
     color: #fff;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .cal-day-cell.is-today:hover {
-    background: rgba(59, 130, 246, 0.35);
+    background: rgba(147, 197, 253, 0.25);
 }
 
 /* Selected */
 .cal-day-cell.is-selected {
-    background: rgba(59, 130, 246, 0.9) !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    background: rgba(147, 197, 253, 0.25) !important;
+    border: 1px solid rgba(147, 197, 253, 0.5);
     transform: scale(1.05);
 }
 
 .cal-day-cell.is-selected span {
     color: #fff !important;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 /* ===== Day cells WITH events ===== */
 .cal-day-cell.has-events {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(219, 234, 254, 0.92));
-    border: 1.5px solid rgba(59, 130, 246, 0.25);
+    background: rgba(147, 197, 253, 0.08);
+    border: 1px solid rgba(147, 197, 253, 0.15);
 }
 
 .cal-day-cell.has-events:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(191, 219, 254, 0.95));
-    border-color: rgba(59, 130, 246, 0.45);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    background: rgba(147, 197, 253, 0.15);
+    border-color: rgba(147, 197, 253, 0.3);
 }
 
 .cal-day-cell.has-events.is-today {
-    background: rgba(59, 130, 246, 0.35);
-    border-color: rgba(59, 130, 246, 0.7);
+    background: rgba(147, 197, 253, 0.2);
+    border-color: rgba(147, 197, 253, 0.4);
 }
 
 .cal-day-cell.has-events.other-month {
-    background: rgba(219, 234, 254, 0.35);
-    border-color: rgba(59, 130, 246, 0.12);
+    background: rgba(147, 197, 253, 0.04);
+    border-color: rgba(147, 197, 253, 0.08);
 }
 
 /* Event bar indicator (bottom colored bar) */
@@ -379,19 +374,16 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #3b82f6;
-    box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+    background: rgba(147, 197, 253, 0.7);
 }
 
 .cal-day-cell.other-month .cal-day-dot span {
-    background: rgba(59, 130, 246, 0.35);
-    box-shadow: none;
+    background: rgba(147, 197, 253, 0.25);
 }
 
 .cal-day-cell.is-selected .cal-day-dot span,
 .cal-day-cell.is-today .cal-day-dot span {
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.8);
 }
 
 /* ===== Empty cell (no day) ===== */

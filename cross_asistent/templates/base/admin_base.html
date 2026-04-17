@@ -66,8 +66,8 @@
         }
         .admin-layout .form-control:focus,
         .admin-layout .form-select:focus {
-            border-color: var(--admin-accent, #26a69a) !important;
-            box-shadow: 0 0 0 0.2rem rgba(38, 166, 154, 0.15) !important;
+            border-color: rgba(147, 197, 253, 0.5) !important;
+            box-shadow: 0 0 0 0.2rem rgba(147, 197, 253, 0.1) !important;
         }
         .admin-layout .form-control::placeholder,
         .admin-layout textarea::placeholder,
@@ -76,16 +76,15 @@
             opacity: 0.7;
         }
 
-        /* ── MDB form-outline labels ── */
         .admin-layout .form-outline .form-control ~ .form-label,
         .admin-layout .form-outline .form-control ~ label,
         .admin-layout .form-label,
         .admin-layout label {
-            color: var(--admin-text-muted, #8a9bb8) !important;
+            color: rgba(226, 232, 240, 0.7) !important;
         }
         .admin-layout .form-outline .form-control:focus ~ .form-label,
         .admin-layout .form-outline .form-control.active ~ .form-label {
-            color: var(--admin-accent, #26a69a) !important;
+            color: rgba(147, 197, 253, 0.9) !important;
         }
         .admin-layout .form-outline .form-notch-leading,
         .admin-layout .form-outline .form-notch-middle,
@@ -282,6 +281,18 @@
             filter: invert(0.8);
         }
 
+        /* ── Modal backdrop fix ── */
+        .modal-backdrop {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        .modal {
+            z-index: 1055 !important;
+        }
+        .modal-dialog {
+            z-index: 1056 !important;
+        }
+
         /* ── Blog / TinyMCE container ── */
         .admin-layout .tox .tox-edit-area__iframe {
             background-color: #0f1e3c !important;
@@ -289,7 +300,7 @@
 
         /* ── Lead text ── */
         .admin-layout .lead {
-            color: var(--admin-text-muted, #8a9bb8);
+            color: rgba(226, 232, 240, 0.7);
         }
 
         /* ── Text utilities override ── */
@@ -299,9 +310,91 @@
             color: inherit;
         }
 
+        /* ── Bootstrap text-muted → cream ── */
+        .admin-layout .text-muted {
+            color: rgba(226, 232, 240, 0.6) !important;
+        }
+        .admin-layout .blockquote-footer {
+            color: rgba(226, 232, 240, 0.55) !important;
+        }
+        .admin-layout .text-secondary {
+            color: rgba(226, 232, 240, 0.5) !important;
+        }
+
+        /* ── Blog form text size boost ── */
+        .admin-layout .form-label {
+            font-size: 0.95rem;
+        }
+        .admin-layout .form-label.fs-5 {
+            font-size: 1.15rem !important;
+        }
+        .admin-layout .small,
+        .admin-layout small {
+            font-size: 0.85rem;
+        }
+
+        /* ── FullCalendar admin overrides ── */
+        .admin-layout .fc-toolbar-title {
+            color: #e2e8f0 !important;
+        }
+        .admin-layout .fc-col-header-cell-cushion {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: capitalize;
+        }
+        /* Force dark header background */
+        .admin-layout .fc-col-header,
+        .admin-layout .fc-col-header-cell,
+        .admin-layout .fc-scrollgrid-section-header,
+        .admin-layout .fc-scrollgrid-section-header > *,
+        .admin-layout .fc-scrollgrid thead,
+        .admin-layout .fc-scrollgrid thead tr,
+        .admin-layout .fc-scrollgrid thead th,
+        .admin-layout .fc-scrollgrid-sync-table thead,
+        .admin-layout .fc thead,
+        .admin-layout .fc thead tr,
+        .admin-layout .fc thead th,
+        .admin-layout table.fc-scrollgrid thead,
+        .admin-layout table.fc-scrollgrid thead th {
+            background: rgba(15, 30, 60, 0.7) !important;
+            background-color: rgba(15, 30, 60, 0.7) !important;
+            border-color: rgba(147, 197, 253, 0.12) !important;
+        }
+        .admin-layout .fc-daygrid-day-number {
+            color: rgba(226, 232, 240, 0.85) !important;
+            font-weight: 500;
+        }
+        .admin-layout .fc-button-primary {
+            background-color: rgba(15, 30, 60, 0.6) !important;
+            border-color: rgba(147, 197, 253, 0.2) !important;
+            color: #e2e8f0 !important;
+        }
+        .admin-layout .fc-button-primary:hover {
+            background-color: rgba(147, 197, 253, 0.15) !important;
+        }
+        .admin-layout .fc-button-active {
+            background-color: rgba(147, 197, 253, 0.2) !important;
+        }
+        .admin-layout .fc-daygrid-day {
+            border-color: rgba(147, 197, 253, 0.08) !important;
+        }
+        .admin-layout .fc-scrollgrid {
+            border-color: rgba(147, 197, 253, 0.08) !important;
+        }
+        .admin-layout .fc-col-header-cell {
+            border-color: rgba(147, 197, 253, 0.08) !important;
+        }
+        .admin-layout .fc-day-today {
+            background: rgba(147, 197, 253, 0.08) !important;
+        }
+        .admin-layout .fc-event {
+            border: none !important;
+        }
+
         /* ── Pulse loader ── */
         .admin-layout .pulse-container .pulse-bubble {
-            background: var(--admin-accent, #26a69a) !important;
+            background: rgba(147, 197, 253, 0.6) !important;
         }
     </style>
 

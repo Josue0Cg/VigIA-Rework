@@ -11,3 +11,4 @@ media/
 Thumbs.db
 .DS_Store
 node_modules/
+db1.sqlite3
