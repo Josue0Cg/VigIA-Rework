@@ -21,6 +21,7 @@ urlpatterns = [
     # Chatbot ----------------------------------------------------------
     path('chatbot/', chatbot.chatbot, name='chatbot'),
     path('tts/', chatbot.tts_audio, name='tts'),
+    path('whisper/', chatbot.whisper_transcribe, name='whisper'),
     
     # API Móvil --------------------------------------------------------
     path('api/get_table/<str:table_name>/', views.api_get_table, name='api_get_table'),

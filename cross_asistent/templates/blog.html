@@ -38,7 +38,7 @@
             
             <!-- Columna Derecha: Portada Grande -->
             <div class="col-12 col-lg-7 col-xl-8 order-1 order-lg-2">
-                {% if not encabezado_url == '' %}
+                {% if encabezado_url != '' %}
                 <figure class="m-0 position-relative w-100">
                     <img src="{{encabezado_url}}" alt='Imagen de encabezado del articulo "{{ articulo.titulo }}"' class="img-fluid rounded shadow materialBoxed" style="width: 100%; object-fit: cover; max-height: 550px;" />
                     <figcaption class="text-end text-muted mt-2 fw-light" style="font-size: 0.8rem;">
@@ -107,13 +107,16 @@
     <div class="position-absolute bottom-0 text-white mb-3 fs-6" id="lightboxCounter" style="font-family: monospace; letter-spacing: 2px; pointer-events: none;"></div>
 </div>
 
-<script>
-// Empaquetador de matriz para JavaScript
-const galleryImages = [
+<script id="gallery-data" type="application/json">
+[
     {% for foto in articulo.album_imagenes.all %}
-    "{{ foto.imagen.url }}",
+    "{{ foto.imagen.url }}"{% if not forloop.last %},{% endif %}
     {% endfor %}
-];
+]
+</script>
+<script>
+// Empaquetador de matriz para JavaScript recuperado del JSON script
+const galleryImages = JSON.parse(document.getElementById('gallery-data').textContent);
 let currentLightboxIndex = 0;
 
 function openLightbox(index) {

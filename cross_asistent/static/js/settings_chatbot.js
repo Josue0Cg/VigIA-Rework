@@ -15,16 +15,10 @@ $(document).ready(function () {
     try {
         // Mic button in the new chat panel
         $("#chatMicBtn").click(function () {
-            if (recognizing) {
-                stopRecording();
+            if (isRecording) {
+                stopWhisperRecording();
             } else {
-                try {
-                    $("#btn_controls_icon").addClass("fa-stop").removeClass("fa-microphone fa-microphone-slash");
-                    microphonerecord = true;
-                    recognition.start();
-                } catch (err) {
-                    console.error("Error al iniciar reconocimiento:", err);
-                }
+                startWhisperRecording();
             }
         });
 
@@ -48,82 +42,110 @@ $(document).ready(function () {
 // #################################### Funciones JAVASCRIPT ####################################
 // ##############################################################################################
 
-// Activar y desactivar micrófono ###########################################
+// ── Micrófono con MediaRecorder + OpenAI Whisper ──────────────────────
+// (reemplaza Web Speech API que falla con "error de red" en localhost)
 const recVoice = $("#chatMicBtn");
 const textarea = document.getElementById("txtQuestion");
 const submitButton = document.getElementById("chatForm_submit");
-let finalTranscript = "";
-let recognition;
+
+// Variables de compatibilidad (usadas en chatSubmit y ttsCustom)
 let recognizing = false;
 
-try {
-    // Verifica si el navegador soporta la Web Speech API
-    if ("webkitSpeechRecognition" in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.lang = "es-MX";
-        recognition.continuous = true;
-        recognition.interimResults = true;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
 
-        recognition.onstart = function () {
-            recognizing = true;
-            microphonerecord = true;
-            finalTranscript = "";
+async function startWhisperRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+
+        // Preferir webm/opus, con fallback a ogg
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+            ? 'audio/webm;codecs=opus'
+            : MediaRecorder.isTypeSupported('audio/webm')
+                ? 'audio/webm'
+                : 'audio/ogg';
+
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunks.push(e.data);
         };
 
-        recognition.onresult = function (event) {
-            let interimTranscript = "";
+        mediaRecorder.onstop = async () => {
+            // Detener todas las pistas de audio
+            stream.getTracks().forEach(t => t.stop());
 
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                let transcript = event.results[i][0].transcript;
+            const blob = new Blob(audioChunks, { type: mimeType });
+            const ext = mimeType.includes('ogg') ? 'ogg' : 'webm';
 
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcript;
+            const formData = new FormData();
+            formData.append('audio', blob, `recording.${ext}`);
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+            // Mostrar spinner mientras transcribe
+            $("#btn_controls_icon").removeClass("fa-stop fa-microphone").addClass("fa-spinner fa-spin");
+
+            try {
+                const response = await fetch('/whisper/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': csrfToken },
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.text) {
+                    textarea.value = data.text;
+                    // Auto-enviar la pregunta transcrita
+                    document.getElementById('chatForm_submit').click();
                 } else {
-                    interimTranscript += transcript;
+                    alertSToast('top', 6000, 'error',
+                        data.error || 'No se pudo transcribir el audio. Intente escribir su pregunta.');
                 }
+            } catch (err) {
+                console.error('Whisper fetch error:', err);
+                alertSToast('top', 6000, 'error', 'Error al transcribir. Por favor escribe tu pregunta.');
+            } finally {
+                isRecording = false;
+                recognizing = false;
+                microphonerecord = false;
+                $("#btn_controls_icon").removeClass("fa-spinner fa-spin fa-stop").addClass("fa-microphone");
             }
-            textarea.value = finalTranscript + interimTranscript;
         };
 
-        recognition.onerror = function (event) {
-            console.error("Error de reconocimiento:", event.error);
-            if (event.error === "not-allowed") {
-                alertSToast(
-                    "top",
-                    8000,
-                    "error",
-                    "Permiso de micrófono denegado. Por favor, permite el acceso al micrófono."
-                );
-            } else if (event.error === "no-speech") {
-                alertSToast("top", 8000, "error", "No se detectó ninguna voz. Por favor, intenta de nuevo.");
-            } else if (event.error === "network") {
-                alertSToast("top", 8000, "error", "Error de red. Por favor, verifica tu conexión.");
-            }
+        mediaRecorder.start();
+        isRecording = true;
+        recognizing = true;
+        microphonerecord = true;
+        $("#btn_controls_icon").removeClass("fa-microphone").addClass("fa-stop");
 
-            console.error("Error de reconocimiento: ", event.error);
-            recognizing = false;
-            microphonerecord = false;
-            $("#btn_controls_icon").removeClass("fa-stop").addClass("fa-microphone");
-        };
-
-        recognition.onend = function () {
-            recognizing = false;
-            $("#btn_controls_icon").removeClass("fa-stop").addClass("fa-microphone");
-        };
-
-        function stopRecording() {
-            recognition.stop();
-            microphonerecord = false;
-            $("#btn_controls_icon").addClass("fa-microphone").removeClass("fa-stop");
+    } catch (err) {
+        console.error('Error al acceder al micrófono:', err);
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            alertSToast('top', 8000, 'error', 'Permiso de micrófono denegado. Permite el acceso al micrófono.');
+        } else {
+            alertSToast('top', 8000, 'error', 'No se pudo acceder al micrófono.');
         }
-    } else {
-        microphoneSpeech = false;
-        console.warn("Este navegador no soporta la Web Speech API");
-        $("#btn_controls_icon").addClass("fa-microphone-slash");
-        alertSToast("center", 9000, "warning", "Al parecer tu navegador no permite activar el micrófono.");
+        isRecording = false;
+        recognizing = false;
+        microphonerecord = false;
+        $("#btn_controls_icon").removeClass("fa-stop").addClass("fa-microphone");
     }
-} catch (error) {
-    alertSToast("top", 10000, "warning", error);
+}
+
+function stopWhisperRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+    }
+    isRecording = false;
+    recognizing = false;
+}
+
+function stopRecording() {
+    stopWhisperRecording();
 }
 
 // Dictado de texto — Modo Híbrido (OpenAI + Navegador) ##################################

@@ -1,0 +1,70 @@
+commit 26731abe0c278a1b41b23267ed60666feca98b69
+Author: JHONNIGARCIA <22040053@alumno.utc.edu.mx>
+Date:   Thu Apr 16 16:43:40 2026 -0600
+
+    feat: Admin layout unificado con sidebar persistente
+    
+    - Nuevo admin_base.html: layout base con sidebar, head y scripts compartidos
+    - Migrados 7 templates admin a extender admin_base.html
+    - Eliminada navbar publica de todas las vistas admin
+    - Dark-mode CSS overrides para componentes MDB
+    - helper admin_context() para preguntas_pendientes en sidebar
+    - Rediseno blog publico y admin
+    - Calendario custom CSS y paridad movil
+    - Migraciones: ArticuloAlbum y descripcion_breve
+
+ cross_asistent/functions.py                        |   3 +
+ ...s_descripcion_breve_alter_articulos_creacion.py |  24 +
+ cross_asistent/migrations/0019_articuloalbum.py    |  23 +
+ cross_asistent/models.py                           |  20 +-
+ cross_asistent/static/css/calendario_custom.css    | 238 +++++-
+ cross_asistent/static/css/dark_theme.css           |  42 +
+ cross_asistent/static/css/floating_nav.css         |  11 +-
+ cross_asistent/static/js/calendario_custom.js      |  85 +-
+ cross_asistent/static/js/settings.js               |  16 +-
+ cross_asistent/static/js/settings.min.js           | 694 ++++++++++++++++-
+ cross_asistent/static/js/settings_tinymce.js       |   4 +-
+ .../templates/admin/admin_dashboard.html           | 860 +++++++++------------
+ .../templates/admin/admin_preguntas.html           | 839 ++++++++++----------
+ cross_asistent/templates/admin/blog.html           | 216 +++---
+ cross_asistent/templates/admin/calendario.html     |  36 +-
+ cross_asistent/templates/admin/database.html       |  15 +-
+ cross_asistent/templates/admin/mapa.html           |  15 +-
+ cross_asistent/templates/admin/perfil.html         |  13 +-
+ cross_asistent/templates/base/admin_base.html      | 449 +++++++++++
+ cross_asistent/templates/base/widget_footer.html   |   2 +-
+ cross_asistent/templates/blog.html                 | 212 +++--
+ cross_asistent/templates/blogs_all.html            | 135 +++-
+ cross_asistent/templates/calendario.html           |   8 +-
+ cross_asistent/urls.py                             |   3 +
+ cross_asistent/views.py                            | 172 ++++-
+ db_report.txt                                      |  49 --
+ media.zip                                          | Bin 0 -> 25958289 bytes
+ 27 files changed, 2911 insertions(+), 1273 deletions(-)
+
+commit 036fedc9e6e08d8437906118607037460d2c7a22
+Merge: 521a946 6145d95
+Author: JHONNIGARCIA <22040053@alumno.utc.edu.mx>
+Date:   Tue Apr 7 18:12:06 2026 -0600
+
+    Merge branch 'main' of https://github.com/Josue0Cg/VigIA-Rework
+
+commit 521a946a81d744d59cc0129396dcaf368559d7fc
+Author: JHONNIGARCIA <22040053@alumno.utc.edu.mx>
+Date:   Tue Apr 7 18:10:20 2026 -0600
+
+    chore: actualiza archivos
+
+ DEPLOY_PYTHONANYWHERE.md                     | 197 ++++++++++++++++++++++
+ check_db.py                                  |  27 ++++
+ cross_asistent/chatbot.py                    |  45 +++++-
+ cross_asistent/static/css/dark_theme.css     |  35 ++++
+ cross_asistent/static/css/index_styles.css   |  56 +++++++
+ cross_asistent/static/js/settings_chatbot.js | 234 ++++++++++++++++++---------
+ cross_asistent/templates/blog.html           |  45 ++++++
+ cross_asistent/templates/index.html          |  25 +--
+ cross_asistent/urls.py                       |   1 +
+ cross_project/settings.py                    |  25 ++-
+ db_report.txt                                |  49 ++++++
+ pythonanywhere_wsgi.py                       |  35 ++++
+ 12 files changed, 666 insertions(+), 108 deletions(-)

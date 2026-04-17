@@ -1,11 +1,13 @@
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.conf import settings
 from .models import Database
 import openai
 import json
 import re
+import io
 
 now = timezone.localtime(timezone.now()).strftime('%d-%m-%Y_%H%M')
 
@@ -309,3 +311,47 @@ def tts_audio(request):
         except (UnicodeEncodeError, OSError):
             pass
         return JsonResponse({'error': f'Error al generar audio: {error_msg}'}, status=500)
+
+
+# ─── STT con OpenAI Whisper ──────────────────────────────────────────────────
+
+@require_POST
+def whisper_transcribe(request):
+    """Transcribe audio usando OpenAI Whisper y retorna el texto al frontend."""
+    try:
+        audio_file = request.FILES.get('audio')
+        if not audio_file:
+            return JsonResponse({'error': 'No se proporcionó audio.'}, status=400)
+
+        # Limitar tamaño: máximo 25 MB (límite de Whisper)
+        if audio_file.size > 25 * 1024 * 1024:
+            return JsonResponse({'error': 'El audio es demasiado largo.'}, status=400)
+
+        # Leer el contenido del archivo en memoria
+        audio_bytes = audio_file.read()
+        audio_buffer = io.BytesIO(audio_bytes)
+        audio_buffer.name = 'recording.webm'
+
+        client = get_openai_client()
+        response = client.audio.transcriptions.create(
+            model='whisper-1',
+            file=audio_buffer,
+            language='es',
+        )
+
+        text = response.text.strip()
+
+        try:
+            print(f'Whisper transcripcion: {text}')
+        except (UnicodeEncodeError, OSError):
+            pass
+
+        return JsonResponse({'success': True, 'text': text})
+
+    except Exception as e:
+        error_msg = str(e)
+        try:
+            print(f'Whisper Error: {error_msg}')
+        except (UnicodeEncodeError, OSError):
+            pass
+        return JsonResponse({'error': f'Error al transcribir: {error_msg}'}, status=500)
