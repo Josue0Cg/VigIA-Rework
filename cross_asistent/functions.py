@@ -466,38 +466,42 @@ def mapa_data(request):
     data = []
     
     for mapa in mapas:
-        imagenQuery = models.Database.objects.filter(uuid=mapa.uuid).values_list('imagen', flat=True)
-        imagen = imagenQuery.first() if imagenQuery.exists() else None
+        try:
+            imagenQuery = models.Database.objects.filter(uuid=mapa.uuid).values_list('imagen', flat=True)
+            imagen = imagenQuery.first() if imagenQuery.exists() else None
 
-        galeryQuery = models.galeria.objects.filter(uuid=mapa.uuid)
-        galery_items = []
-        for galeria_item in galeryQuery:
-            galery_items.append({
-                "id": galeria_item.id,
-                "imagen": galeria_item.imagen.url,
-                "img_size": galeria_item.imagen.size
-            })
-        
-        item = {
-            "uuid": mapa.uuid,
-            "color": mapa.color,
-            "imagen_url": imagen,
-            "nombre": mapa.nombre,
-            "ismarker": mapa.is_marker,
-            "sizemarker": mapa.size_marker,
-            "informacion": mapa.informacion,
-            "galery_items": galery_items,
-            "galery_count": galeryQuery.count(),
-            "hidename": True if mapa.hide_name else False,
-            "door_coords": [float(coord) for coord in mapa.door_cords.split(",")],
-            "polygons": [
-                [float(coord) for coord in mapa.p1_polygons.split(",")],
-                [float(coord) for coord in mapa.p2_polygons.split(",")],
-                [float(coord) for coord in mapa.p3_polygons.split(",")],
-                [float(coord) for coord in mapa.p4_polygons.split(",")],
-            ]
-        }
-        data.append(item)
+            galeryQuery = models.galeria.objects.filter(uuid=mapa.uuid)
+            galery_items = []
+            for galeria_item in galeryQuery:
+                galery_items.append({
+                    "id": galeria_item.id,
+                    "imagen": galeria_item.imagen.url,
+                    "img_size": galeria_item.imagen.size
+                })
+            
+            item = {
+                "uuid": mapa.uuid,
+                "color": mapa.color,
+                "imagen_url": imagen,
+                "nombre": mapa.nombre,
+                "ismarker": mapa.is_marker,
+                "sizemarker": mapa.size_marker,
+                "informacion": mapa.informacion,
+                "galery_items": galery_items,
+                "galery_count": galeryQuery.count(),
+                "hidename": True if mapa.hide_name else False,
+                "door_coords": [float(coord.strip()) for coord in mapa.door_cords.split(",")],
+                "polygons": [
+                    [float(coord.strip()) for coord in mapa.p1_polygons.split(",")],
+                    [float(coord.strip()) for coord in mapa.p2_polygons.split(",")],
+                    [float(coord.strip()) for coord in mapa.p3_polygons.split(",")],
+                    [float(coord.strip()) for coord in mapa.p4_polygons.split(",")],
+                ]
+            }
+            data.append(item)
+        except Exception as e:
+            print(f"Error procesando edificio {mapa.nombre}: {e}")
+            continue
 
     return JsonResponse(data, safe=False)
 
@@ -505,23 +509,29 @@ def mapa_markers(request):
     mapas = models.Mapa.objects.filter(is_marker=True)
     data = []
     for mapa in mapas:
-        imagen_mark = get_object_or_404(models.Database, uuid=mapa.uuid)
-        item = {
-            "uuid": mapa.uuid,
-            "nombre": mapa.nombre,
-            "ismarker": mapa.is_marker,
-            "sizemarker": mapa.size_marker,
-            "imagen": imagen_mark.imagen.url,
-            "icon_size": float(mapa.size_marker),
-            "door_coords": [float(coord) for coord in mapa.door_cords.split(",")],
-            "edges": [
-                [mapa.p1_polygons],
-                [mapa.p2_polygons],
-                [mapa.p3_polygons],
-                [mapa.p4_polygons],
-            ]
-        }
-        data.append(item)
+        try:
+            imagen_mark = models.Database.objects.filter(uuid=mapa.uuid).first()
+            if not imagen_mark:
+                continue
+            item = {
+                "uuid": mapa.uuid,
+                "nombre": mapa.nombre,
+                "ismarker": mapa.is_marker,
+                "sizemarker": mapa.size_marker,
+                "imagen": imagen_mark.imagen.url if imagen_mark.imagen else "",
+                "icon_size": float(mapa.size_marker),
+                "door_coords": [float(coord.strip()) for coord in mapa.door_cords.split(",")],
+                "edges": [
+                    [mapa.p1_polygons],
+                    [mapa.p2_polygons],
+                    [mapa.p3_polygons],
+                    [mapa.p4_polygons],
+                ]
+            }
+            data.append(item)
+        except Exception as e:
+            print(f"Error procesando marcador {mapa.nombre}: {e}")
+            continue
 
     return JsonResponse(data, safe=False)
 
