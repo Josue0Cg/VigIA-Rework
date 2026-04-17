@@ -134,8 +134,18 @@ class Articulos(models.Model):
     
     def delete(self, *args, **kwargs):
         if self.encabezado:
-            self.encabezado.delete()
+            self.encabezado.delete(save=False)
         super(Articulos, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            try:
+                old_info = Articulos.objects.get(pk=self.pk)
+                if old_info.encabezado and old_info.encabezado != self.encabezado:
+                    old_info.encabezado.delete(save=False)
+            except Articulos.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
 
 class ArticuloAlbum(models.Model):
     articulo = models.ForeignKey(Articulos, related_name='album_imagenes', on_delete=models.CASCADE)
