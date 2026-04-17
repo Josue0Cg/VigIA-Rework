@@ -64,6 +64,7 @@ def fqt_questions(request):
         **configuraciones
     })
 
+@csrf_exempt
 def fqt_questions_send(request):    
     if request.method == "POST":
         try:
