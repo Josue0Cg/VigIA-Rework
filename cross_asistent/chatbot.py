@@ -259,6 +259,7 @@ PREGUNTA: {question}"""
     return response.choices[0].message.content
 
 
+@csrf_exempt
 def chatbot(request):
     if request.method == 'POST':
         try:
@@ -327,6 +328,7 @@ def chatbot(request):
 ALLOWED_TTS_VOICES = {'alloy', 'echo', 'fable', 'nova', 'onyx', 'shimmer'}
 
 
+@csrf_exempt
 @require_POST
 def tts_audio(request):
     """Genera audio MP3 usando OpenAI TTS y lo retorna al frontend."""
@@ -367,6 +369,7 @@ def tts_audio(request):
 
 # ─── STT con OpenAI Whisper ──────────────────────────────────────────────────
 
+@csrf_exempt
 @require_POST
 def whisper_transcribe(request):
     """Transcribe audio usando OpenAI Whisper y retorna el texto al frontend."""
