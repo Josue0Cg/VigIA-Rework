@@ -159,6 +159,7 @@
                         <th>Email</th>
                         <th>Rol</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -184,10 +185,92 @@
                             <span class="status-badge pending"><span class="dot"></span> Inactivo</span>
                             {% endif %}
                         </td>
+                        <td>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <button class="btn-admin btn-admin-primary btn-admin-sm"
+                                    onclick="openEditUserModal({{ oneuser.id }}, '{{ oneuser.username|escapejs }}', {{ oneuser.is_staff|yesno:'true,false' }}, {{ oneuser.is_active|yesno:'true,false' }})"
+                                    title="Editar usuario">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                {% if oneuser.id != user.id %}
+                                <button class="btn-admin btn-admin-danger btn-admin-sm"
+                                    onclick="confirmDeleteUser({{ oneuser.id }}, '{{ oneuser.username|escapejs }}')"
+                                    title="Eliminar usuario">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ Edit User Modal ═══ -->
+<div class="admin-modal-overlay" id="editUserModal">
+    <div class="admin-modal" style="max-width:480px;">
+        <div class="admin-modal-header">
+            <h3 class="admin-modal-title">
+                <i class="fa-solid fa-user-pen" style="color:var(--admin-info); margin-right:8px;"></i>
+                Editar Usuario: <span id="editUserName" style="color:#93c5fd;"></span>
+            </h3>
+            <button class="admin-modal-close" onclick="closeEditUserModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <form id="editUserForm">
+                {% csrf_token %}
+                <input type="hidden" name="username" id="editUserId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Nueva Contraseña (dejar vacío para no cambiar)</label>
+                    <input type="password" class="admin-form-input" name="password" id="editUserPassword"
+                        placeholder="Nueva contraseña..." autocomplete="new-password">
+                </div>
+                <div class="admin-form-group" style="margin-top:16px;">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; color:#e2e8f0;">
+                        <input type="checkbox" name="is_staff" id="editUserStaff"
+                            style="width:18px; height:18px; accent-color:#93c5fd;">
+                        Rol de Administrador (Staff + Superuser)
+                    </label>
+                </div>
+            </form>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-ghost" onclick="closeEditUserModal()">Cancelar</button>
+            <button class="btn-admin btn-admin-primary" onclick="submitEditUser()" id="btnSubmitEditUser">
+                <i class="fa-solid fa-save"></i>
+                Guardar Cambios
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ Delete User Confirm Modal ═══ -->
+<div class="admin-modal-overlay" id="deleteUserModal">
+    <div class="admin-modal" style="max-width:400px;">
+        <div class="admin-modal-header">
+            <h3 class="admin-modal-title" style="color:var(--admin-danger);">
+                <i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>
+                Eliminar Usuario
+            </h3>
+            <button class="admin-modal-close" onclick="closeDeleteUserModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <p style="color:var(--admin-text-muted);">¿Estás seguro de que quieres eliminar al usuario
+                <strong id="deleteUserName" style="color:#fff;"></strong>? Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-ghost" onclick="closeDeleteUserModal()">Cancelar</button>
+            <button class="btn-admin btn-admin-danger" id="btnConfirmDeleteUser">
+                <i class="fa-solid fa-trash"></i>
+                Eliminar
+            </button>
         </div>
     </div>
 </div>
@@ -386,6 +469,94 @@
         if (e.key === 'Escape') {
             document.querySelectorAll('.admin-modal-overlay.show').forEach(m => m.classList.remove('show'));
         }
+    });
+
+    // ── Edit User Modal ──
+    let editUserId = null;
+
+    function openEditUserModal(id, username, isStaff, isActive) {
+        editUserId = id;
+        document.getElementById('editUserName').textContent = username;
+        document.getElementById('editUserId').value = username;
+        document.getElementById('editUserPassword').value = '';
+        document.getElementById('editUserStaff').checked = isStaff;
+        document.getElementById('editUserModal').classList.add('show');
+    }
+
+    function closeEditUserModal() {
+        document.getElementById('editUserModal').classList.remove('show');
+        editUserId = null;
+    }
+
+    function submitEditUser() {
+        if (!editUserId) return;
+        const form = document.getElementById('editUserForm');
+        const formData = new FormData(form);
+        const btn = document.getElementById('btnSubmitEditUser');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+        fetch(`/administracion/usuarios/editar/${editUserId}/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+            body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error al editar usuario.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar Cambios';
+            }
+        })
+        .catch(() => {
+            alert('Error de conexión.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar Cambios';
+        });
+    }
+
+    // ── Delete User Modal ──
+    let deleteUserId = null;
+
+    function confirmDeleteUser(id, username) {
+        deleteUserId = id;
+        document.getElementById('deleteUserName').textContent = username;
+        document.getElementById('deleteUserModal').classList.add('show');
+    }
+
+    function closeDeleteUserModal() {
+        document.getElementById('deleteUserModal').classList.remove('show');
+        deleteUserId = null;
+    }
+
+    document.getElementById('btnConfirmDeleteUser')?.addEventListener('click', function () {
+        if (!deleteUserId) return;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        fetch(`/administracion/usuarios/eliminar/${deleteUserId}/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken,
+            },
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error al eliminar usuario.');
+            }
+        })
+        .catch(() => alert('Error de conexión.'));
+
+        closeDeleteUserModal();
     });
 </script>
 {% endblock %}
