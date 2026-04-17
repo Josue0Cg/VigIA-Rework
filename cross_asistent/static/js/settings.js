@@ -364,10 +364,10 @@ $(document).ready(function () {
                         $("#formularioArticulo #album_imagenes").val("");
                         const blogContent = data.contenido;
                         tinymce.get("mainTiny").setContent(blogContent);
-                        $("#formularioArticulo .blogSubmit").html(
+                        $("#formularioArticulo #blogSubmit").html(
                             'Modificar <i class="fa-regular fa-paper-plane ms-1"></i>'
                         );
-                        $("#formularioArticulo .btnModal").slideDown("fast");
+                        $("#formularioArticulo #btnEliminarTop").removeClass("none").slideDown("fast");
                         $("#blogDelete #blogDeleteTitle").text(data.titulo);
                         $("#blogDelete #blogIdDelete").val(blogIdGet);
                     },
@@ -388,9 +388,9 @@ $(document).ready(function () {
                 $("#formularioArticulo #new_firma").val("");
                 $("#formularioArticulo #fecha_publicacion").val("");
                 $("#formularioArticulo #album_imagenes").val("");
-                tinymce.get("mainTiny").setContent("");
-                $("#formularioArticulo .blogSubmit").html('Publicar <i class="fa-regular fa-paper-plane ms-1"></i>');
-                $("#formularioArticulo .btnModal").slideUp("fast");
+                if (tinymce.get("mainTiny")) tinymce.get("mainTiny").setContent("");
+                $("#formularioArticulo #blogSubmit").html('Publicar / Guardar <i class="fa-regular fa-paper-plane ms-1"></i>');
+                $("#formularioArticulo #btnEliminarTop").slideUp("fast").addClass("none");
                 $("#blogDelete #blogDeleteTitle").text("");
                 $("#blogDelete #blogIdDelete").val("");
             }
@@ -417,7 +417,8 @@ $(document).ready(function () {
 // ##############################################################################################
 
 // Cerrar la sesion ##########################################################
-if (document.querySelector("main").classList.contains("main_container")) {
+var mainElement = document.querySelector("main");
+if (mainElement && mainElement.classList.contains("main_container")) {
     window.location.href = "/logout";
 }
 
