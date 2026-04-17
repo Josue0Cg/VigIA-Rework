@@ -396,6 +396,68 @@
         .admin-layout .pulse-container .pulse-bubble {
             background: rgba(147, 197, 253, 0.6) !important;
         }
+
+        /* ── Map page: fill admin-main properly ── */
+        .admin-layout .admin-main:has(.full_page.map_editing) {
+            padding: 0 !important;
+            overflow: hidden;
+        }
+        .admin-layout .full_page.map_editing {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100vh !important;
+            z-index: 1;
+        }
+
+        /* Offcanvas panel: shift right so it's not behind sidebar */
+        .admin-layout .offcanvas-start {
+            left: var(--admin-sidebar-width) !important;
+            z-index: 1045 !important;
+        }
+        .admin-layout .offcanvas-end {
+            z-index: 1045 !important;
+        }
+        .admin-layout .offcanvas-bottom {
+            left: var(--admin-sidebar-width) !important;
+            z-index: 1045 !important;
+        }
+
+        /* Map floating controls: higher z-index */
+        .admin-layout .controls_route,
+        .admin-layout .controls_indications {
+            z-index: 10 !important;
+        }
+
+        /* Map: ensure canvas is interactive */
+        .admin-layout .mapboxgl-canvas-container,
+        .admin-layout .mapboxgl-canvas {
+            z-index: 1;
+        }
+
+        /* ── Sidebar icons: all white ── */
+        .admin-sidebar .sidebar-link i,
+        .admin-sidebar .sidebar-nav-label i,
+        .admin-sidebar .sidebar-footer i {
+            color: #ffffff !important;
+        }
+        .admin-sidebar .sidebar-link.active i {
+            color: #ffffff !important;
+        }
+
+        /* ── Mapbox control icons: all white ── */
+        .admin-layout .mapboxgl-ctrl-group button {
+            color: #ffffff !important;
+        }
+        .admin-layout .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
+            filter: invert(1) !important;
+        }
+        .admin-layout .mapboxgl-ctrl-group button span {
+            filter: invert(1) !important;
+        }
     </style>
 
     {% block admin_extra_head %}{% endblock %}
