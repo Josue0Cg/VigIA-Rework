@@ -448,7 +448,7 @@
             color: #ffffff !important;
         }
 
-        /* ── Mapbox control icons: all white ── */
+        /* ── ALL Mapbox control icons: white ── */
         .admin-layout .mapboxgl-ctrl-group button {
             color: #ffffff !important;
         }
@@ -457,6 +457,18 @@
         }
         .admin-layout .mapboxgl-ctrl-group button span {
             filter: invert(1) !important;
+        }
+        /* Custom mapbox buttons with FontAwesome icons */
+        .admin-layout .mapboxgl-ctrl button i,
+        .admin-layout .mapboxgl-ctrl button i.fa-solid,
+        .admin-layout .mapboxgl-ctrl button i.fa-regular,
+        .admin-layout button.mapboxgl-ctrl-newBuild i,
+        .admin-layout [class*='mapboxgl-ctrl'] button i {
+            color: #ffffff !important;
+        }
+        /* SVG icons inside mapbox buttons */
+        .admin-layout .mapboxgl-ctrl button svg {
+            fill: #ffffff !important;
         }
     </style>
 

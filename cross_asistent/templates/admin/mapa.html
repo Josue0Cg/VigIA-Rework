@@ -11,52 +11,52 @@
 {% block admin_content %}
 <main class="full_page map_editing {% if not user.is_staff %}main_container{% endif %}" id='map' data-mapa_edif="{% url 'mapa_edificios' %}"
     data-mapa_markers="{% url 'mapa_markers' %}">
-    <!-- Controles de ruta -->
-    <section class="controls_route card m-2 max_w250" id="controlsRoute">
-        <div class="card-header d-flex justify-content-between align-items-center p-3">
-            <h6 class="m-0"><i class="fa-solid fa-route me-1"></i>Como ir a...</h6>
-            <button type="button" class="btn-close" data-btn_closed="controlsRoute"></button>
-        </div>
-        <div class="card-body p-3">
-            <!-- Formulario de ruta -->
-            <form autocomplete="off" id="form_route">
-                <select id="origen" class="form-control mb-3">
-                    <option disabled selected hidden>Tu ubicación</option>
-                </select>
-                <select id="destino" class="form-control">
-                    <option disabled selected hidden>Seleccionar destino</option>
-                </select>
-            </form>
-            <div class="none mt-3" id="buttons_route">
-                <div class="d-flex justify-content-between">
-                    <button title="Borrar Formulario" type="button" class="btn btn_detail btn-sm p-2 px-3 fs-10" data-reset_form="form_route">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </button>
-                    <button title="Borrar Ruta" type="button" class="none btn btn-danger p-2 px-3 fs-13" data-reset_form="form_route" data-del_route>
-                        <i class="fa-regular fa-trash-can"></i>
-                    </button>
-                </div>
+</main>
+<!-- Controls OUTSIDE #map so Mapbox interactivity is not blocked -->
+<section class="controls_route card m-2 max_w250" id="controlsRoute" style="position:absolute; top:0; left:0; z-index:10;">
+    <div class="card-header d-flex justify-content-between align-items-center p-3">
+        <h6 class="m-0"><i class="fa-solid fa-route me-1"></i>Como ir a...</h6>
+        <button type="button" class="btn-close" data-btn_closed="controlsRoute"></button>
+    </div>
+    <div class="card-body p-3">
+        <!-- Formulario de ruta -->
+        <form autocomplete="off" id="form_route">
+            <select id="origen" class="form-control mb-3">
+                <option disabled selected hidden>Tu ubicación</option>
+            </select>
+            <select id="destino" class="form-control">
+                <option disabled selected hidden>Seleccionar destino</option>
+            </select>
+        </form>
+        <div class="none mt-3" id="buttons_route">
+            <div class="d-flex justify-content-between">
+                <button title="Borrar Formulario" type="button" class="btn btn_detail btn-sm p-2 px-3 fs-10" data-reset_form="form_route">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button title="Borrar Ruta" type="button" class="none btn btn-danger p-2 px-3 fs-13" data-reset_form="form_route" data-del_route>
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
             </div>
         </div>
-        <!-- Informacion de la ruta -->
-        <div class="card-footer">
-            <div id="route-info" class="p-0 m-0 none"></div>
-        </div>
-    </section>
-    <!-- Indicaciones -->
-    <section class="controls_indications card m-2 max_w250" id="controlsIndic">
-        <div class="card-header d-flex justify-content-between align-items-center p-3">
-            <h6 class="m-0 fs-8"><i class="fa-solid fa-draw-polygon me-1"></i>Dibujar Poligono:</h6>
-            <button type="button" class="btn-close" data-btn_closed="controlsIndic"></button>
-        </div>
-        <div class="card-body p-3">
-            <p class="text-center m-0">
-                Da <strong id="poligonClicks">4</strong> cliks derechos en el mapa... <br>
-                Dibuja el poligono en sentido <u>Horario</u> <i class="fa-solid fa-arrow-rotate-right ms-1"></i>
-            </p>
-        </div>
-    </section>
-</main>
+    </div>
+    <!-- Informacion de la ruta -->
+    <div class="card-footer">
+        <div id="route-info" class="p-0 m-0 none"></div>
+    </div>
+</section>
+<!-- Indicaciones -->
+<section class="controls_indications card m-2 max_w250" id="controlsIndic" style="position:absolute; top:0; left:0; z-index:10;">
+    <div class="card-header d-flex justify-content-between align-items-center p-3">
+        <h6 class="m-0 fs-8"><i class="fa-solid fa-draw-polygon me-1"></i>Dibujar Poligono:</h6>
+        <button type="button" class="btn-close" data-btn_closed="controlsIndic"></button>
+    </div>
+    <div class="card-body p-3">
+        <p class="text-center m-0">
+            Da <strong id="poligonClicks">4</strong> cliks derechos en el mapa... <br>
+            Dibuja el poligono en sentido <u>Horario</u> <i class="fa-solid fa-arrow-rotate-right ms-1"></i>
+        </p>
+    </div>
+</section>
 
 <!-- OffCanvas: Editar/Crear informacion -->
 <form class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="infoLateral" aria-labelledby="infoLateralLabel"
