@@ -36,12 +36,12 @@ def set_imgDB_path(instance, filename):
     categoria = instance.categoria.categoria
     instanceTitulo = instance.titulo.strip().replace(' ', '')
     newName = f'{categoria}_{instanceTitulo}'
-    thispath = os.path.join(settings.MEDIA_ROOT, 'imagenes/')
+    thispath = 'imagenes/'
     if instance.categoria:
         if categoria == 'Mapa':
-            thispath = os.path.join(thispath, 'mapa/')
+            thispath = 'imagenes/mapa/'
         elif categoria == 'Calendario':
-            thispath = os.path.join(thispath, 'calendario/')
+            thispath = 'imagenes/calendario/'
     return create_filename_path(filename, newName, 'db', 35, 6, thispath)
 
 def set_imgBlog_path(instance, filename):
@@ -49,33 +49,33 @@ def set_imgBlog_path(instance, filename):
         newName = instance.titulo.strip().replace(' ', '')
     else:
         newName = getattr(instance.articulo, 'titulo', 'galeria').strip().replace(' ', '')
-    thispath = os.path.join(settings.MEDIA_ROOT, 'imagenes/blogs/')
+    thispath = 'imagenes/blogs/'
     return create_filename_path(filename, newName, 'blog', 18, 8, thispath)
 
 def set_imgMarker_path(instance, filename):
     newName = instance.nombre.strip().replace(' ', '')
-    thispath = os.path.join(settings.MEDIA_ROOT, 'imagenes/mapa/')
+    thispath = 'imagenes/mapa/'
     return create_filename_path(filename, newName, 'marker', 18, 8, thispath)
 
 def set_imgs_path(instance, filename):
     newName = filename.strip().replace(' ', '')
     theName, _  = os.path.splitext(newName)
-    thispath = os.path.join(settings.MEDIA_ROOT, 'imagenes/')
+    thispath = 'imagenes/'
     return create_filename_path(filename, theName, 'cross_image', 22, 11, thispath)
 
 def set_conf_path(instance, filename):
     newName = filename.strip().replace(' ', '')
-    thispath = os.path.join(settings.MEDIA_ROOT, 'settings/')
+    thispath = 'settings/'
     return create_filename_path(filename, newName, 'config', 16, 4, thispath)
 
 def set_imgProfile_path(instance, filename):
     newName = instance.user.username.strip().replace(' ', '')
-    thispath = os.path.join(settings.MEDIA_ROOT, 'imagenes/personal/')
+    thispath = 'imagenes/personal/'
     return create_filename_path(filename, newName, 'profile', 20, 8, thispath)
 
 def set_pdfDB_path(instance, filename):
     newName = instance.titulo.strip().replace(' ', '')
-    thispath = os.path.join(settings.MEDIA_ROOT, 'documentos/')
+    thispath = 'documentos/'
     return create_filename_path(filename, newName, 'db_doc', 18, 10, thispath)
 
 
